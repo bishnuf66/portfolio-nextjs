@@ -1,6 +1,8 @@
-import React from 'react';
+import React from "react";
+import useStore from "@/store/store";
 
 const DownloadCVButton = () => {
+  const { isDarkMode } = useStore();
   return (
     <a
       href="/assets/Bishnu-Bk-CV.pdf" // Path to your CV file in the public folder
@@ -9,14 +11,12 @@ const DownloadCVButton = () => {
       rel="noopener noreferrer"
     >
       <button
-        style={{
-          padding: '5px 10px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-        }}
+        type="submit"
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-300 ${
+          isDarkMode
+            ? "bg-blue-600 hover:bg-blue-700 text-white"
+            : "bg-blue-500 hover:bg-blue-600 text-white"
+        }`}
       >
         Download CV
       </button>

@@ -6,9 +6,9 @@ import Home from "../components/Home";
 
 import Projects from "../components/Projects";
 import Contact from "../components/Contact"; // Import Contact component
-
+import Footer from "../components/Footer";
 export default function HomePage() {
-  const { isDarkMode, toggleDarkMode } = useStore(); // Access state and toggle function
+  const { isDarkMode } = useStore(); // Access state and toggle function
 
   return (
     <div
@@ -16,19 +16,20 @@ export default function HomePage() {
         isDarkMode ? "bg-black" : "bg-gray-50"
       }`}
     >
-      <Design isDarkMode={isDarkMode} />
+      <Design />
       <div
         className={`w-full p-0 sm:px-10 sm:py-4 ${
           isDarkMode ? "text-white" : "text-black"
         }`}
       >
-        <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+        <Header />
       </div>
-      <div className="flex-grow flex justify-start items-start p-4 flex-col">
+      <div className="">
         <Home />
         <Projects />
-        <Contact isDarkMode={isDarkMode} />
+        <Contact />
       </div>
+      <Footer />
     </div>
   );
 }

@@ -3,17 +3,19 @@ import dynamic from "next/dynamic";
 import { loadSlim } from "tsparticles-slim"; // Use loadSlim instead of loadFull
 
 const Particles = dynamic(() => import("react-tsparticles"), { ssr: false });
+import useStore from "@/store/store";
 
-const Design = ({ isDarkMode }) => {
+const Design = () => {
+  const { isDarkMode } = useStore();
   const particleColor = isDarkMode ? "#ffffff" : "#000000";
   const linksColor = isDarkMode ? "#ffffff" : "#000000";
 
-  const particlesInit = useCallback(async (engine) => {
+  const particlesInit = useCallback(async (engine: any) => {
     console.log("Particles Engine Loaded:", engine);
     await loadSlim(engine); // Ensure slim is used
   }, []);
 
-  const particlesLoaded = useCallback(async (container) => {
+  const particlesLoaded = useCallback(async (container: any) => {
     console.log("Particles Container:", container);
   }, []);
 
@@ -39,7 +41,13 @@ const Design = ({ isDarkMode }) => {
           },
           particles: {
             color: { value: particleColor },
-            links: { color: linksColor, distance: 120, enable: true, opacity: 0.6, width: 1 },
+            links: {
+              color: linksColor,
+              distance: 120,
+              enable: true,
+              opacity: 0.6,
+              width: 1,
+            },
             collisions: { enable: true },
             move: {
               enable: true,
