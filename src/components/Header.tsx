@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import useStore from "@/store/store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,8 +16,8 @@ const Header = () => {
   }, [scrollPosition]);
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
+    { name: "Home", href: "/" },
+    // { name: "About", href: "#about" },
     { name: "Projects", href: "#projects" },
     { name: "Contact", href: "#contact" },
   ];

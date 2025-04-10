@@ -1,14 +1,11 @@
 "use client";
-import useStore from "../store/store"; // Import the Zustand store
+import useStore from "../store/store";
 import Design from "../components/Design";
-import Header from "../components/Header";
 import Home from "../components/Home";
-
-import Projects from "../components/Projects";
-import Contact from "../components/Contact"; // Import Contact component
-import Footer from "../components/Footer";
+import Contact from "../components/Contact";
+import ProjectShowcase from "@/components/ProjectShowcase";
 export default function HomePage() {
-  const { isDarkMode } = useStore(); // Access state and toggle function
+  const { isDarkMode } = useStore();
 
   return (
     <div
@@ -17,19 +14,28 @@ export default function HomePage() {
       }`}
     >
       <Design />
-      <div
-        className={`w-full p-0 sm:px-10 sm:py-4 ${
-          isDarkMode ? "text-white" : "text-black"
-        }`}
-      >
-        <Header />
+      <Home />
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2
+            className={`text-4xl font-bold mb-4 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            My Projects
+          </h2>
+          <p
+            className={`text-xl ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
+            A showcase of my work and technical expertise
+          </p>
+        </div>
       </div>
-      <div className="">
-        <Home />
-        <Projects />
-        <Contact />
-      </div>
-      <Footer />
+
+      <ProjectShowcase />
+      <Contact />
     </div>
   );
 }

@@ -31,7 +31,7 @@ const Design = () => {
           interactivity: {
             events: {
               onClick: { enable: true, mode: "push" },
-              onHover: { enable: true, mode: "repulse", distance: 400 },
+              onHover: { enable: true, mode: "repulse" },
               resize: true,
             },
             modes: {

@@ -6,7 +6,8 @@ const Home = () => {
   const { isDarkMode } = useStore();
   return (
     <div
-      className={`min-h-screen flex flex-col justify-center items-center p-8 ${
+      id="home"
+      className={`min-h-screen flex flex-col justify-center items-center p-8 pt-20  ${
         isDarkMode ? "text-white" : "text-black"
       }`}
     >

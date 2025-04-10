@@ -10,7 +10,7 @@ const ProjectShowcase = () => {
   const displayedPersonalProjects = personalProjects.slice(0, 6);
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8">
+    <div id="projects" className="py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Professional Projects Section */}
         <div className="mb-16">
@@ -24,7 +24,7 @@ const ProjectShowcase = () => {
             </h2>
             <Link
               href="/projects/professional"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+              className={`px-4 py-2 rounded-lg transition-colors duration-300  text-nowrap ${
                 isDarkMode
                   ? "bg-blue-600 hover:bg-blue-700 text-white"
                   : "bg-blue-500 hover:bg-blue-600 text-white"
@@ -59,7 +59,7 @@ const ProjectShowcase = () => {
             </h2>
             <Link
               href="/projects/personal"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ${
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 text-nowrap ${
                 isDarkMode
                   ? "bg-blue-600 hover:bg-blue-700 text-white"
                   : "bg-blue-500 hover:bg-blue-600 text-white"

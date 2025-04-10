@@ -8,7 +8,11 @@ const ProfessionalProjects = () => {
   const { isDarkMode } = useStore();
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      className={`min-h-screen py-12 px-4 sm:px-6 lg:px-8 pt-20 ${
+        isDarkMode ? "bg-black" : "bg-white"
+      } `}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1
@@ -40,7 +44,6 @@ const ProfessionalProjects = () => {
           ))}
         </div>
       </div>
-      
     </div>
   );
 };
