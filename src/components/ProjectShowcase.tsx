@@ -10,7 +10,7 @@ const ProjectShowcase = () => {
   const displayedPersonalProjects = personalProjects.slice(0, 6);
 
   return (
-    <div id="projects" className="py-12 px-4 sm:px-6 lg:px-8">
+    <div id="projects" className="pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Professional Projects Section */}
         <div className="mb-16">

@@ -123,6 +123,7 @@ const Contact = () => {
               <input
                 type="text"
                 id="name"
+                required
                 className={`w-full px-4 py-2 rounded-lg border ${
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white"
@@ -145,6 +146,7 @@ const Contact = () => {
               <input
                 type="email"
                 id="email"
+                required
                 className={`w-full px-4 py-2 rounded-lg border ${
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white"
@@ -167,6 +169,7 @@ const Contact = () => {
               <textarea
                 id="message"
                 rows={4}
+                required
                 className={`w-full px-4 py-2 rounded-lg border ${
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white"

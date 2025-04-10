@@ -4,6 +4,7 @@ import Design from "../components/Design";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
 import ProjectShowcase from "@/components/ProjectShowcase";
+import ThreeCanvas from "@/components/ThreeCanvas";
 export default function HomePage() {
   const { isDarkMode } = useStore();
 
@@ -16,7 +17,7 @@ export default function HomePage() {
       <Design />
       <Home />
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center ">
           <h2
             className={`text-4xl font-bold mb-4 ${
               isDarkMode ? "text-white" : "text-gray-900"
@@ -32,6 +33,9 @@ export default function HomePage() {
             A showcase of my work and technical expertise
           </p>
         </div>
+      </div>
+      <div className="flex justify-center items-center ">
+        <ThreeCanvas />
       </div>
 
       <ProjectShowcase />

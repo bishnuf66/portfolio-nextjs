@@ -4,6 +4,7 @@ import useStore from "@/store/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon, FiMenu, FiX } from "react-icons/fi";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import Link from "next/link";
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useStore();
@@ -33,22 +34,24 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
-            <motion.h1
-              className={`text-2xl font-bold ${
-                isDarkMode ? "text-white" : "text-black"
-              }`}
-            >
-              Bishnu Bk
-            </motion.h1>
-            <motion.p
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              }`}
-            >
-              Full Stack Developer
-            </motion.p>
-          </motion.div>
+          <Link href={"/"}>
+            <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
+              <motion.h1
+                className={`text-2xl font-bold ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Bishnu Bk
+              </motion.h1>
+              <motion.p
+                className={`text-sm font-medium ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Full Stack Developer
+              </motion.p>
+            </motion.div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
