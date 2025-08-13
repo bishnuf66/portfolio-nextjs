@@ -18,7 +18,7 @@ export default function Test() {
   }, []);
 
   // Calculate rotation based on scroll position (max 30 degrees)
-  const rotation = Math.min(scrollY * 0.05, 30);
+  const rotation = Math.min(scrollY * 0.0, 30);
 
   // Calculate scale to make it look like it's tilting away
   const scale = 1 + scrollY * 0.0005;
@@ -45,6 +45,8 @@ export default function Test() {
               alt="mountain"
               fill
               unoptimized
+              // width={2560}
+              // height={1440}
               className={`object-cover transition-opacity duration-500 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
