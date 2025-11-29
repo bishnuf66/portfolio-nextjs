@@ -73,53 +73,42 @@ const Dashboard = () => {
   };
 
   const uploadPendingImages = async () => {
-    const uploadedUrls = [];
+    let newCoverUrl = "";
+    const uploadedGalleryUrls = [];
 
     // Upload cover image if pending
     if (pendingUploads.cover) {
-      const formData = new FormData();
-      formData.append("file", pendingUploads.cover);
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", pendingUploads.cover);
 
       const response = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        body: uploadFormData,
       });
 
       if (response.ok) {
         const data = await response.json();
-        uploadedUrls.push(data.imageUrl);
-        setFormData((prev) => ({ ...prev, cover_image_url: data.imageUrl }));
+        newCoverUrl = data.imageUrl;
       }
     }
 
     // Upload gallery images if pending
-    const galleryUrls = [];
     for (const file of pendingUploads.gallery) {
-      const formData = new FormData();
-      formData.append("file", file);
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
 
       const response = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        body: uploadFormData,
       });
 
       if (response.ok) {
         const data = await response.json();
-        galleryUrls.push(data.imageUrl);
+        uploadedGalleryUrls.push(data.imageUrl);
       }
     }
 
-    if (galleryUrls.length > 0) {
-      // Replace preview URLs with actual URLs
-      const actualGalleryUrls = [
-        ...formData.gallery_images.filter((url) => !url.startsWith("blob:")),
-        ...galleryUrls,
-      ];
-      setFormData((prev) => ({ ...prev, gallery_images: actualGalleryUrls }));
-      uploadedUrls.push(...galleryUrls);
-    }
-
-    return uploadedUrls;
+    return { coverUrl: newCoverUrl, galleryUrls: uploadedGalleryUrls };
   };
 
   const cleanupOrphanedImages = async (imageUrls: string[]) => {
@@ -144,34 +133,14 @@ const Dashboard = () => {
   };
 
   const handleCoverImageChange = async (file: File) => {
-    const oldCoverImage = formData.cover_image_url;
-
-    // Mark old image for deletion if it's a real URL (not blob)
-    if (
-      oldCoverImage &&
-      !oldCoverImage.startsWith("blob:") &&
-      oldCoverImage !== originalImages.cover_image_url
-    ) {
-      setImagesToDelete((prev) => [...prev, oldCoverImage]);
-    }
-
-    // Handle new image upload
+    // Simply handle the new image upload
+    // Deletion of old image will be handled in handleSubmit
     await handleImageUpload(file, "cover");
   };
 
   const removeCoverImage = () => {
-    const currentCoverImage = formData.cover_image_url;
-
-    // Mark for deletion if it's a real URL (not blob)
-    if (
-      currentCoverImage &&
-      !currentCoverImage.startsWith("blob:") &&
-      currentCoverImage !== originalImages.cover_image_url
-    ) {
-      setImagesToDelete((prev) => [...prev, currentCoverImage]);
-    }
-
-    // Clear cover image
+    // Clear cover image and pending upload
+    // Deletion of original will be handled in handleSubmit
     setFormData((prev) => ({ ...prev, cover_image_url: "" }));
     setPendingUploads((prev) => ({ ...prev, cover: null }));
   };
@@ -196,11 +165,51 @@ const Dashboard = () => {
     setUploading(true);
 
     try {
-      // Upload pending images first
-      const uploadedUrls = await uploadPendingImages();
+      // Build list of images to delete
+      const toDelete: string[] = [];
+
+      // Check if cover image was changed or removed
+      if (
+        originalImages.cover_image_url &&
+        originalImages.cover_image_url !== formData.cover_image_url
+      ) {
+        // Original cover image exists and is different from current
+        // Delete the original if it's a real URL (not a blob)
+        if (!originalImages.cover_image_url.startsWith("blob:")) {
+          toDelete.push(originalImages.cover_image_url);
+        }
+      }
+
+      // Find gallery images that were removed
+      const currentGalleryUrls = formData.gallery_images.filter(
+        (url) => !url.startsWith("blob:")
+      );
+      const originalGalleryUrls = originalImages.gallery_images;
+
+      const removedGalleryImages = originalGalleryUrls.filter(
+        (originalUrl) => !currentGalleryUrls.includes(originalUrl)
+      );
+
+      if (removedGalleryImages.length > 0) {
+        toDelete.push(...removedGalleryImages);
+      }
+
+      // Upload pending images and get actual URLs
+      const { coverUrl, galleryUrls } = await uploadPendingImages();
+
+      // Prepare final URLs, using uploaded URLs or existing non-blob URLs
+      const finalCoverImageUrl = coverUrl ||
+        (formData.cover_image_url.startsWith("blob:") ? "" : formData.cover_image_url);
+
+      const finalGalleryImages = [
+        ...formData.gallery_images.filter((url) => !url.startsWith("blob:")),
+        ...galleryUrls,
+      ];
 
       const projectData = {
         ...formData,
+        cover_image_url: finalCoverImageUrl,
+        gallery_images: finalGalleryImages,
         tech_stack: formData.tech_stack
           .split(",")
           .map((tech) => tech.trim())
@@ -222,16 +231,13 @@ const Dashboard = () => {
 
       if (response.ok) {
         // Delete marked images on successful save
-        if (imagesToDelete.length > 0) {
-          await cleanupOrphanedImages(imagesToDelete);
+        if (toDelete.length > 0) {
+          console.log("Deleting images:", toDelete);
+          await cleanupOrphanedImages(toDelete);
         }
         await fetchProjects();
         resetForm();
       } else {
-        // Cleanup newly uploaded images if project save fails
-        if (uploadedUrls.length > 0) {
-          await cleanupOrphanedImages(uploadedUrls);
-        }
         alert("Failed to save project");
       }
     } catch (error) {
@@ -259,6 +265,9 @@ const Dashboard = () => {
       cover_image_url: project.cover_image_url || "",
       gallery_images: project.gallery_images || [],
     });
+    // Clear any pending uploads and deletion queue
+    setPendingUploads({ cover: null, gallery: [] });
+    setImagesToDelete([]);
     setShowForm(true);
   };
 
@@ -330,9 +339,8 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-      } p-8`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+        } p-8`}
     >
       <div className="max-w-6xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
@@ -349,9 +357,8 @@ const Dashboard = () => {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">
@@ -377,11 +384,10 @@ const Dashboard = () => {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                 </div>
 
@@ -396,11 +402,10 @@ const Dashboard = () => {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, url: e.target.value }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                 </div>
 
@@ -418,11 +423,10 @@ const Dashboard = () => {
                         description: e.target.value,
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                 </div>
 
@@ -441,11 +445,10 @@ const Dashboard = () => {
                         tech_stack: e.target.value,
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                 </div>
 
@@ -461,11 +464,10 @@ const Dashboard = () => {
                         category: e.target.value as "professional" | "personal",
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   >
                     <option value="professional">Professional</option>
                     <option value="personal">Personal</option>
@@ -485,11 +487,10 @@ const Dashboard = () => {
                         handleCoverImageChange(file);
                       }
                     }}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                   {formData.cover_image_url && (
                     <div className="mt-2 relative inline-block">
@@ -522,11 +523,10 @@ const Dashboard = () => {
                         handleGalleryImageUpload(e.target.files);
                       }
                     }}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                      ? "bg-gray-700 border-gray-600"
+                      : "bg-white border-gray-300"
+                      }`}
                   />
                   {formData.gallery_images.length > 0 && (
                     <div className="mt-2">
@@ -564,8 +564,8 @@ const Dashboard = () => {
                     {uploading
                       ? "Processing..."
                       : editingProject
-                      ? "Update Project"
-                      : "Add Project"}
+                        ? "Update Project"
+                        : "Add Project"}
                   </button>
                   <button
                     type="button"
@@ -584,9 +584,8 @@ const Dashboard = () => {
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 shadow-lg`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 shadow-lg`}
             >
               <div className="flex gap-6">
                 <img

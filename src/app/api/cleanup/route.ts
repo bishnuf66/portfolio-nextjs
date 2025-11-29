@@ -15,17 +15,35 @@ export async function POST(request: Request) {
 
         for (const imageUrl of imageUrls) {
             try {
-                // Extract file path from URL
+                // Skip blob URLs
+                if (imageUrl.startsWith("blob:")) {
+                    continue;
+                }
+
+                // Extract file path from Supabase URL
+                // URL format: https://{project}.supabase.co/storage/v1/object/public/project-images/project-images/{filename}
                 const url = new URL(imageUrl);
-                const filePath = url.pathname.split("/").pop();
+                const pathParts = url.pathname.split("/");
 
-                if (filePath) {
-                    const { error } = await supabase.storage
-                        .from("project-images")
-                        .remove([`project-images/${filePath}`]);
+                // Find the index of 'project-images' bucket name and get everything after it
+                const bucketIndex = pathParts.indexOf("project-images");
+                if (bucketIndex !== -1 && bucketIndex < pathParts.length - 1) {
+                    // Get the path after the bucket name (e.g., "project-images/123456.jpg")
+                    const filePath = pathParts.slice(bucketIndex + 1).join("/");
 
-                    if (!error) {
-                        deletedImages.push(imageUrl);
+                    if (filePath) {
+                        const { error } = await supabase.storage
+                            .from("project-images")
+                            .remove([filePath]);
+
+                        if (!error) {
+                            deletedImages.push(imageUrl);
+                        } else {
+                            console.error(
+                                `Supabase delete error for ${filePath}:`,
+                                error,
+                            );
+                        }
                     }
                 }
             } catch (error) {
