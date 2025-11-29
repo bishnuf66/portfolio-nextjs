@@ -5,7 +5,6 @@ CREATE TABLE projects (
   url TEXT NOT NULL,
   description TEXT NOT NULL,
   tech_stack TEXT[] NOT NULL,
-  image_url TEXT NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('professional', 'personal')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

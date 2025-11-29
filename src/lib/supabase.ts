@@ -11,7 +11,6 @@ export interface Project {
   url: string;
   description: string;
   tech_stack: string[];
-  image_url: string;
   cover_image_url: string;
   gallery_images: string[];
   category: "professional" | "personal";

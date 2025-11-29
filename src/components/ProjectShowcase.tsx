@@ -51,17 +51,19 @@ const ProjectShowcase = () => {
         <div className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2
-              className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"
-                }`}
+              className={`text-3xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
             >
               Professional Projects
             </h2>
             <Link
               href="/projects/professional"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300  text-nowrap ${isDarkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-                }`}
+              className={`px-4 py-2 rounded-lg transition-colors duration-300  text-nowrap ${
+                isDarkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
             >
               View All
             </Link>
@@ -70,7 +72,9 @@ const ProjectShowcase = () => {
             {professionalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
-                image={project.cover_image_url ?? "/project-images/placeholder.png"}
+                image={
+                  project.cover_image_url ?? "/project-images/placeholder.png"
+                }
                 name={project.name}
                 techStack={project.tech_stack.join(", ")}
                 description={project.description}
@@ -84,17 +88,19 @@ const ProjectShowcase = () => {
         <div>
           <div className="flex justify-between items-center mb-8">
             <h2
-              className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"
-                }`}
+              className={`text-3xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
             >
               Personal Projects
             </h2>
             <Link
               href="/projects/personal"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 text-nowrap ${isDarkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-                }`}
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 text-nowrap ${
+                isDarkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
             >
               View All
             </Link>
@@ -103,7 +109,9 @@ const ProjectShowcase = () => {
             {personalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
-                image={project.image_url}
+                image={
+                  project.cover_image_url ?? "/project-images/placeholder.png"
+                }
                 name={project.name}
                 techStack={project.tech_stack.join(", ")}
                 description={project.description}

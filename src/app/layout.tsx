@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,29 +82,31 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        {children}
-        <Footer />
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar
-          newestOnTop
-          closeButton={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          toastStyle={{
-            backgroundColor: "#333",
-            color: "#fff",
-            borderRadius: "8px",
-            fontSize: "16px",
-            padding: "12px 20px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            maxWidth: "400px",
-          }}
-        />
+        <ThemeProvider>
+          <Header />
+          {children}
+          <Footer />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop
+            closeButton={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            toastStyle={{
+              backgroundColor: "#333",
+              color: "#fff",
+              borderRadius: "8px",
+              fontSize: "16px",
+              padding: "12px 20px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              maxWidth: "400px",
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

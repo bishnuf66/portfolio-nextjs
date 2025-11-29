@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const body = await request.json();
@@ -26,14 +26,14 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to update project" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const { error } = await supabase
@@ -49,7 +49,7 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to delete project" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
