@@ -330,9 +330,8 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-      } p-8`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+        } p-8`}
     >
       <div className="max-w-6xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
@@ -358,9 +357,8 @@ const Dashboard = () => {
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">
@@ -386,11 +384,10 @@ const Dashboard = () => {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                 </div>
 
@@ -405,11 +402,10 @@ const Dashboard = () => {
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, url: e.target.value }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                 </div>
 
@@ -427,11 +423,10 @@ const Dashboard = () => {
                         description: e.target.value,
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                 </div>
 
@@ -450,11 +445,10 @@ const Dashboard = () => {
                         tech_stack: e.target.value,
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                 </div>
 
@@ -470,11 +464,10 @@ const Dashboard = () => {
                         category: e.target.value as "professional" | "personal",
                       }))
                     }
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   >
                     <option value="professional">Professional</option>
                     <option value="personal">Personal</option>
@@ -494,11 +487,10 @@ const Dashboard = () => {
                         handleCoverImageChange(file);
                       }
                     }}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                   {formData.cover_image_url && (
                     <div className="mt-2 relative inline-block">
@@ -531,11 +523,10 @@ const Dashboard = () => {
                         handleGalleryImageUpload(e.target.files);
                       }
                     }}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      isDarkMode
+                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                         ? "bg-gray-700 border-gray-600"
                         : "bg-white border-gray-300"
-                    }`}
+                      }`}
                   />
                   {formData.gallery_images.length > 0 && (
                     <div className="mt-2">
@@ -573,8 +564,8 @@ const Dashboard = () => {
                     {uploading
                       ? "Processing..."
                       : editingProject
-                      ? "Update Project"
-                      : "Add Project"}
+                        ? "Update Project"
+                        : "Add Project"}
                   </button>
                   <button
                     type="button"
@@ -593,9 +584,8 @@ const Dashboard = () => {
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 shadow-lg`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 shadow-lg`}
             >
               <div className="flex gap-6">
                 <img

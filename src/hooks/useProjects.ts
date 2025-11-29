@@ -51,11 +51,17 @@ export function useDeleteProject() {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            await api.delete(`/projects/${id}`);
+            console.log("Attempting to delete project:", id);
+            const response = await api.delete(`/projects/${id}`);
+            console.log("Delete response:", response.status, response.data);
             return id;
         },
         onSuccess: () => {
+            console.log("Delete mutation successful, invalidating cache");
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+        },
+        onError: (error) => {
+            console.error("Delete mutation failed:", error);
         },
     });
 }

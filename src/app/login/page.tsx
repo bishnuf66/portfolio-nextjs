@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useStore from "@/store/store";
 import { signIn } from "@/lib/auth";
@@ -16,8 +16,13 @@ const Login = () => {
   const [error, setError] = useState("");
 
   // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
+
   if (user) {
-    router.push("/dashboard");
     return null;
   }
 

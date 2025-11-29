@@ -24,10 +24,21 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    // Get the authorization header
+    const authHeader = request.headers.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+
     const supabase = await createClient();
 
-    // Check if user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Verify the token and get user
+    const { data: { user }, error: authError } = await supabase.auth.getUser(
+      token,
+    );
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,9 +46,10 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
+    // Cast body to any here to avoid overly strict generic typing issues
     const { data, error } = await supabase
       .from("projects")
-      .insert([body])
+      .insert([body as any])
       .select();
 
     if (error) {

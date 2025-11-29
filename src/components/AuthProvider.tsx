@@ -29,13 +29,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("AuthProvider: Initializing auth");
+
     // Get initial session
     const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        console.log("AuthProvider: Initial session", {
+          user: session?.user?.email,
+          error,
+        });
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("AuthProvider: Error getting initial session", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getInitialSession();
@@ -43,8 +55,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("AuthProvider: Auth state changed", {
+        event,
+        user: session?.user?.email,
+      });
+
+      // Handle token refresh events
+      if (event === "TOKEN_REFRESHED") {
+        console.log("AuthProvider: Token refreshed");
+      }
+
+      // Handle sign out events
+      if (event === "SIGNED_OUT") {
+        console.log("AuthProvider: User signed out");
+        setUser(null);
+      } else {
+        setUser(session?.user ?? null);
+      }
+
       setLoading(false);
     });
 
@@ -52,8 +81,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
+    console.log("AuthProvider: Signing out");
     await supabase.auth.signOut();
   };
+
+  console.log("AuthProvider: Current state", { user: user?.email, loading });
 
   return (
     <AuthContext.Provider value={{ user, loading, signOut }}>

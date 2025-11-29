@@ -1,22 +1,22 @@
 import axios from "axios";
+import { supabase } from "./supabase";
 
-// Create axios instance with default configuration
+// Axios instance configured to send cookies to Next.js API routes
 export const api = axios.create({
     baseURL: "/api",
     headers: {
         "Content-Type": "application/json",
     },
-    withCredentials: true, // This enables sending cookies for authentication
+    withCredentials: true,
 });
 
-// Optional: Add response interceptor for error handling
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Handle unauthorized access - redirect to login
-            window.location.href = "/login";
-        }
-        return Promise.reject(error);
-    },
-);
+// Add interceptor to include auth token in requests
+api.interceptors.request.use(async (config) => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+    }
+
+    return config;
+});
