@@ -3,10 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
-import { Upload, X, Edit2, Trash2, Plus } from "lucide-react";
+import { Upload, X, Edit2, Trash2, Plus, LogOut } from "lucide-react";
+import withAuth from "@/components/withAuth";
+import { useAuth } from "@/components/AuthProvider";
 
 const Dashboard = () => {
   const { isDarkMode } = useStore();
+  const { signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -329,6 +332,10 @@ const Dashboard = () => {
     setShowForm(false);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -346,13 +353,22 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Project Dashboard</h1>
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={20} />
-            Add Project
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={20} />
+              Add Project
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <LogOut size={20} />
+              Sign Out
+            </button>
+          </div>
         </div>
 
         {showForm && (
@@ -661,4 +677,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default withAuth(Dashboard);
