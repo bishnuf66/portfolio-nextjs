@@ -17,9 +17,13 @@ const Dashboard = () => {
     description: "",
     tech_stack: "",
     image_url: "",
+    cover_image_url: "",
+    gallery_images: [] as string[],
     category: "professional" as "professional" | "personal",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -38,7 +42,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (file: File, type: "cover" | "gallery") => {
     setUploading(true);
     try {
       const formData = new FormData();
@@ -51,7 +55,14 @@ const Dashboard = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setFormData((prev) => ({ ...prev, image_url: data.imageUrl }));
+        if (type === "cover") {
+          setFormData((prev) => ({ ...prev, cover_image_url: data.imageUrl }));
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            gallery_images: [...prev.gallery_images, data.imageUrl],
+          }));
+        }
       } else {
         alert("Failed to upload image");
       }
@@ -61,6 +72,20 @@ const Dashboard = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleGalleryImageUpload = async (files: FileList) => {
+    const fileArray = Array.from(files);
+    for (const file of fileArray) {
+      await handleImageUpload(file, "gallery");
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      gallery_images: prev.gallery_images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,6 +133,8 @@ const Dashboard = () => {
       description: project.description,
       tech_stack: project.tech_stack.join(", "),
       image_url: project.image_url,
+      cover_image_url: project.cover_image_url || "",
+      gallery_images: project.gallery_images || [],
       category: project.category,
     });
     setShowForm(true);
@@ -139,9 +166,13 @@ const Dashboard = () => {
       description: "",
       tech_stack: "",
       image_url: "",
+      cover_image_url: "",
+      gallery_images: [],
       category: "professional",
     });
     setImageFile(null);
+    setCoverImageFile(null);
+    setGalleryFiles([]);
     setEditingProject(null);
     setShowForm(false);
   };
@@ -160,7 +191,7 @@ const Dashboard = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
       } p-8`}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Project Dashboard</h1>
           <button
@@ -309,7 +340,7 @@ const Dashboard = () => {
                       const file = e.target.files?.[0];
                       if (file) {
                         setImageFile(file);
-                        handleImageUpload(file);
+                        handleImageUpload(file, "cover");
                       }
                     }}
                     className={`w-full px-3 py-2 border rounded-lg ${
@@ -321,12 +352,58 @@ const Dashboard = () => {
                   {uploading && (
                     <p className="text-sm mt-1">Uploading image...</p>
                   )}
-                  {formData.image_url && (
+                  {formData.cover_image_url && (
                     <img
-                      src={formData.image_url}
-                      alt="Preview"
+                      src={formData.cover_image_url}
+                      alt="Cover Preview"
                       className="mt-2 w-32 h-32 object-cover rounded"
                     />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Gallery Images (multiple)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        handleGalleryImageUpload(e.target.files);
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                  {formData.gallery_images.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm font-medium mb-1">
+                        Gallery Preview:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.gallery_images.map((url, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={url}
+                              alt={`Gallery ${index + 1}`}
+                              className="w-20 h-20 object-cover rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeGalleryImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -426,3 +503,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
