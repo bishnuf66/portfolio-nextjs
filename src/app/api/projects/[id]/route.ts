@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } },
 ) {
   try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -36,17 +45,28 @@ export async function DELETE(
   { params }: { params: { id: string } },
 ) {
   try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { error } = await supabase
       .from("projects")
       .delete()
       .eq("id", params.id);
 
     if (error) {
+      console.error("Delete error:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ message: "Project deleted successfully" });
   } catch (error) {
+    console.error("Delete catch error:", error);
     return NextResponse.json(
       { error: "Failed to delete project" },
       { status: 500 },

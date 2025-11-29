@@ -1,17 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
 import { Upload, X, Edit2, Trash2, Plus, LogOut } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
+import {
+  useProjects,
+  useCreateProject,
+  useUpdateProject,
+  useDeleteProject,
+} from "@/hooks/useProjects";
 
 const Dashboard = () => {
   const { isDarkMode } = useStore();
   const { signOut } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // TanStack Query hooks
+  const { data: projects = [], isLoading, error } = useProjects();
+  const createProject = useCreateProject();
+  const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
+
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({
@@ -37,22 +48,6 @@ const Dashboard = () => {
     cover: File | null;
     gallery: File[];
   }>({ cover: null, gallery: [] });
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch("/api/projects");
-      const data = await response.json();
-      setProjects(data);
-    } catch (error) {
-      console.error("Failed to fetch projects:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleImageUpload = async (file: File, type: "cover" | "gallery") => {
     if (type === "cover") {
@@ -221,28 +216,24 @@ const Dashboard = () => {
           .filter(Boolean),
       };
 
-      const url = editingProject
-        ? `/api/projects/${editingProject.id}`
-        : "/api/projects";
-      const method = editingProject ? "PUT" : "POST";
+      try {
+        if (editingProject) {
+          await updateProject.mutateAsync({
+            id: editingProject.id,
+            projectData,
+          });
+        } else {
+          await createProject.mutateAsync(projectData);
+        }
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(projectData),
-      });
-
-      if (response.ok) {
         // Delete marked images on successful save
         if (toDelete.length > 0) {
           console.log("Deleting images:", toDelete);
           await cleanupOrphanedImages(toDelete);
         }
-        await fetchProjects();
         resetForm();
-      } else {
+      } catch (error) {
+        console.error("Failed to save project:", error);
         alert("Failed to save project");
       }
     } catch (error) {
@@ -292,18 +283,11 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`/api/projects/${id}`, {
-        method: "DELETE",
-      });
+      await deleteProject.mutateAsync(id);
 
-      if (response.ok) {
-        // Delete associated images
-        if (imagesToDelete.length > 0) {
-          await cleanupOrphanedImages(imagesToDelete);
-        }
-        await fetchProjects();
-      } else {
-        alert("Failed to delete project");
+      // Delete associated images
+      if (imagesToDelete.length > 0) {
+        await cleanupOrphanedImages(imagesToDelete);
       }
     } catch (error) {
       console.error("Failed to delete project:", error);
@@ -336,7 +320,7 @@ const Dashboard = () => {
     await signOut();
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>

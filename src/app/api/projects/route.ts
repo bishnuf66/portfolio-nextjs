@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-server";
+import { supabasePublic } from "@/lib/supabase-public";
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabasePublic
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });
@@ -16,13 +17,22 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch projects" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -38,7 +48,7 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to create project" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
