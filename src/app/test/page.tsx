@@ -47,9 +47,8 @@ export default function Test() {
               unoptimized
               // width={2560}
               // height={1440}
-              className={`object-cover transition-opacity duration-500 ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              className={`object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
               priority
               onLoadingComplete={() => setImageLoaded(true)}
             />
@@ -57,11 +56,7 @@ export default function Test() {
         </div>
       </div>
 
-      <div className="h-screen bg-gradient-to-b from-black to-gray-900 flex items-center justify-center">
-        <h2 className="text-4xl font-bold text-white text-center px-4">
-          Scroll down to see the 3D tilt effect
-        </h2>
-      </div>
+
     </div>
   );
 }
