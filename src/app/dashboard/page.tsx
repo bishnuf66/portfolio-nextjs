@@ -25,6 +25,16 @@ const Dashboard = () => {
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [originalImages, setOriginalImages] = useState<{
+    cover_image_url: string;
+    gallery_images: string[];
+  }>({ cover_image_url: "", gallery_images: [] });
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [pendingUploads, setPendingUploads] = useState<{
+    cover: File | null;
+    gallery: File[];
+  }>({ cover: null, gallery: [] });
 
   useEffect(() => {
     fetchProjects();
@@ -43,8 +53,48 @@ const Dashboard = () => {
   };
 
   const handleImageUpload = async (file: File, type: "cover" | "gallery") => {
-    setUploading(true);
-    try {
+    if (type === "cover") {
+      setPendingUploads((prev) => ({ ...prev, cover: file }));
+      // Create preview URL for immediate UI update
+      const previewUrl = URL.createObjectURL(file);
+      setFormData((prev) => ({ ...prev, cover_image_url: previewUrl }));
+    } else {
+      setPendingUploads((prev) => ({
+        ...prev,
+        gallery: [...prev.gallery, file],
+      }));
+      // Create preview URLs for immediate UI update
+      const previewUrl = URL.createObjectURL(file);
+      setFormData((prev) => ({
+        ...prev,
+        gallery_images: [...prev.gallery_images, previewUrl],
+      }));
+    }
+  };
+
+  const uploadPendingImages = async () => {
+    const uploadedUrls = [];
+
+    // Upload cover image if pending
+    if (pendingUploads.cover) {
+      const formData = new FormData();
+      formData.append("file", pendingUploads.cover);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        uploadedUrls.push(data.imageUrl);
+        setFormData((prev) => ({ ...prev, cover_image_url: data.imageUrl }));
+      }
+    }
+
+    // Upload gallery images if pending
+    const galleryUrls = [];
+    for (const file of pendingUploads.gallery) {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -53,24 +103,36 @@ const Dashboard = () => {
         body: formData,
       });
 
-      const data = await response.json();
       if (response.ok) {
-        if (type === "cover") {
-          setFormData((prev) => ({ ...prev, cover_image_url: data.imageUrl }));
-        } else {
-          setFormData((prev) => ({
-            ...prev,
-            gallery_images: [...prev.gallery_images, data.imageUrl],
-          }));
-        }
-      } else {
-        alert("Failed to upload image");
+        const data = await response.json();
+        galleryUrls.push(data.imageUrl);
       }
+    }
+
+    if (galleryUrls.length > 0) {
+      // Replace preview URLs with actual URLs
+      const actualGalleryUrls = [
+        ...formData.gallery_images.filter((url) => !url.startsWith("blob:")),
+        ...galleryUrls,
+      ];
+      setFormData((prev) => ({ ...prev, gallery_images: actualGalleryUrls }));
+      uploadedUrls.push(...galleryUrls);
+    }
+
+    return uploadedUrls;
+  };
+
+  const cleanupOrphanedImages = async (imageUrls: string[]) => {
+    try {
+      await fetch("/api/cleanup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrls }),
+      });
     } catch (error) {
-      console.error("Failed to upload image:", error);
-      alert("Failed to upload image");
-    } finally {
-      setUploading(false);
+      console.error("Failed to cleanup images:", error);
     }
   };
 
@@ -81,25 +143,70 @@ const Dashboard = () => {
     }
   };
 
-  const removeGalleryImage = (index: number) => {
+  const handleCoverImageChange = async (file: File) => {
+    const oldCoverImage = formData.cover_image_url;
+
+    // Mark old image for deletion if it's a real URL (not blob)
+    if (
+      oldCoverImage &&
+      !oldCoverImage.startsWith("blob:") &&
+      oldCoverImage !== originalImages.cover_image_url
+    ) {
+      setImagesToDelete((prev) => [...prev, oldCoverImage]);
+    }
+
+    // Handle new image upload
+    await handleImageUpload(file, "cover");
+  };
+
+  const removeCoverImage = () => {
+    const currentCoverImage = formData.cover_image_url;
+
+    // Mark for deletion if it's a real URL (not blob)
+    if (
+      currentCoverImage &&
+      !currentCoverImage.startsWith("blob:") &&
+      currentCoverImage !== originalImages.cover_image_url
+    ) {
+      setImagesToDelete((prev) => [...prev, currentCoverImage]);
+    }
+
+    // Clear cover image
+    setFormData((prev) => ({ ...prev, cover_image_url: "" }));
+    setPendingUploads((prev) => ({ ...prev, cover: null }));
+  };
+
+  const removeGalleryImage = async (index: number) => {
+    const imageToRemove = formData.gallery_images[index];
+
+    // Remove from form data
     setFormData((prev) => ({
       ...prev,
       gallery_images: prev.gallery_images.filter((_, i) => i !== index),
     }));
+
+    // Mark real image for deletion (not blob URLs)
+    if (imageToRemove && !imageToRemove.startsWith("blob:")) {
+      setImagesToDelete((prev) => [...prev, imageToRemove]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const projectData = {
-      ...formData,
-      tech_stack: formData.tech_stack
-        .split(",")
-        .map((tech) => tech.trim())
-        .filter(Boolean),
-    };
+    setUploading(true);
 
     try {
+      // Upload pending images first
+      const uploadedUrls = await uploadPendingImages();
+
+      const projectData = {
+        ...formData,
+        tech_stack: formData.tech_stack
+          .split(",")
+          .map((tech) => tech.trim())
+          .filter(Boolean),
+      };
+
       const url = editingProject
         ? `/api/projects/${editingProject.id}`
         : "/api/projects";
@@ -114,14 +221,24 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
+        // Delete marked images on successful save
+        if (imagesToDelete.length > 0) {
+          await cleanupOrphanedImages(imagesToDelete);
+        }
         await fetchProjects();
         resetForm();
       } else {
+        // Cleanup newly uploaded images if project save fails
+        if (uploadedUrls.length > 0) {
+          await cleanupOrphanedImages(uploadedUrls);
+        }
         alert("Failed to save project");
       }
     } catch (error) {
       console.error("Failed to save project:", error);
       alert("Failed to save project");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -137,11 +254,29 @@ const Dashboard = () => {
       gallery_images: project.gallery_images || [],
       category: project.category,
     });
+    // Track original images for cleanup
+    setOriginalImages({
+      cover_image_url: project.cover_image_url || "",
+      gallery_images: project.gallery_images || [],
+    });
     setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
+
+    // Find project to get its images for cleanup
+    const projectToDelete = projects.find((p) => p.id === id);
+    const imagesToDelete = [];
+
+    if (projectToDelete) {
+      if (projectToDelete.cover_image_url) {
+        imagesToDelete.push(projectToDelete.cover_image_url);
+      }
+      if (projectToDelete.gallery_images) {
+        imagesToDelete.push(...projectToDelete.gallery_images);
+      }
+    }
 
     try {
       const response = await fetch(`/api/projects/${id}`, {
@@ -149,6 +284,10 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
+        // Delete associated images
+        if (imagesToDelete.length > 0) {
+          await cleanupOrphanedImages(imagesToDelete);
+        }
         await fetchProjects();
       } else {
         alert("Failed to delete project");
@@ -173,6 +312,10 @@ const Dashboard = () => {
     setImageFile(null);
     setCoverImageFile(null);
     setGalleryFiles([]);
+    setUploadedImages([]);
+    setOriginalImages({ cover_image_url: "", gallery_images: [] });
+    setImagesToDelete([]);
+    setPendingUploads({ cover: null, gallery: [] });
     setEditingProject(null);
     setShowForm(false);
   };
@@ -331,7 +474,7 @@ const Dashboard = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Project Image
+                    Cover Image
                   </label>
                   <input
                     type="file"
@@ -339,8 +482,7 @@ const Dashboard = () => {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        setImageFile(file);
-                        handleImageUpload(file, "cover");
+                        handleCoverImageChange(file);
                       }
                     }}
                     className={`w-full px-3 py-2 border rounded-lg ${
@@ -349,15 +491,21 @@ const Dashboard = () => {
                         : "bg-white border-gray-300"
                     }`}
                   />
-                  {uploading && (
-                    <p className="text-sm mt-1">Uploading image...</p>
-                  )}
                   {formData.cover_image_url && (
-                    <img
-                      src={formData.cover_image_url}
-                      alt="Cover Preview"
-                      className="mt-2 w-32 h-32 object-cover rounded"
-                    />
+                    <div className="mt-2 relative inline-block">
+                      <img
+                        src={formData.cover_image_url}
+                        alt="Cover Preview"
+                        className="w-32 h-32 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeCoverImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -503,5 +651,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
