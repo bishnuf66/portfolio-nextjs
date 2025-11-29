@@ -21,10 +21,6 @@ const Home = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Parallax effect calculations
-  const parallaxOffset = scrollY * 0.5;
-  const opacity = Math.max(1 - scrollY / 600, 0);
-
   return (
     <>
       {/* Hero Section with 3D Spline */}
@@ -118,29 +114,32 @@ const Home = () => {
       </div>
 
       {/* Parallax Mountain Section */}
-      <div className="relative w-full h-screen overflow-hidden">
+      <div className="relative w-full h-screen overflow-hidden bg-black">
         <div
-          className="absolute inset-0"
+          className="w-full h-full origin-center transition-transform duration-100 ease-out"
           style={{
-            transform: `translateY(${parallaxOffset}px)`,
-            opacity: opacity,
+            transform: `perspective(1000px) rotateX(${Math.min(scrollY * 0.03, 30)}deg) scale(${1 + scrollY * 0.0005}) translateZ(${-scrollY * 0.1}px)`,
+            transformStyle: "preserve-3d",
+            willChange: "transform",
           }}
         >
-          <Image
-            src="/mountain.jpg"
-            alt="Mountain landscape"
-            fill
-            unoptimized
-            className={`object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-            priority
-            onLoad={() => setImageLoaded(true)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80"></div>
+          <div className="relative w-full h-full">
+            <Image
+              src="/mountain.jpg"
+              alt="Mountain landscape"
+              fill
+              unoptimized
+              className={`object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+              priority
+              onLoad={() => setImageLoaded(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80"></div>
+          </div>
         </div>
 
         {/* Overlay Content */}
-        <div className="relative z-10 h-full flex items-center justify-center">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
           <div className="text-center px-4 max-w-4xl">
             <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
               <Typewriter
