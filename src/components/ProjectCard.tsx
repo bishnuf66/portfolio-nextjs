@@ -21,9 +21,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   return (
     <div className="group relative">
       <div
-        className={`relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        }`}
+        className={`relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl ${isDarkMode ? "bg-gray-800" : "bg-white"
+          }`}
       >
         {/* Project Image */}
         <div className="relative h-48 overflow-hidden">
@@ -42,20 +41,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {techStack.split(",").map((tech: string, index: number) => (
               <span
                 key={index}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  isDarkMode
-                    ? "bg-gray-700 text-gray-200"
-                    : "bg-gray-100 text-gray-700"
-                }`}
+                className={`px-3 py-1 rounded-full text-sm ${isDarkMode
+                  ? "bg-gray-700 text-gray-200"
+                  : "bg-gray-100 text-gray-700"
+                  }`}
               >
                 {tech.trim()}
               </span>
             ))}
           </div>
           <p
-            className={`text-sm mb-4 ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-sm mb-4 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
             {description}
           </p>
@@ -63,11 +60,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-300 ${
-              isDarkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-            }`}
+            className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-300 ${isDarkMode
+              ? "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
           >
             View Project
             <svg

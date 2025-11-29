@@ -589,7 +589,7 @@ const Dashboard = () => {
             >
               <div className="flex gap-6">
                 <img
-                  src={project.image_url}
+                  src={project.cover_image_url ?? "/project-images/placeholder.png"}
                   alt={project.name}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
