@@ -44,6 +44,17 @@ export default function AnalyticsDashboard() {
             setAnalytics(data);
         } catch (error) {
             console.error("Failed to fetch analytics:", error);
+            // Set empty analytics data to prevent errors
+            setAnalytics({
+                totalViews: 0,
+                uniqueVisitors: 0,
+                topCountries: [],
+                topPages: [],
+                deviceBreakdown: [],
+                avgDuration: 0,
+                recentVisitors: [],
+                projectViews: [],
+            });
         } finally {
             setLoading(false);
         }
@@ -62,12 +73,22 @@ export default function AnalyticsDashboard() {
         );
     }
 
-    if (!analytics) {
+    if (!analytics || (analytics.totalViews === 0 && analytics.topCountries.length === 0)) {
         return (
             <div className="text-center py-12">
-                <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
-                    No analytics data available
-                </p>
+                <div className={`max-w-md mx-auto p-8 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
+                    <p className={`text-lg mb-4 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                        No analytics data yet
+                    </p>
+                    <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Analytics will appear here once you:
+                    </p>
+                    <ol className={`text-sm mt-4 space-y-2 text-left ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        <li>1. Run the SQL migration in Supabase</li>
+                        <li>2. Visit some pages on your site</li>
+                        <li>3. Wait a few seconds for data to sync</li>
+                    </ol>
+                </div>
             </div>
         );
     }
@@ -137,10 +158,10 @@ export default function AnalyticsDashboard() {
                             key={range}
                             onClick={() => setTimeRange(range)}
                             className={`px-4 py-2 rounded-lg font-medium transition-all ${timeRange === range
-                                    ? "bg-blue-500 text-white"
-                                    : isDarkMode
-                                        ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                ? "bg-blue-500 text-white"
+                                : isDarkMode
+                                    ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                 }`}
                         >
                             {range === "24h"
@@ -160,28 +181,28 @@ export default function AnalyticsDashboard() {
                 <StatCard
                     icon={Eye}
                     title="Total Views"
-                    value={analytics.totalViews.toLocaleString()}
+                    value={(analytics.totalViews || 0).toLocaleString()}
                     subtitle="Page views"
                     color="blue"
                 />
                 <StatCard
                     icon={Users}
                     title="Unique Visitors"
-                    value={analytics.uniqueVisitors.toLocaleString()}
+                    value={(analytics.uniqueVisitors || 0).toLocaleString()}
                     subtitle="Unique users"
                     color="purple"
                 />
                 <StatCard
                     icon={Clock}
                     title="Avg. Duration"
-                    value={`${Math.floor(analytics.avgDuration / 60)}m ${analytics.avgDuration % 60}s`}
+                    value={`${Math.floor((analytics.avgDuration || 0) / 60)}m ${(analytics.avgDuration || 0) % 60}s`}
                     subtitle="Time on site"
                     color="green"
                 />
                 <StatCard
                     icon={TrendingUp}
                     title="Engagement"
-                    value={`${Math.round((analytics.avgDuration / 60) * 10) / 10}x`}
+                    value={`${Math.round(((analytics.avgDuration || 0) / 60) * 10) / 10}x`}
                     subtitle="Interaction rate"
                     color="pink"
                 />
@@ -205,7 +226,7 @@ export default function AnalyticsDashboard() {
                             </h3>
                         </div>
                         <div className="space-y-4">
-                            {analytics.topCountries.slice(0, 5).map((country, index) => (
+                            {(analytics.topCountries || []).slice(0, 5).map((country, index) => (
                                 <div key={index} className="space-y-2">
                                     <div className="flex justify-between items-center">
                                         <span
@@ -225,7 +246,7 @@ export default function AnalyticsDashboard() {
                                         <div
                                             className="bg-blue-500 h-2 rounded-full transition-all duration-500"
                                             style={{
-                                                width: `${(country.count / analytics.topCountries[0].count) * 100}%`,
+                                                width: `${analytics.topCountries && analytics.topCountries[0] ? (country.count / analytics.topCountries[0].count) * 100 : 0}%`,
                                             }}
                                         ></div>
                                     </div>
@@ -251,7 +272,7 @@ export default function AnalyticsDashboard() {
                             </h3>
                         </div>
                         <div className="space-y-4">
-                            {analytics.deviceBreakdown.map((device, index) => (
+                            {(analytics.deviceBreakdown || []).map((device, index) => (
                                 <div key={index} className="space-y-2">
                                     <div className="flex justify-between items-center">
                                         <span
@@ -271,7 +292,7 @@ export default function AnalyticsDashboard() {
                                         <div
                                             className="bg-purple-500 h-2 rounded-full transition-all duration-500"
                                             style={{
-                                                width: `${(device.count / analytics.deviceBreakdown[0].count) * 100}%`,
+                                                width: `${analytics.deviceBreakdown && analytics.deviceBreakdown[0] ? (device.count / analytics.deviceBreakdown[0].count) * 100 : 0}%`,
                                             }}
                                         ></div>
                                     </div>
@@ -319,7 +340,7 @@ export default function AnalyticsDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {analytics.topPages.map((page, index) => (
+                                {(analytics.topPages || []).map((page, index) => (
                                     <tr
                                         key={index}
                                         className={`border-b ${isDarkMode ? "border-gray-800" : "border-gray-200"

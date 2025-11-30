@@ -55,14 +55,14 @@ export const getDeviceInfo = () => {
     else if (ua.includes("iOS")) os = "iOS";
 
     return {
-        deviceType,
-        browser,
-        os,
-        userAgent: ua,
-        screenWidth: window.screen.width,
-        screenHeight: window.screen.height,
-        viewportWidth: window.innerWidth,
-        viewportHeight: window.innerHeight,
+        device_type: deviceType,
+        browser: browser,
+        os: os,
+        user_agent: ua,
+        screen_width: window.screen.width,
+        screen_height: window.screen.height,
+        viewport_width: window.innerWidth,
+        viewport_height: window.innerHeight,
         language: navigator.language,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
@@ -79,7 +79,7 @@ export const getLocationInfo = async () => {
             region: data.region,
             latitude: data.latitude,
             longitude: data.longitude,
-            ipAddress: data.ip,
+            ip_address: data.ip,
         };
     } catch (error) {
         console.error("Failed to get location:", error);
@@ -95,7 +95,7 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
         const deviceInfo = getDeviceInfo();
         const locationInfo = await getLocationInfo();
 
-        const { error } = await supabase.from("analytics").insert({
+        const analyticsData = {
             session_id: sessionId,
             visitor_id: visitorId,
             page_path: pagePath,
@@ -103,9 +103,16 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
             referrer: document.referrer,
             ...deviceInfo,
             ...locationInfo,
-        });
+        };
+
+        console.log("Tracking page view:", { pagePath, sessionId });
+
+        const { data, error } = await supabase.from("analytics").insert(
+            analyticsData,
+        );
 
         if (error) {
+            console.error("Analytics insert error:", error);
             // Silently fail if table doesn't exist yet
             if (
                 !error.message?.includes("relation") &&
@@ -113,9 +120,11 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
             ) {
                 console.warn("Analytics tracking error:", error.message);
             }
+        } else {
+            console.log("Analytics tracked successfully");
         }
     } catch (error) {
-        // Silently fail - analytics shouldn't break the app
+        console.error("Analytics tracking exception:", error);
     }
 };
 

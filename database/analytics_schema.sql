@@ -43,6 +43,10 @@ ALTER TABLE analytics ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public insert" ON analytics
   FOR INSERT WITH CHECK (true);
 
+-- Alternative: If above doesn't work, use this instead
+-- CREATE POLICY "Allow anon insert" ON analytics
+--   FOR INSERT TO anon WITH CHECK (true);
+
 -- Only authenticated users can read analytics (for dashboard)
 CREATE POLICY "Allow authenticated read" ON analytics
   FOR SELECT USING (auth.role() = 'authenticated');

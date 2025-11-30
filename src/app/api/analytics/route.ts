@@ -39,10 +39,32 @@ export async function GET(request: Request) {
             .gte("created_at", dateFilter.toISOString());
 
         if (analyticsError) {
-            return NextResponse.json(
-                { error: analyticsError.message },
-                { status: 500 },
-            );
+            console.error("Analytics fetch error:", analyticsError);
+            // Return empty data instead of error
+            return NextResponse.json({
+                totalViews: 0,
+                uniqueVisitors: 0,
+                topCountries: [],
+                topPages: [],
+                deviceBreakdown: [],
+                avgDuration: 0,
+                recentVisitors: [],
+                projectViews: [],
+            });
+        }
+
+        // Handle empty data
+        if (!analyticsData || analyticsData.length === 0) {
+            return NextResponse.json({
+                totalViews: 0,
+                uniqueVisitors: 0,
+                topCountries: [],
+                topPages: [],
+                deviceBreakdown: [],
+                avgDuration: 0,
+                recentVisitors: [],
+                projectViews: [],
+            });
         }
 
         // Calculate metrics
@@ -128,10 +150,17 @@ export async function GET(request: Request) {
         });
     } catch (error) {
         console.error("Analytics API error:", error);
-        return NextResponse.json(
-            { error: "Failed to fetch analytics" },
-            { status: 500 },
-        );
+        // Return empty data instead of error to prevent dashboard crashes
+        return NextResponse.json({
+            totalViews: 0,
+            uniqueVisitors: 0,
+            topCountries: [],
+            topPages: [],
+            deviceBreakdown: [],
+            avgDuration: 0,
+            recentVisitors: [],
+            projectViews: [],
+        });
     }
 }
 
