@@ -106,10 +106,16 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
         });
 
         if (error) {
-            console.error("Analytics tracking error:", error);
+            // Silently fail if table doesn't exist yet
+            if (
+                !error.message?.includes("relation") &&
+                !error.message?.includes("does not exist")
+            ) {
+                console.warn("Analytics tracking error:", error.message);
+            }
         }
     } catch (error) {
-        console.error("Failed to track page view:", error);
+        // Silently fail - analytics shouldn't break the app
     }
 };
 
@@ -132,10 +138,10 @@ export const trackProjectView = async (projectId: string) => {
         });
 
         if (error) {
-            console.error("Project view tracking error:", error);
+            // Silently fail if table doesn't exist
         }
     } catch (error) {
-        console.error("Failed to track project view:", error);
+        // Silently fail
     }
 };
 
@@ -156,10 +162,10 @@ export const trackSectionInteraction = async (
         });
 
         if (error) {
-            console.error("Section interaction tracking error:", error);
+            // Silently fail if table doesn't exist
         }
     } catch (error) {
-        console.error("Failed to track section interaction:", error);
+        // Silently fail
     }
 };
 
@@ -182,10 +188,10 @@ export const trackTimeOnPage = (pagePath: string) => {
                 .limit(1);
 
             if (error) {
-                console.error("Duration update error:", error);
+                // Silently fail
             }
         } catch (error) {
-            console.error("Failed to update duration:", error);
+            // Silently fail
         }
     };
 
