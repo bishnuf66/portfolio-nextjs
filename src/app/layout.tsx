@@ -8,7 +8,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import QueryProvider from "@/components/QueryProvider";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
-import AudioManager from "@/components/AudioManager";
+import ConsentManager from "@/components/ConsentManager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,7 +93,7 @@ export default function RootLayout({
                 <Header />
                 {children}
                 <Footer />
-                <AudioManager />
+                <ConsentManager />
                 <ToastContainer
                   position="top-right"
                   autoClose={3000}

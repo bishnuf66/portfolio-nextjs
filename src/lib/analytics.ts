@@ -89,6 +89,14 @@ export const getLocationInfo = async () => {
 
 // Track page view
 export const trackPageView = async (pagePath: string, pageTitle?: string) => {
+    // Check consent before tracking
+    if (typeof window !== "undefined") {
+        const cookieConsent = localStorage.getItem("cookie-consent");
+        if (cookieConsent !== "accepted") {
+            return; // Don't track if cookies not accepted
+        }
+    }
+
     try {
         const sessionId = getSessionId();
         const visitorId = getVisitorId();
@@ -130,6 +138,14 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
 
 // Track project view
 export const trackProjectView = async (projectId: string) => {
+    // Check consent before tracking
+    if (typeof window !== "undefined") {
+        const cookieConsent = localStorage.getItem("cookie-consent");
+        if (cookieConsent !== "accepted") {
+            return; // Don't track if cookies not accepted
+        }
+    }
+
     try {
         const sessionId = getSessionId();
         const visitorId = getVisitorId();
@@ -160,6 +176,14 @@ export const trackSectionInteraction = async (
     interactionType: "view" | "click" | "scroll",
     metadata?: Record<string, any>,
 ) => {
+    // Check consent before tracking
+    if (typeof window !== "undefined") {
+        const cookieConsent = localStorage.getItem("cookie-consent");
+        if (cookieConsent !== "accepted") {
+            return; // Don't track if cookies not accepted
+        }
+    }
+
     try {
         const sessionId = getSessionId();
 

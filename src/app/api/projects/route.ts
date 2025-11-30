@@ -78,9 +78,9 @@ export async function POST(request: Request) {
     const authenticatedSupabase = createAuthenticatedClient(token);
 
     // Cast body to any here to avoid overly strict generic typing issues
-    const { data, error } = await authenticatedSupabase
+    const { data, error } = await (authenticatedSupabase as any)
       .from("projects")
-      .insert([body as any])
+      .insert([body])
       .select();
 
     if (error) {

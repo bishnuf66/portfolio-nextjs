@@ -16,6 +16,12 @@ export default function AnalyticsProvider({
     const pathname = usePathname();
 
     useEffect(() => {
+        // Check if user has accepted cookies
+        const cookieConsent = localStorage.getItem("cookie-consent");
+        if (cookieConsent !== "accepted") {
+            return; // Don't track if cookies not accepted
+        }
+
         // Track page view
         trackPageView(pathname);
 
