@@ -170,6 +170,10 @@ export const trackProjectView = async (projectId: string) => {
     }
 };
 
+// Throttle cache for section interactions
+const interactionCache = new Map<string, number>();
+const THROTTLE_DURATION = 5000; // 5 seconds
+
 // Track section interaction
 export const trackSectionInteraction = async (
     sectionName: string,
@@ -183,6 +187,19 @@ export const trackSectionInteraction = async (
             return; // Don't track if cookies not accepted
         }
     }
+
+    // Throttle: prevent duplicate tracking within 5 seconds
+    const cacheKey = `${sectionName}-${interactionType}-${
+        JSON.stringify(metadata)
+    }`;
+    const lastTracked = interactionCache.get(cacheKey);
+    const now = Date.now();
+
+    if (lastTracked && now - lastTracked < THROTTLE_DURATION) {
+        return; // Skip if tracked recently
+    }
+
+    interactionCache.set(cacheKey, now);
 
     try {
         const sessionId = getSessionId();

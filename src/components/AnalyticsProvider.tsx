@@ -28,27 +28,47 @@ export default function AnalyticsProvider({
         // Track time on page
         const cleanup = trackTimeOnPage(pathname);
 
-        // Track scroll depth
+        // Track scroll depth with throttling
         let maxScrollDepth = 0;
+        let scrollTimeout: NodeJS.Timeout | null = null;
+        const trackedDepths = new Set<string>(); // Track which depths we've already logged
+
         const handleScroll = () => {
-            const scrollDepth =
-                (window.scrollY + window.innerHeight) / document.body.scrollHeight;
-            if (scrollDepth > maxScrollDepth) {
-                maxScrollDepth = scrollDepth;
-                if (scrollDepth > 0.25 && scrollDepth < 0.5) {
-                    trackSectionInteraction(pathname, "scroll", { depth: "25%" });
-                } else if (scrollDepth > 0.5 && scrollDepth < 0.75) {
-                    trackSectionInteraction(pathname, "scroll", { depth: "50%" });
-                } else if (scrollDepth > 0.75) {
-                    trackSectionInteraction(pathname, "scroll", { depth: "75%" });
-                }
+            // Clear existing timeout
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
             }
+
+            // Throttle scroll events - only track after user stops scrolling for 500ms
+            scrollTimeout = setTimeout(() => {
+                const scrollDepth =
+                    (window.scrollY + window.innerHeight) / document.body.scrollHeight;
+
+                if (scrollDepth > maxScrollDepth) {
+                    maxScrollDepth = scrollDepth;
+
+                    // Only track each depth milestone once
+                    if (scrollDepth > 0.25 && scrollDepth < 0.5 && !trackedDepths.has("25%")) {
+                        trackedDepths.add("25%");
+                        trackSectionInteraction(pathname, "scroll", { depth: "25%" });
+                    } else if (scrollDepth > 0.5 && scrollDepth < 0.75 && !trackedDepths.has("50%")) {
+                        trackedDepths.add("50%");
+                        trackSectionInteraction(pathname, "scroll", { depth: "50%" });
+                    } else if (scrollDepth > 0.75 && !trackedDepths.has("75%")) {
+                        trackedDepths.add("75%");
+                        trackSectionInteraction(pathname, "scroll", { depth: "75%" });
+                    }
+                }
+            }, 500); // Wait 500ms after user stops scrolling
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });
 
         return () => {
             cleanup();
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
             window.removeEventListener("scroll", handleScroll);
         };
     }, [pathname]);
