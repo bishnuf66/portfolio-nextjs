@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
-import { Upload, X, Edit2, Trash2, Plus, LogOut } from "lucide-react";
+import { Upload, X, Edit2, Trash2, Plus, LogOut, BarChart3, FolderKanban } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -12,6 +12,7 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "@/hooks/useProjects";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 const Dashboard = () => {
   const { isDarkMode } = useStore();
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
+  const [activeTab, setActiveTab] = useState<"projects" | "analytics">("projects");
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({
@@ -333,17 +335,19 @@ const Dashboard = () => {
       className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
         } p-8`}
     >
-      <div className="max-w-6xl mx-auto pt-20">
+      <div className="max-w-7xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Project Dashboard</h1>
+          <h1 className="text-4xl font-bold">Dashboard</h1>
           <div className="flex gap-4">
-            <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus size={20} />
-              Add Project
-            </button>
+            {activeTab === "projects" && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus size={20} />
+                Add Project
+              </button>
+            )}
             <button
               onClick={handleSignOut}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -354,298 +358,333 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div
-              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">
-                  {editingProject ? "Edit Project" : "Add New Project"}
-                </h2>
-                <button
-                  onClick={resetForm}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+        {/* Tab Navigation */}
+        <div className="flex gap-4 mb-8 border-b border-gray-700">
+          <button
+            onClick={() => setActiveTab("projects")}
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${activeTab === "projects"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-900"
+              }`}
+          >
+            <FolderKanban size={20} />
+            Projects
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${activeTab === "analytics"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-900"
+              }`}
+          >
+            <BarChart3 size={20} />
+            Analytics
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "analytics" ? (
+          <AnalyticsDashboard />
+        ) : (
+          <>
+            {showForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div
+                  className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                    } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
                 >
-                  <X size={20} />
-                </button>
-              </div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold">
+                      {editingProject ? "Edit Project" : "Add New Project"}
+                    </h2>
+                    <button
+                      onClick={resetForm}
+                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Project Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Project URL
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={formData.url}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, url: e.target.value }))
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Tech Stack (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="React, Node.js, MongoDB"
-                    value={formData.tech_stack}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        tech_stack: e.target.value,
-                      }))
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        category: e.target.value as "professional" | "personal",
-                      }))
-                    }
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  >
-                    <option value="professional">Professional</option>
-                    <option value="personal">Personal</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Cover Image
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleCoverImageChange(file);
-                      }
-                    }}
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                  {formData.cover_image_url && (
-                    <div className="mt-2 relative inline-block">
-                      <img
-                        src={formData.cover_image_url}
-                        alt="Cover Preview"
-                        className="w-32 h-32 object-cover rounded"
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Project Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, name: e.target.value }))
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Project URL
+                      </label>
+                      <input
+                        type="url"
+                        required
+                        value={formData.url}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, url: e.target.value }))
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Tech Stack (comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="React, Node.js, MongoDB"
+                        value={formData.tech_stack}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            tech_stack: e.target.value,
+                          }))
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Category
+                      </label>
+                      <select
+                        value={formData.category}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: e.target.value as "professional" | "personal",
+                          }))
+                        }
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      >
+                        <option value="professional">Professional</option>
+                        <option value="personal">Personal</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Cover Image
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleCoverImageChange(file);
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      />
+                      {formData.cover_image_url && (
+                        <div className="mt-2 relative inline-block">
+                          <img
+                            src={formData.cover_image_url}
+                            alt="Cover Preview"
+                            className="w-32 h-32 object-cover rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={removeCoverImage}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Gallery Images (multiple)
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            handleGalleryImageUpload(e.target.files);
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                          ? "bg-gray-700 border-gray-600"
+                          : "bg-white border-gray-300"
+                          }`}
+                      />
+                      {formData.gallery_images.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium mb-1">
+                            Gallery Preview:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {formData.gallery_images.map((url, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                  src={url}
+                                  alt={`Gallery ${index + 1}`}
+                                  className="w-20 h-20 object-cover rounded"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeGalleryImage(index)}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 pt-4">
+                      <button
+                        type="submit"
+                        disabled={uploading}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      >
+                        {uploading
+                          ? "Processing..."
+                          : editingProject
+                            ? "Update Project"
+                            : "Add Project"}
+                      </button>
                       <button
                         type="button"
-                        onClick={removeCoverImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                        onClick={resetForm}
+                        className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                       >
-                        <X size={12} />
+                        Cancel
                       </button>
                     </div>
-                  )}
+                  </form>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Gallery Images (multiple)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        handleGalleryImageUpload(e.target.files);
+            <div className="grid gap-6">
+              {projects.map((project) => (
+                <div
+                  key={project.id}
+                  className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                    } rounded-lg p-6 shadow-lg`}
+                >
+                  <div className="flex gap-6">
+                    <img
+                      src={
+                        project.cover_image_url ?? "/project-images/placeholder.png"
                       }
-                    }}
-                    className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                        ? "bg-gray-700 border-gray-600"
-                        : "bg-white border-gray-300"
-                      }`}
-                  />
-                  {formData.gallery_images.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-sm font-medium mb-1">
-                        Gallery Preview:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.gallery_images.map((url, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={url}
-                              alt={`Gallery ${index + 1}`}
-                              className="w-20 h-20 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeGalleryImage(index)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
-                            >
-                              <X size={12} />
-                            </button>
+                      alt={project.name}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-bold mb-2">{project.name}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {project.description}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {project.tech_stack.map((tech, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"
+                              >
+                                {tech}
+                              </span>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 pt-4">
-                  <button
-                    type="submit"
-                    disabled={uploading}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                  >
-                    {uploading
-                      ? "Processing..."
-                      : editingProject
-                        ? "Update Project"
-                        : "Add Project"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        <div className="grid gap-6">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                } rounded-lg p-6 shadow-lg`}
-            >
-              <div className="flex gap-6">
-                <img
-                  src={
-                    project.cover_image_url ?? "/project-images/placeholder.png"
-                  }
-                  alt={project.name}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-bold mb-2">{project.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {project.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {project.tech_stack.map((tech, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"
+                          <div className="flex gap-4 text-sm">
+                            <a
+                              href={project.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              View Project
+                            </a>
+                            <span className="text-gray-500">
+                              {project.category}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(project)}
+                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded"
                           >
-                            {tech}
-                          </span>
-                        ))}
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(project.id)}
+                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-4 text-sm">
-                        <a
-                          href={project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          View Project
-                        </a>
-                        <span className="text-gray-500">
-                          {project.category}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(project)}
-                        className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(project.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded"
-                      >
-                        <Trash2 size={16} />
-                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

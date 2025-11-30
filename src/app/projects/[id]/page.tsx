@@ -30,6 +30,15 @@ export default function ProjectDetailPage() {
         fetchProject();
     }, [params.id]);
 
+    useEffect(() => {
+        if (project) {
+            // Track project view
+            import("@/lib/analytics").then(({ trackProjectView }) => {
+                trackProjectView(project.id);
+            });
+        }
+    }, [project]);
+
     const fetchProject = async () => {
         try {
             const response = await fetch(`/api/projects/${params.id}`);
@@ -227,8 +236,8 @@ export default function ProjectDetailPage() {
                 <button
                     onClick={() => router.back()}
                     className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${isDarkMode
-                            ? "text-gray-300 hover:text-white hover:bg-gray-800"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                        ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
                         }`}
                 >
                     <ArrowLeft className="w-5 h-5" />
@@ -271,8 +280,8 @@ export default function ProjectDetailPage() {
                             <span
                                 key={index}
                                 className={`px-4 py-2 rounded-full text-sm font-medium ${isDarkMode
-                                        ? "bg-linear-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
-                                        : "bg-linear-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
+                                    ? "bg-linear-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
+                                    : "bg-linear-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
                                     }`}
                             >
                                 {tech}
@@ -316,8 +325,8 @@ export default function ProjectDetailPage() {
                         <button
                             onClick={() => router.push("/#projects")}
                             className={`px-6 py-3 rounded-full font-semibold transition-all ${isDarkMode
-                                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                : "bg-blue-500 hover:bg-blue-600 text-white"
                                 }`}
                         >
                             View All Projects
@@ -325,8 +334,8 @@ export default function ProjectDetailPage() {
                         <button
                             onClick={() => router.push("/#contact")}
                             className={`px-6 py-3 rounded-full font-semibold border-2 transition-all ${isDarkMode
-                                    ? "border-gray-700 text-white hover:bg-gray-800"
-                                    : "border-gray-300 text-gray-900 hover:bg-gray-100"
+                                ? "border-gray-700 text-white hover:bg-gray-800"
+                                : "border-gray-300 text-gray-900 hover:bg-gray-100"
                                 }`}
                         >
                             Contact Me
