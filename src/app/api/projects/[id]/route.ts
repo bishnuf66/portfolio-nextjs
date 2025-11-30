@@ -1,8 +1,35 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
+import { supabasePublic } from "@/lib/supabase-public";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateProjectData } from "@/lib/validation";
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+
+    const { data, error } = await supabasePublic
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch project" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function PUT(
   request: Request,

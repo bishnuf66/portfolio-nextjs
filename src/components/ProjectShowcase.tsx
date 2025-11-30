@@ -74,6 +74,7 @@ const ProjectShowcase = () => {
             {professionalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
+                id={project.id}
                 image={
                   project.cover_image_url ?? "/project-images/placeholder.png"
                 }
@@ -113,6 +114,7 @@ const ProjectShowcase = () => {
             {personalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
+                id={project.id}
                 image={
                   project.cover_image_url ?? "/project-images/placeholder.png"
                 }

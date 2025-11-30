@@ -8,6 +8,7 @@ import { ExternalLink, Code } from "lucide-react";
 import Image from "next/image";
 
 interface ProjectCardProps {
+  id: string;
   image: string;
   name: string;
   techStack: string;
@@ -16,6 +17,7 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
+  id,
   image,
   name,
   techStack,
@@ -104,11 +106,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
           <CardItem
             translateZ={20}
-            as="button"
+            as="a"
+            href={`/projects/${id}`}
             className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
-              ? "border-white/[0.2] text-white hover:bg-white/[0.1]"
-              : "border-black/[0.1] text-black hover:bg-black/[0.05]"
-              } transition-colors duration-200`}
+              ? "border-white/20 text-white hover:bg-white/10"
+              : "border-black/10 text-black hover:bg-black/5"
+              } transition-colors duration-200 cursor-pointer`}
           >
             Details →
           </CardItem>
