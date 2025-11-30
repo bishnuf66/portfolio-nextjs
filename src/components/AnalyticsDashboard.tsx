@@ -39,7 +39,27 @@ export default function AnalyticsDashboard() {
 
     const fetchAnalytics = async () => {
         try {
-            const response = await fetch(`/api/analytics?range=${timeRange}`);
+            // Get the auth token from Supabase
+            const { supabase } = await import("@/lib/supabase");
+            const { data: { session } } = await supabase.auth.getSession();
+
+            const headers: HeadersInit = {};
+            if (session?.access_token) {
+                headers["Authorization"] = `Bearer ${session.access_token}`;
+            }
+
+            const response = await fetch(`/api/analytics?range=${timeRange}`, {
+                headers,
+                credentials: "include", // Include cookies
+            });
+
+            if (!response.ok) {
+                console.error("Analytics fetch failed:", response.status, response.statusText);
+                const errorData = await response.json();
+                console.error("Error details:", errorData);
+                throw new Error(`Failed to fetch analytics: ${response.statusText}`);
+            }
+
             const data = await response.json();
             setAnalytics(data);
         } catch (error) {

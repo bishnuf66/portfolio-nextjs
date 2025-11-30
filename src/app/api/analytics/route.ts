@@ -1,21 +1,51 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
+import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 
 export async function GET(request: Request) {
     try {
-        const supabase = await createClient();
+        let supabase = await createClient();
+        let user = null;
+        let accessToken = null;
 
-        // Check if user is authenticated
+        // First try to get user from cookies (server-side session)
         const {
-            data: { user },
-            error: authError,
+            data: { user: cookieUser },
+            error: cookieError,
         } = await supabase.auth.getUser();
 
-        if (authError || !user) {
-            return NextResponse.json({ error: "Unauthorized" }, {
+        if (cookieUser) {
+            user = cookieUser;
+        } else {
+            // If no cookie session, try Authorization header
+            const authHeader = request.headers.get("authorization");
+
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                accessToken = authHeader.replace("Bearer ", "");
+                const { data: { user: tokenUser }, error: tokenError } =
+                    await supabase.auth.getUser(accessToken);
+
+                if (tokenUser) {
+                    user = tokenUser;
+                    // Use authenticated client for RLS
+                    supabase = createAuthenticatedClient(accessToken);
+                } else {
+                    console.error("Token auth error:", tokenError);
+                }
+            }
+        }
+
+        if (!user) {
+            console.error("No authenticated user found");
+            return NextResponse.json({
+                error: "Unauthorized",
+                details: "Please log in to view analytics",
+            }, {
                 status: 401,
             });
         }
+
+        console.log("Analytics API - User authenticated:", user.id);
 
         const { searchParams } = new URL(request.url);
         const range = searchParams.get("range") || "7d";
