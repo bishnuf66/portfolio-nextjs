@@ -63,14 +63,14 @@ const ProjectShowcase = () => {
             <Link
               href="/projects/professional"
               className={`px-6 py-3 rounded-full transition-all duration-300 text-nowrap font-semibold ${isDarkMode
-                  ? "bg-linear-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50 text-white"
-                  : "bg-linear-to-r from-blue-500 to-purple-500 hover:shadow-lg hover:shadow-blue-500/50 text-white"
+                ? "bg-linear-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                : "bg-linear-to-r from-blue-500 to-purple-500 hover:shadow-lg hover:shadow-blue-500/50 text-white"
                 }`}
             >
               View All →
             </Link>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 place-items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
             {professionalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -102,14 +102,14 @@ const ProjectShowcase = () => {
             <Link
               href="/projects/personal"
               className={`px-6 py-3 rounded-full transition-all duration-300 text-nowrap font-semibold ${isDarkMode
-                  ? "bg-linear-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-pink-500/50 text-white"
-                  : "bg-linear-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                ? "bg-linear-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-pink-500/50 text-white"
+                : "bg-linear-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 text-white"
                 }`}
             >
               View All →
             </Link>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 place-items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
             {personalProjects.map((project) => (
               <ProjectCard
                 key={project.id}

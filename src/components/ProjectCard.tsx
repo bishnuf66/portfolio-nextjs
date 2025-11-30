@@ -25,11 +25,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { isDarkMode } = useStore();
 
   return (
-    <CardContainer className="inter-var">
+    <CardContainer className="inter-var w-full">
       <CardBody
-        className={`relative group/card w-auto sm:w-[30rem] h-auto rounded-xl p-6 border ${isDarkMode
-            ? "bg-black border-white/[0.2] hover:shadow-2xl hover:shadow-emerald-500/[0.1]"
-            : "bg-gray-50 border-black/[0.1] hover:shadow-2xl hover:shadow-blue-500/[0.1]"
+        className={`relative group/card w-full max-w-[30rem] mx-auto h-auto rounded-xl p-6 border ${isDarkMode
+          ? "bg-black border-white/20 hover:shadow-2xl hover:shadow-emerald-500/10"
+          : "bg-gray-50 border-black/10 hover:shadow-2xl hover:shadow-blue-500/10"
           }`}
       >
         {/* Project Title */}
@@ -75,8 +75,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <span
                 key={index}
                 className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
-                    ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
-                    : "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
+                  ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
+                  : "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
                   }`}
               >
                 {tech.trim()}
@@ -94,8 +94,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className={`px-6 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 ${isDarkMode
-                ? "bg-white text-black hover:bg-gray-100"
-                : "bg-black text-white hover:bg-gray-800"
+              ? "bg-white text-black hover:bg-gray-100"
+              : "bg-black text-white hover:bg-gray-800"
               } transition-colors duration-200`}
           >
             View Project
@@ -106,8 +106,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             translateZ={20}
             as="button"
             className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
-                ? "border-white/[0.2] text-white hover:bg-white/[0.1]"
-                : "border-black/[0.1] text-black hover:bg-black/[0.05]"
+              ? "border-white/[0.2] text-white hover:bg-white/[0.1]"
+              : "border-black/[0.1] text-black hover:bg-black/[0.05]"
               } transition-colors duration-200`}
           >
             Details →
