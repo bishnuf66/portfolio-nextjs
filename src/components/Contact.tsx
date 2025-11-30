@@ -1,14 +1,17 @@
+"use client";
+
 import React, { useState } from "react";
-import { Typewriter } from "react-simple-typewriter";
-import { send } from "emailjs-com"; // EmailJS library
+import { send } from "emailjs-com";
 import useStore from "@/store/store";
-import { toast } from "react-toastify"; // Importing toast from react-toastify
-import "react-toastify/dist/ReactToastify.css"; // Importing CSS for toast notifications
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Mail, Send, User, MessageSquare, MapPin, Phone, Linkedin, Github } from "lucide-react";
+import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
+import { MovingBorder } from "@/components/ui/MovingBorder";
 
 const Contact = () => {
   const { isDarkMode } = useStore();
 
-  // Form state management
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,7 +19,6 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handle form data change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -26,19 +28,16 @@ const Contact = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Basic validation
     if (!formData.name || !formData.email || !formData.message) {
       toast.error("All fields are required.");
       setIsSubmitting(false);
       return;
     }
 
-    // Prepare the email data (adjust according to your EmailJS template placeholders)
     const emailParams = {
       name: formData.name,
       email: formData.email,
@@ -46,16 +45,14 @@ const Contact = () => {
     };
 
     try {
-      // Send email using EmailJS
       const response = await send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID as string, // Your EmailJS Service ID
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID as string, // Your EmailJS Template ID
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID as string,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID as string,
         emailParams,
-        process.env.NEXT_PUBLIC_EMAILJS_USER_ID as string // Your EmailJS User ID
+        process.env.NEXT_PUBLIC_EMAILJS_USER_ID as string
       );
       console.log("Email sent successfully:", response);
       toast.success("Your message has been sent!");
-      // Reset form after submission
       setFormData({
         name: "",
         email: "",
@@ -70,129 +67,269 @@ const Contact = () => {
   };
 
   return (
-    <div id="contact" className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1
-            className={`text-4xl font-bold mb-4 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            <Typewriter
-              words={["Get in Touch"]}
-              loop={1}
-              cursor
-              cursorStyle="_"
-              typeSpeed={70}
-              deleteSpeed={50}
-              delaySpeed={1000}
-            />
-          </h1>
+    <div
+      id="contact"
+      className={`min-h-screen py-20 px-4 sm:px-6 lg:px-8 ${isDarkMode ? "bg-black" : "bg-gray-50"
+        }`}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            Let's Connect
+          </h2>
           <p
-            className={`text-xl ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-xl md:text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
-            Let's discuss how we can work together to bring your ideas to life
+            Have a project in mind? Let's make it happen together
           </p>
         </div>
 
-        {/* Contact Form */}
-        <div
-          className={`p-8 rounded-xl ${
-            isDarkMode ? "bg-gray-800" : "bg-white"
-          } shadow-lg`}
-        >
-          <h2
-            className={`text-2xl font-bold mb-6 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Send a Message
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* Contact Info */}
+          <div className="space-y-8">
             <div>
-              <label
-                htmlFor="name"
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
+              <h3
+                className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
               >
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                required
-                className={`w-full px-4 py-2 rounded-lg border ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                placeholder="Your name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
+                Get in Touch
+              </h3>
+              <p
+                className={`text-lg mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                required
-                className={`w-full px-4 py-2 rounded-lg border ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                placeholder="Your email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="message"
-                className={`block text-sm font-medium mb-1 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Message
-              </label>
-              <textarea
-                id="message"
-                rows={4}
-                required
-                className={`w-full px-4 py-2 rounded-lg border ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white border-gray-300 text-gray-900"
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                placeholder="Your message"
-                value={formData.message}
-                onChange={handleChange}
-              ></textarea>
+                I'm always open to discussing new projects, creative ideas, or
+                opportunities to be part of your vision.
+              </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-                isDarkMode
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
-            >
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </button>
-          </form>
+            {/* Contact Cards */}
+            <div className="space-y-4">
+              <BackgroundGradient className="rounded-[22px] p-1">
+                <div
+                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
+                    }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-500/10 rounded-lg">
+                      <Mail className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <div>
+                      <h4
+                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                      >
+                        Email
+                      </h4>
+                      <a
+                        href="mailto:your.email@example.com"
+                        className="text-blue-500 hover:text-blue-600"
+                      >
+                        your.email@example.com
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </BackgroundGradient>
+
+              <BackgroundGradient className="rounded-[22px] p-1">
+                <div
+                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
+                    }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-purple-500/10 rounded-lg">
+                      <MapPin className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h4
+                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                      >
+                        Location
+                      </h4>
+                      <p
+                        className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
+                      >
+                        Your City, Country
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </BackgroundGradient>
+
+              <BackgroundGradient className="rounded-[22px] p-1">
+                <div
+                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
+                    }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-pink-500/10 rounded-lg">
+                      <Phone className="w-6 h-6 text-pink-500" />
+                    </div>
+                    <div>
+                      <h4
+                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
+                          }`}
+                      >
+                        Phone
+                      </h4>
+                      <a
+                        href="tel:+1234567890"
+                        className="text-pink-500 hover:text-pink-600"
+                      >
+                        +1 (234) 567-890
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </BackgroundGradient>
+            </div>
+
+            {/* Social Links */}
+            <div>
+              <h4
+                className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+              >
+                Connect on Social
+              </h4>
+              <div className="flex gap-4">
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
+                      ? "bg-gray-800 hover:bg-blue-600"
+                      : "bg-gray-200 hover:bg-blue-500"
+                    } hover:scale-110`}
+                >
+                  <Linkedin className="w-6 h-6" />
+                </a>
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
+                      ? "bg-gray-800 hover:bg-purple-600"
+                      : "bg-gray-200 hover:bg-purple-500"
+                    } hover:scale-110`}
+                >
+                  <Github className="w-6 h-6" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Form */}
+          <div>
+            <BackgroundGradient className="rounded-[22px] p-1">
+              <div
+                className={`p-8 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
+                  }`}
+              >
+                <h3
+                  className={`text-2xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
+                >
+                  Send a Message
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                    >
+                      <User className="w-4 h-4" />
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      required
+                      className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-blue-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500"
+                        } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
+                      placeholder="Your name"
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                    >
+                      <Mail className="w-4 h-4" />
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-purple-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500"
+                        } focus:ring-2 focus:ring-purple-500/20 focus:outline-none`}
+                      placeholder="your.email@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="message"
+                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                        }`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      rows={5}
+                      required
+                      className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-pink-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-pink-500"
+                        } focus:ring-2 focus:ring-pink-500/20 focus:outline-none`}
+                      placeholder="Tell me about your project..."
+                      value={formData.message}
+                      onChange={handleChange}
+                    ></textarea>
+                  </div>
+
+                  <MovingBorder
+                    as="button"
+                    type="submit"
+                    disabled={isSubmitting}
+                    duration={3000}
+                    className="w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <Send className="w-4 h-4" />
+                      </>
+                    )}
+                  </MovingBorder>
+                </form>
+              </div>
+            </BackgroundGradient>
+          </div>
         </div>
       </div>
     </div>

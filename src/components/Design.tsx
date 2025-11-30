@@ -1,6 +1,8 @@
+"use client";
+
 import { useCallback } from "react";
 import dynamic from "next/dynamic";
-import { loadSlim } from "tsparticles-slim"; // Use loadSlim instead of loadFull
+import { loadSlim } from "tsparticles-slim";
 
 const Particles = dynamic(() => import("react-tsparticles"), { ssr: false });
 import useStore from "@/store/store";
@@ -11,51 +13,60 @@ const Design = () => {
   const linksColor = isDarkMode ? "#ffffff" : "#000000";
 
   const particlesInit = useCallback(async (engine: any) => {
-    console.log("Particles Engine Loaded:", engine);
-    await loadSlim(engine); // Ensure slim is used
+    await loadSlim(engine);
   }, []);
 
   const particlesLoaded = useCallback(async (container: any) => {
-    console.log("Particles Container:", container);
+    // Particles loaded
   }, []);
 
   return (
-    <div>
+    <div className="fixed inset-0 pointer-events-none z-0">
       <Particles
         id="tsparticles"
         init={particlesInit}
         loaded={particlesLoaded}
         options={{
-          fullScreen: { enable: true },
+          fullScreen: { enable: false },
           fpsLimit: 60,
           interactivity: {
             events: {
-              onClick: { enable: true, mode: "push" },
-              onHover: { enable: true, mode: "repulse" },
+              onClick: { enable: false },
+              onHover: { enable: true, mode: "grab" },
               resize: true,
             },
             modes: {
-              push: { quantity: 4 },
-              repulse: { distance: 150, duration: 0.4 },
+              grab: {
+                distance: 140,
+                links: {
+                  opacity: 0.5,
+                },
+              },
             },
           },
           particles: {
             color: { value: particleColor },
             links: {
               color: linksColor,
-              distance: 120,
+              distance: 150,
               enable: true,
-              opacity: 0.6,
+              opacity: 0.2,
               width: 1,
             },
-            collisions: { enable: true },
+            collisions: { enable: false },
             move: {
               enable: true,
-              outModes: { default: "bounce" },
-              speed: 3,
+              outModes: { default: "out" },
+              speed: 1,
+              straight: false,
             },
-            number: { density: { enable: true, area: 1200 }, value: 80 },
-            opacity: { value: 0.5 },
+            number: {
+              density: { enable: true, area: 1500 },
+              value: 50,
+            },
+            opacity: {
+              value: 0.3,
+            },
             shape: { type: "circle" },
             size: { value: { min: 1, max: 2 } },
           },

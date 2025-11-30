@@ -1,5 +1,11 @@
+"use client";
+
 import React from "react";
 import useStore from "@/store/store";
+import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
+import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
+import { ExternalLink, Code } from "lucide-react";
+import Image from "next/image";
 
 interface ProjectCardProps {
   image: string;
@@ -19,71 +25,96 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const { isDarkMode } = useStore();
 
   return (
-    <div className="group relative">
-      <div
-        className={`relative overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl ${isDarkMode ? "bg-gray-800" : "bg-white"
+    <CardContainer className="inter-var">
+      <CardBody
+        className={`relative group/card w-auto sm:w-[30rem] h-auto rounded-xl p-6 border ${isDarkMode
+            ? "bg-black border-white/[0.2] hover:shadow-2xl hover:shadow-emerald-500/[0.1]"
+            : "bg-gray-50 border-black/[0.1] hover:shadow-2xl hover:shadow-blue-500/[0.1]"
           }`}
       >
-        {/* Project Image */}
-        <div className="relative h-48 overflow-hidden">
-          <img
-            src={image}
-            alt={name}
-            className="w-full h-full object-contain transform transition-transform duration-300 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
+        {/* Project Title */}
+        <CardItem
+          translateZ="50"
+          className="text-xl font-bold text-neutral-600 dark:text-white"
+        >
+          {name}
+        </CardItem>
 
-        {/* Content */}
-        <div className={`p-6 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
-          <h3 className="text-xl font-bold mb-2">{name}</h3>
-          <div className="flex flex-wrap gap-2 mb-4">
+        {/* Description */}
+        <CardItem
+          as="p"
+          translateZ="60"
+          className={`text-sm max-w-sm mt-2 ${isDarkMode ? "text-neutral-300" : "text-neutral-500"
+            }`}
+        >
+          {description}
+        </CardItem>
+
+        {/* Project Image with Gradient Border */}
+        <CardItem translateZ="100" className="w-full mt-4">
+          <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
+            <div className="relative w-full h-60 rounded-2xl overflow-hidden">
+              <Image
+                src={image}
+                alt={name}
+                fill
+                className="object-cover group-hover/card:scale-110 transition-transform duration-500"
+              />
+              {/* Overlay on hover */}
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                <Code className="w-8 h-8 text-white" />
+              </div>
+            </div>
+          </BackgroundGradient>
+        </CardItem>
+
+        {/* Tech Stack */}
+        <CardItem translateZ="50" className="w-full mt-4">
+          <div className="flex flex-wrap gap-2">
             {techStack.split(",").map((tech: string, index: number) => (
               <span
                 key={index}
-                className={`px-3 py-1 rounded-full text-sm ${isDarkMode
-                  ? "bg-gray-700 text-gray-200"
-                  : "bg-gray-100 text-gray-700"
+                className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
+                    ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
+                    : "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
                   }`}
               >
                 {tech.trim()}
               </span>
             ))}
           </div>
-          <p
-            className={`text-sm mb-4 ${isDarkMode ? "text-gray-300" : "text-gray-600"
-              }`}
-          >
-            {description}
-          </p>
-          <a
+        </CardItem>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center mt-6">
+          <CardItem
+            translateZ={20}
+            as="a"
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-300 ${isDarkMode
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+            className={`px-6 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 ${isDarkMode
+                ? "bg-white text-black hover:bg-gray-100"
+                : "bg-black text-white hover:bg-gray-800"
+              } transition-colors duration-200`}
           >
             View Project
-            <svg
-              className="w-4 h-4 ml-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
-          </a>
+            <ExternalLink className="w-4 h-4" />
+          </CardItem>
+
+          <CardItem
+            translateZ={20}
+            as="button"
+            className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
+                ? "border-white/[0.2] text-white hover:bg-white/[0.1]"
+                : "border-black/[0.1] text-black hover:bg-black/[0.05]"
+              } transition-colors duration-200`}
+          >
+            Details →
+          </CardItem>
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </CardContainer>
   );
 };
 

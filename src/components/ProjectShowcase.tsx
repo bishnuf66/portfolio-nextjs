@@ -48,27 +48,29 @@ const ProjectShowcase = () => {
     <div id="projects" className="pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Professional Projects Section */}
-        <div className="mb-16">
-          <div className="flex justify-between items-center mb-8">
-            <h2
-              className={`text-3xl font-bold ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Professional Projects
-            </h2>
+        <div className="mb-20">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
+            <div>
+              <h2
+                className={`text-4xl font-bold mb-2 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent`}
+              >
+                Professional Projects
+              </h2>
+              <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                Client work and production applications
+              </p>
+            </div>
             <Link
               href="/projects/professional"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300  text-nowrap ${
-                isDarkMode
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+              className={`px-6 py-3 rounded-full transition-all duration-300 text-nowrap font-semibold ${isDarkMode
+                  ? "bg-linear-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                  : "bg-linear-to-r from-blue-500 to-purple-500 hover:shadow-lg hover:shadow-blue-500/50 text-white"
+                }`}
             >
-              View All
+              View All →
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 place-items-center">
             {professionalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -86,26 +88,28 @@ const ProjectShowcase = () => {
 
         {/* Personal Projects Section */}
         <div>
-          <div className="flex justify-between items-center mb-8">
-            <h2
-              className={`text-3xl font-bold ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Personal Projects
-            </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
+            <div>
+              <h2
+                className={`text-4xl font-bold mb-2 bg-linear-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent`}
+              >
+                Personal Projects
+              </h2>
+              <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                Side projects and experiments
+              </p>
+            </div>
             <Link
               href="/projects/personal"
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 text-nowrap ${
-                isDarkMode
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
-              }`}
+              className={`px-6 py-3 rounded-full transition-all duration-300 text-nowrap font-semibold ${isDarkMode
+                  ? "bg-linear-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-pink-500/50 text-white"
+                  : "bg-linear-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                }`}
             >
-              View All
+              View All →
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 place-items-center">
             {personalProjects.map((project) => (
               <ProjectCard
                 key={project.id}
