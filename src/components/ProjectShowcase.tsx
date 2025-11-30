@@ -3,6 +3,7 @@ import ProjectCard from "./ProjectCard";
 import { Project } from "@/lib/supabase";
 import Link from "next/link";
 import useStore from "@/store/store";
+import { ProjectCardSkeleton } from "./LoadingSkeleton";
 
 const ProjectShowcase = () => {
   const { isDarkMode } = useStore();
@@ -36,8 +37,39 @@ const ProjectShowcase = () => {
     return (
       <div id="projects" className="pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="text-xl">Loading projects...</div>
+          <div className="mb-20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
+              <div>
+                <h2 className="text-4xl font-bold mb-2 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                  Professional Projects
+                </h2>
+                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  Client work and production applications
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
+              {[1, 2, 3].map((i) => (
+                <ProjectCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4">
+              <div>
+                <h2 className="text-4xl font-bold mb-2 bg-linear-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
+                  Personal Projects
+                </h2>
+                <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  Side projects and experiments
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 lg:gap-12 xl:gap-16">
+              {[1, 2, 3].map((i) => (
+                <ProjectCardSkeleton key={i} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

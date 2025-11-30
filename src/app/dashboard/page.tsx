@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
-import { Upload, X, Edit2, Trash2, Plus, LogOut, BarChart3, FolderKanban } from "lucide-react";
+import { Upload, X, Edit2, Trash2, Plus, LogOut, BarChart3, FolderKanban, BookOpen, MessageSquare, Star } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -12,7 +12,23 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "@/hooks/useProjects";
+import {
+  useBlogs,
+  useCreateBlog,
+  useUpdateBlog,
+  useDeleteBlog,
+} from "@/hooks/useBlogs";
+import {
+  useTestimonials,
+  useCreateTestimonial,
+  useUpdateTestimonial,
+  useDeleteTestimonial,
+} from "@/hooks/useTestimonials";
+import { Blog, Testimonial } from "@/types/blog";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import BlogManager from "@/components/dashboard/BlogManager";
+import TestimonialManager from "@/components/dashboard/TestimonialManager";
 
 const Dashboard = () => {
   const { isDarkMode } = useStore();
@@ -24,7 +40,7 @@ const Dashboard = () => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
-  const [activeTab, setActiveTab] = useState<"projects" | "analytics">("projects");
+  const [activeTab, setActiveTab] = useState<"projects" | "analytics" | "blogs" | "testimonials">("projects");
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({
@@ -359,10 +375,10 @@ const Dashboard = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8 border-b border-gray-700">
+        <div className="flex gap-4 mb-8 border-b border-gray-700 overflow-x-auto">
           <button
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${activeTab === "projects"
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "projects"
               ? "border-b-2 border-blue-500 text-blue-500"
               : isDarkMode
                 ? "text-gray-400 hover:text-white"
@@ -373,8 +389,32 @@ const Dashboard = () => {
             Projects
           </button>
           <button
+            onClick={() => setActiveTab("blogs")}
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "blogs"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-900"
+              }`}
+          >
+            <BookOpen size={20} />
+            Blogs
+          </button>
+          <button
+            onClick={() => setActiveTab("testimonials")}
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "testimonials"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-900"
+              }`}
+          >
+            <MessageSquare size={20} />
+            Testimonials
+          </button>
+          <button
             onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all ${activeTab === "analytics"
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "analytics"
               ? "border-b-2 border-blue-500 text-blue-500"
               : isDarkMode
                 ? "text-gray-400 hover:text-white"
@@ -389,6 +429,10 @@ const Dashboard = () => {
         {/* Tab Content */}
         {activeTab === "analytics" ? (
           <AnalyticsDashboard />
+        ) : activeTab === "blogs" ? (
+          <BlogManager />
+        ) : activeTab === "testimonials" ? (
+          <TestimonialManager />
         ) : (
           <>
             {showForm && (

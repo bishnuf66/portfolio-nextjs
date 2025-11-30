@@ -18,8 +18,8 @@ const Header = () => {
 
   const navItems = [
     { name: "Home", href: "/" },
-    // { name: "About", href: "#about" },
     { name: "Projects", href: "#projects" },
+    { name: "Blog", href: "/blog" },
     { name: "Contact", href: "#contact" },
   ];
 
@@ -28,25 +28,22 @@ const Header = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? " backdrop-blur-md shadow-lg" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? " backdrop-blur-md shadow-lg" : "bg-transparent"
+        }`}
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href={"/"}>
             <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
               <motion.h1
-                className={`text-2xl font-bold ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-black"
+                  }`}
               >
                 Bishnu Bk
               </motion.h1>
               <motion.p
-                className={`text-sm font-medium ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Full Stack Developer
               </motion.p>
@@ -61,9 +58,8 @@ const Header = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 href={item.href}
-                className={`${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                } hover:text-primary transition-colors relative group`}
+                className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  } hover:text-primary transition-colors relative group`}
               >
                 {item.name}
                 <motion.span
@@ -80,9 +76,8 @@ const Header = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                }`}
             >
               {isDarkMode ? (
                 <FiSun className="text-yellow-400" size={20} />
@@ -121,9 +116,8 @@ const Header = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className={`md:hidden mt-4 ${
-                isDarkMode ? "bg-dark/95" : "bg-white/95"
-              } backdrop-blur-md rounded-lg`}
+              className={`md:hidden mt-4 ${isDarkMode ? "bg-dark/95" : "bg-white/95"
+                } backdrop-blur-md rounded-lg`}
             >
               <div className="flex flex-col space-y-4 p-4">
                 {navItems.map((item) => (
@@ -131,9 +125,8 @@ const Header = () => {
                     key={item.name}
                     whileHover={{ x: 10 }}
                     href={item.href}
-                    className={`${
-                      isDarkMode ? "text-gray-300" : "text-gray-600"
-                    } hover:text-primary transition-colors`}
+                    className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
+                      } hover:text-primary transition-colors`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}

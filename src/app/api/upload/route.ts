@@ -5,6 +5,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const bucket = (formData.get("bucket") as string) || "project-images";
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -12,10 +13,10 @@ export async function POST(request: Request) {
 
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `project-images/${fileName}`;
+    const filePath = fileName;
 
     const { data, error } = await supabase.storage
-      .from("project-images")
+      .from(bucket)
       .upload(filePath, file);
 
     if (error) {
@@ -24,13 +25,13 @@ export async function POST(request: Request) {
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from("project-images").getPublicUrl(filePath);
+    } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
     return NextResponse.json({ imageUrl: publicUrl });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to upload image" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

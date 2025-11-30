@@ -5,6 +5,7 @@ import Home from "../components/Home";
 import Contact from "../components/Contact";
 import ProjectShowcase from "@/components/ProjectShowcase";
 import ThreeCanvas from "@/components/ThreeCanvas";
+import Testimonials from "@/components/Testimonials";
 
 export default function HomePage() {
   const { isDarkMode } = useStore();
@@ -43,6 +44,8 @@ export default function HomePage() {
             <ProjectShowcase />
           </div>
         </div>
+
+        <Testimonials />
 
         <Contact />
       </div>
