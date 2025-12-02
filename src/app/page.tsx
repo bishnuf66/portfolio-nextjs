@@ -7,6 +7,7 @@ import ProjectShowcase from "@/components/ProjectShowcase";
 import ThreeCanvas from "@/components/ThreeCanvas";
 import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
+import ThreeJsShowcase from "@/components/ThreeJsShowcase";
 
 export default function HomePage() {
   const { isDarkMode } = useStore();
@@ -49,6 +50,8 @@ export default function HomePage() {
         <Testimonials />
 
         <SpaceShooterGame />
+
+        <ThreeJsShowcase />
 
         <Contact />
       </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import useStore from "@/store/store";
-import { Github, Linkedin, Mail, Heart, ArrowUp } from "lucide-react";
+import { Github, Linkedin, Mail, Heart, ArrowUp, Code2 } from "lucide-react";
 
 const Footer = () => {
   const { isDarkMode } = useStore();
@@ -48,8 +48,8 @@ const Footer = () => {
                   <a
                     href={`#${link.toLowerCase()}`}
                     className={`text-sm transition-colors ${isDarkMode
-                        ? "text-gray-400 hover:text-blue-400"
-                        : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-blue-400"
+                      : "text-gray-600 hover:text-blue-600"
                       }`}
                   >
                     {link}
@@ -73,8 +73,8 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-2 rounded-lg transition-all ${isDarkMode
-                    ? "bg-gray-800 hover:bg-blue-600"
-                    : "bg-gray-100 hover:bg-blue-500 hover:text-white"
+                  ? "bg-gray-800 hover:bg-blue-600"
+                  : "bg-gray-100 hover:bg-blue-500 hover:text-white"
                   }`}
               >
                 <Github className="w-5 h-5" />
@@ -84,8 +84,8 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-2 rounded-lg transition-all ${isDarkMode
-                    ? "bg-gray-800 hover:bg-blue-600"
-                    : "bg-gray-100 hover:bg-blue-500 hover:text-white"
+                  ? "bg-gray-800 hover:bg-blue-600"
+                  : "bg-gray-100 hover:bg-blue-500 hover:text-white"
                   }`}
               >
                 <Linkedin className="w-5 h-5" />
@@ -93,8 +93,8 @@ const Footer = () => {
               <a
                 href="mailto:your.email@example.com"
                 className={`p-2 rounded-lg transition-all ${isDarkMode
-                    ? "bg-gray-800 hover:bg-purple-600"
-                    : "bg-gray-100 hover:bg-purple-500 hover:text-white"
+                  ? "bg-gray-800 hover:bg-purple-600"
+                  : "bg-gray-100 hover:bg-purple-500 hover:text-white"
                   }`}
               >
                 <Mail className="w-5 h-5" />
@@ -108,20 +108,35 @@ const Footer = () => {
           className={`pt-8 border-t ${isDarkMode ? "border-gray-800" : "border-gray-200"
             } flex flex-col sm:flex-row justify-between items-center gap-4`}
         >
-          <p
-            className={`text-sm flex items-center gap-1 ${isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-          >
-            © {currentYear} Bishnu BK. Made with{" "}
-            <Heart className="w-4 h-4 text-red-500 fill-red-500" /> and lots of
-            coffee
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <p
+              className={`text-sm flex items-center gap-1 ${isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+            >
+              © {currentYear} Bishnu BK. Made with{" "}
+              <Heart className="w-4 h-4 text-red-500 fill-red-500" /> and lots of
+              coffee
+            </p>
+
+            <a
+              href="https://github.com/bishnuf66"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`text-sm flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isDarkMode
+                ? "bg-gray-800 text-gray-300 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white"
+                }`}
+            >
+              <Code2 className="w-4 h-4" />
+              View Source Code
+            </a>
+          </div>
 
           <button
             onClick={scrollToTop}
             className={`p-2 rounded-lg transition-all ${isDarkMode
-                ? "bg-gray-800 hover:bg-blue-600"
-                : "bg-gray-100 hover:bg-blue-500 hover:text-white"
+              ? "bg-gray-800 hover:bg-blue-600"
+              : "bg-gray-100 hover:bg-blue-500 hover:text-white"
               }`}
             aria-label="Scroll to top"
           >
