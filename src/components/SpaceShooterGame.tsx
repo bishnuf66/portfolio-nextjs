@@ -475,6 +475,99 @@ export default function SpaceShooterGame() {
                             style={{ display: "block" }}
                         />
 
+                        {/* Idle State - Cool Background */}
+                        {!isPlaying && !showInstructions && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 flex items-center justify-center"
+                                style={{
+                                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+                                }}
+                            >
+                                <div className="text-center text-white relative z-10">
+                                    <motion.div
+                                        animate={{
+                                            scale: [1, 1.1, 1],
+                                            rotate: [0, 5, -5, 0],
+                                        }}
+                                        transition={{
+                                            duration: 3,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        }}
+                                    >
+                                        <Gamepad2 size={80} className="mx-auto mb-6" />
+                                    </motion.div>
+                                    <motion.h3
+                                        className="text-5xl font-bold mb-4"
+                                        animate={{
+                                            textShadow: [
+                                                "0 0 20px rgba(255,255,255,0.5)",
+                                                "0 0 40px rgba(255,255,255,0.8)",
+                                                "0 0 20px rgba(255,255,255,0.5)",
+                                            ],
+                                        }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        }}
+                                    >
+                                        SPACE SHOOTER
+                                    </motion.h3>
+                                    <motion.p
+                                        className="text-xl opacity-90"
+                                        animate={{ opacity: [0.7, 1, 0.7] }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut",
+                                        }}
+                                    >
+                                        Press Start to Begin
+                                    </motion.p>
+                                    <div className="mt-6 flex gap-4 justify-center text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">⭐</span>
+                                            <span>Collect Stars</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">💥</span>
+                                            <span>Shoot Asteroids</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">🏆</span>
+                                            <span>Beat High Score</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Animated stars in background */}
+                                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                    {[...Array(20)].map((_, i) => (
+                                        <motion.div
+                                            key={i}
+                                            className="absolute w-2 h-2 bg-white rounded-full"
+                                            style={{
+                                                left: `${Math.random() * 100}%`,
+                                                top: `${Math.random() * 100}%`,
+                                            }}
+                                            animate={{
+                                                opacity: [0.2, 1, 0.2],
+                                                scale: [0.5, 1.5, 0.5],
+                                            }}
+                                            transition={{
+                                                duration: 2 + Math.random() * 2,
+                                                repeat: Infinity,
+                                                delay: Math.random() * 2,
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+
                         {/* Overlays */}
                         <AnimatePresence>
                             {showInstructions && !isPlaying && (
