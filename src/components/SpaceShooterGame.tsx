@@ -1,162 +1,53 @@
 "use client";
 
-import React, { useRef, useState, useEffect, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Stars, Text } from "@react-three/drei";
-import * as THREE from "three";
+import React, { useRef, useState, useEffect } from "react";
 import useStore from "@/store/store";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gamepad2, Trophy, RotateCcw, Play, Pause, X } from "lucide-react";
+import { Gamepad2, Trophy, RotateCcw, Play, Pause } from "lucide-react";
 
-// Spaceship Component
-function Spaceship({ position }: { position: [number, number, number] }) {
-    const meshRef = useRef<THREE.Mesh>(null);
-
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.1;
-        }
-    });
-
-    return (
-        <group position={position}>
-            {/* Main body */}
-            <mesh ref={meshRef}>
-                <coneGeometry args={[0.5, 1.5, 4]} />
-                <meshStandardMaterial color="#4299e1" emissive="#2b6cb0" emissiveIntensity={0.5} />
-            </mesh>
-            {/* Wings */}
-            <mesh position={[-0.6, 0, 0]} rotation={[0, 0, Math.PI / 4]}>
-                <boxGeometry args={[0.8, 0.1, 0.3]} />
-                <meshStandardMaterial color="#667eea" />
-            </mesh>
-            <mesh position={[0.6, 0, 0]} rotation={[0, 0, -Math.PI / 4]}>
-                <boxGeometry args={[0.8, 0.1, 0.3]} />
-                <meshStandardMaterial color="#667eea" />
-            </mesh>
-            {/* Cockpit */}
-            <mesh position={[0, 0.3, 0.3]}>
-                <sphereGeometry args={[0.2, 16, 16]} />
-                <meshStandardMaterial color="#f6ad55" emissive="#ed8936" emissiveIntensity={0.8} />
-            </mesh>
-        </group>
-    );
+interface GameObject {
+    id: number;
+    x: number;
+    y: number;
+    speed: number;
 }
 
-// Asteroid Component
-function Asteroid({ position, speed, onCollision }: any) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const [isActive, setIsActive] = useState(true);
-
-    useFrame(() => {
-        if (meshRef.current && isActive) {
-            meshRef.current.position.z += speed;
-            meshRef.current.rotation.x += 0.01;
-            meshRef.current.rotation.y += 0.01;
-
-            // Check if asteroid is past the camera
-            if (meshRef.current.position.z > 5) {
-                setIsActive(false);
-                onCollision(false); // Missed asteroid
-            }
-        }
-    });
-
-    if (!isActive) return null;
-
-    return (
-        <mesh ref={meshRef} position={position}>
-            <dodecahedronGeometry args={[0.5, 0]} />
-            <meshStandardMaterial color="#e53e3e" roughness={0.8} />
-        </mesh>
-    );
+interface Bullet {
+    id: number;
+    x: number;
+    y: number;
 }
 
-// Collectible Star Component
-function CollectibleStar({ position, speed, onCollect }: any) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const [isActive, setIsActive] = useState(true);
-
-    useFrame((state) => {
-        if (meshRef.current && isActive) {
-            meshRef.current.position.z += speed;
-            meshRef.current.rotation.y += 0.05;
-            meshRef.current.position.y += Math.sin(state.clock.elapsedTime * 3) * 0.01;
-
-            // Check if star is past the camera
-            if (meshRef.current.position.z > 5) {
-                setIsActive(false);
-            }
-        }
-    });
-
-    if (!isActive) return null;
-
-    return (
-        <mesh
-            ref={meshRef}
-            position={position}
-            onClick={() => {
-                setIsActive(false);
-                onCollect();
-            }}
-        >
-            <octahedronGeometry args={[0.3, 0]} />
-            <meshStandardMaterial color="#ffd700" emissive="#ffa500" emissiveIntensity={1} />
-        </mesh>
-    );
-}
-
-// Game Scene Component
-function GameScene({
-    shipPosition,
-    asteroids,
-    stars,
-    onAsteroidCollision,
-    onStarCollect,
-}: any) {
-    return (
-        <>
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
-            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-
-            <Spaceship position={shipPosition} />
-
-            {asteroids.map((asteroid: any) => (
-                <Asteroid
-                    key={asteroid.id}
-                    position={asteroid.position}
-                    speed={asteroid.speed}
-                    onCollision={onAsteroidCollision}
-                />
-            ))}
-
-            {stars.map((star: any) => (
-                <CollectibleStar
-                    key={star.id}
-                    position={star.position}
-                    speed={star.speed}
-                    onCollect={onStarCollect}
-                />
-            ))}
-        </>
-    );
+interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
 }
 
 // Main Game Component
 export default function SpaceShooterGame() {
     const { isDarkMode } = useStore();
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
     const [lives, setLives] = useState(3);
     const [gameOver, setGameOver] = useState(false);
-    const [shipPosition, setShipPosition] = useState<[number, number, number]>([0, 0, 3]);
-    const [asteroids, setAsteroids] = useState<any[]>([]);
-    const [stars, setStars] = useState<any[]>([]);
     const [showInstructions, setShowInstructions] = useState(true);
+
+    // Game state refs
+    const shipRef = useRef({ x: 400, y: 450, width: 40, height: 40 });
+    const asteroidsRef = useRef<GameObject[]>([]);
+    const starsRef = useRef<GameObject[]>([]);
+    const bulletsRef = useRef<Bullet[]>([]);
+    const particlesRef = useRef<Particle[]>([]);
+    const keysRef = useRef<{ [key: string]: boolean }>({});
+    const lastShotRef = useRef(0);
+    const animationFrameRef = useRef<number | undefined>(undefined);
 
     // Load high score from localStorage
     useEffect(() => {
@@ -174,34 +65,253 @@ export default function SpaceShooterGame() {
         }
     }, [score, highScore]);
 
-    // Spawn asteroids and stars
+    // Draw spaceship
+    const drawShip = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Main body (triangle)
+        ctx.fillStyle = "#4299e1";
+        ctx.beginPath();
+        ctx.moveTo(0, -20);
+        ctx.lineTo(-15, 20);
+        ctx.lineTo(15, 20);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cockpit
+        ctx.fillStyle = "#f6ad55";
+        ctx.beginPath();
+        ctx.arc(0, -5, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wings
+        ctx.fillStyle = "#667eea";
+        ctx.fillRect(-20, 5, 8, 15);
+        ctx.fillRect(12, 5, 8, 15);
+
+        ctx.restore();
+    };
+
+    // Draw asteroid
+    const drawAsteroid = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+        ctx.fillStyle = "#e53e3e";
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const radius = 15 + Math.random() * 5;
+            const px = x + Math.cos(angle) * radius;
+            const py = y + Math.sin(angle) * radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+    };
+
+    // Draw star
+    const drawStar = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+        ctx.fillStyle = "#ffd700";
+        ctx.strokeStyle = "#ffa500";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+            const outerRadius = 12;
+            const innerRadius = 6;
+            const outerX = x + Math.cos(angle) * outerRadius;
+            const outerY = y + Math.sin(angle) * outerRadius;
+            const innerAngle = angle + Math.PI / 5;
+            const innerX = x + Math.cos(innerAngle) * innerRadius;
+            const innerY = y + Math.sin(innerAngle) * innerRadius;
+            if (i === 0) ctx.moveTo(outerX, outerY);
+            else ctx.lineTo(outerX, outerY);
+            ctx.lineTo(innerX, innerY);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    };
+
+    // Draw bullet
+    const drawBullet = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+        ctx.fillStyle = "#00ff00";
+        ctx.fillRect(x - 2, y, 4, 10);
+    };
+
+    // Draw particle
+    const drawParticle = (ctx: CanvasRenderingContext2D, particle: Particle) => {
+        ctx.fillStyle = particle.color;
+        ctx.globalAlpha = particle.life;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    };
+
+    // Create explosion particles
+    const createExplosion = (x: number, y: number, color: string) => {
+        for (let i = 0; i < 15; i++) {
+            particlesRef.current.push({
+                x,
+                y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                life: 1,
+                color,
+            });
+        }
+    };
+
+    // Check collision
+    const checkCollision = (
+        x1: number,
+        y1: number,
+        w1: number,
+        h1: number,
+        x2: number,
+        y2: number,
+        w2: number,
+        h2: number
+    ) => {
+        return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+    };
+
+    // Game loop
+    const gameLoop = () => {
+        const canvas = canvasRef.current;
+        if (!canvas || !isPlaying || isPaused || gameOver) return;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // Clear canvas
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw stars background
+        ctx.fillStyle = "#ffffff";
+        for (let i = 0; i < 100; i++) {
+            const x = (i * 37) % canvas.width;
+            const y = (i * 73 + Date.now() * 0.05) % canvas.height;
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        // Update ship position
+        const ship = shipRef.current;
+        if (keysRef.current["ArrowLeft"] || keysRef.current["a"]) ship.x = Math.max(20, ship.x - 5);
+        if (keysRef.current["ArrowRight"] || keysRef.current["d"]) ship.x = Math.min(canvas.width - 20, ship.x + 5);
+        if (keysRef.current["ArrowUp"] || keysRef.current["w"]) ship.y = Math.max(20, ship.y - 5);
+        if (keysRef.current["ArrowDown"] || keysRef.current["s"]) ship.y = Math.min(canvas.height - 20, ship.y + 5);
+
+        // Auto-shoot
+        const now = Date.now();
+        if (now - lastShotRef.current > 200) {
+            bulletsRef.current.push({ id: now, x: ship.x, y: ship.y - 20 });
+            lastShotRef.current = now;
+        }
+
+        // Update and draw bullets
+        bulletsRef.current = bulletsRef.current.filter((bullet) => {
+            bullet.y -= 8;
+            if (bullet.y < 0) return false;
+            drawBullet(ctx, bullet.x, bullet.y);
+            return true;
+        });
+
+        // Update and draw asteroids
+        asteroidsRef.current = asteroidsRef.current.filter((asteroid) => {
+            asteroid.y += asteroid.speed;
+            if (asteroid.y > canvas.height) return false;
+
+            // Check bullet collision
+            let hit = false;
+            bulletsRef.current = bulletsRef.current.filter((bullet) => {
+                if (checkCollision(bullet.x - 2, bullet.y, 4, 10, asteroid.x - 15, asteroid.y - 15, 30, 30)) {
+                    hit = true;
+                    createExplosion(asteroid.x, asteroid.y, "#e53e3e");
+                    setScore((prev) => prev + 5);
+                    return false;
+                }
+                return true;
+            });
+
+            if (hit) return false;
+
+            // Check ship collision
+            if (checkCollision(ship.x - 15, ship.y - 20, 30, 40, asteroid.x - 15, asteroid.y - 15, 30, 30)) {
+                createExplosion(asteroid.x, asteroid.y, "#e53e3e");
+                setLives((prev) => {
+                    const newLives = prev - 1;
+                    if (newLives <= 0) {
+                        setGameOver(true);
+                        setIsPlaying(false);
+                    }
+                    return newLives;
+                });
+                return false;
+            }
+
+            drawAsteroid(ctx, asteroid.x, asteroid.y);
+            return true;
+        });
+
+        // Update and draw stars
+        starsRef.current = starsRef.current.filter((star) => {
+            star.y += star.speed;
+            if (star.y > canvas.height) return false;
+
+            // Check ship collision
+            if (checkCollision(ship.x - 15, ship.y - 20, 30, 40, star.x - 12, star.y - 12, 24, 24)) {
+                createExplosion(star.x, star.y, "#ffd700");
+                setScore((prev) => prev + 10);
+                return false;
+            }
+
+            drawStar(ctx, star.x, star.y);
+            return true;
+        });
+
+        // Update and draw particles
+        particlesRef.current = particlesRef.current.filter((particle) => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life -= 0.02;
+            if (particle.life <= 0) return false;
+            drawParticle(ctx, particle);
+            return true;
+        });
+
+        // Draw ship
+        drawShip(ctx, ship.x, ship.y);
+
+        animationFrameRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    // Spawn enemies
     useEffect(() => {
         if (!isPlaying || isPaused || gameOver) return;
 
         const asteroidInterval = setInterval(() => {
-            const newAsteroid = {
-                id: Date.now() + Math.random(),
-                position: [
-                    (Math.random() - 0.5) * 8,
-                    (Math.random() - 0.5) * 4,
-                    -20,
-                ] as [number, number, number],
-                speed: 0.1 + Math.random() * 0.1,
-            };
-            setAsteroids((prev) => [...prev, newAsteroid]);
-        }, 1500);
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            asteroidsRef.current.push({
+                id: Date.now(),
+                x: Math.random() * (canvas.width - 40) + 20,
+                y: -20,
+                speed: 2 + Math.random() * 2,
+            });
+        }, 1000);
 
         const starInterval = setInterval(() => {
-            const newStar = {
-                id: Date.now() + Math.random(),
-                position: [
-                    (Math.random() - 0.5) * 8,
-                    (Math.random() - 0.5) * 4,
-                    -20,
-                ] as [number, number, number],
-                speed: 0.15,
-            };
-            setStars((prev) => [...prev, newStar]);
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            starsRef.current.push({
+                id: Date.now(),
+                x: Math.random() * (canvas.width - 40) + 20,
+                y: -20,
+                speed: 3,
+            });
         }, 2000);
 
         return () => {
@@ -212,51 +322,35 @@ export default function SpaceShooterGame() {
 
     // Keyboard controls
     useEffect(() => {
-        if (!isPlaying || isPaused || gameOver) return;
-
         const handleKeyDown = (e: KeyboardEvent) => {
-            const speed = 0.5;
-            setShipPosition((prev) => {
-                let [x, y, z] = prev;
-                if (e.key === "ArrowLeft" || e.key === "a") x = Math.max(x - speed, -4);
-                if (e.key === "ArrowRight" || e.key === "d") x = Math.min(x + speed, 4);
-                if (e.key === "ArrowUp" || e.key === "w") y = Math.min(y + speed, 2);
-                if (e.key === "ArrowDown" || e.key === "s") y = Math.max(y - speed, -2);
-                return [x, y, z];
-            });
+            keysRef.current[e.key] = true;
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            keysRef.current[e.key] = false;
         };
 
         window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isPlaying, isPaused, gameOver]);
+        window.addEventListener("keyup", handleKeyUp);
 
-    // Mouse/Touch controls
-    const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isPlaying || isPaused || gameOver) return;
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
 
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-        setShipPosition([x * 4, y * 2, 3]);
-    };
-
-    const handleAsteroidCollision = (hit: boolean) => {
-        if (hit) {
-            setLives((prev) => {
-                const newLives = prev - 1;
-                if (newLives <= 0) {
-                    setGameOver(true);
-                    setIsPlaying(false);
-                }
-                return newLives;
-            });
+    // Start game loop
+    useEffect(() => {
+        if (isPlaying && !isPaused && !gameOver) {
+            animationFrameRef.current = requestAnimationFrame(gameLoop);
         }
-    };
-
-    const handleStarCollect = () => {
-        setScore((prev) => prev + 10);
-    };
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isPlaying, isPaused, gameOver]);
 
     const startGame = () => {
         setIsPlaying(true);
@@ -264,9 +358,11 @@ export default function SpaceShooterGame() {
         setGameOver(false);
         setScore(0);
         setLives(3);
-        setShipPosition([0, 0, 3]);
-        setAsteroids([]);
-        setStars([]);
+        shipRef.current = { x: 400, y: 450, width: 40, height: 40 };
+        asteroidsRef.current = [];
+        starsRef.current = [];
+        bulletsRef.current = [];
+        particlesRef.current = [];
         setShowInstructions(false);
     };
 
@@ -370,20 +466,14 @@ export default function SpaceShooterGame() {
                     <div
                         className={`relative rounded-xl overflow-hidden shadow-2xl ${isDarkMode ? "bg-gray-900" : "bg-gray-800"
                             }`}
-                        style={{ height: "500px" }}
-                        onClick={handleCanvasClick}
                     >
-                        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                            <Suspense fallback={null}>
-                                <GameScene
-                                    shipPosition={shipPosition}
-                                    asteroids={asteroids}
-                                    stars={stars}
-                                    onAsteroidCollision={handleAsteroidCollision}
-                                    onStarCollect={handleStarCollect}
-                                />
-                            </Suspense>
-                        </Canvas>
+                        <canvas
+                            ref={canvasRef}
+                            width={800}
+                            height={500}
+                            className="w-full h-auto"
+                            style={{ display: "block" }}
+                        />
 
                         {/* Overlays */}
                         <AnimatePresence>
@@ -405,9 +495,9 @@ export default function SpaceShooterGame() {
                                                 </span>
                                             </p>
                                             <p className="flex items-start gap-3">
-                                                <span className="text-2xl">🖱️</span>
+                                                <span className="text-2xl">�️</span>
                                                 <span>
-                                                    Or <strong>Click/Tap</strong> anywhere to move there
+                                                    Your ship <strong>auto-shoots</strong> bullets
                                                 </span>
                                             </p>
                                             <p className="flex items-start gap-3">
@@ -419,7 +509,13 @@ export default function SpaceShooterGame() {
                                             <p className="flex items-start gap-3">
                                                 <span className="text-2xl">💥</span>
                                                 <span>
-                                                    Avoid <strong>Red Asteroids</strong> or lose a life
+                                                    Shoot <strong>Red Asteroids</strong> for +5 points
+                                                </span>
+                                            </p>
+                                            <p className="flex items-start gap-3">
+                                                <span className="text-2xl">💀</span>
+                                                <span>
+                                                    Hitting asteroids loses a life!
                                                 </span>
                                             </p>
                                         </div>
@@ -489,8 +585,8 @@ export default function SpaceShooterGame() {
                             }`}
                     >
                         <p>
-                            Controls: Arrow Keys / WASD / Click to Move • Collect ⭐ Stars •
-                            Avoid 💥 Asteroids
+                            Controls: Arrow Keys / WASD to Move • Auto-Shoot 🔫 • Collect ⭐ Stars (+10) •
+                            Shoot 💥 Asteroids (+5)
                         </p>
                     </div>
                 </div>
