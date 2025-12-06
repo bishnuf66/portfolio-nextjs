@@ -23,7 +23,7 @@ export async function GET(
     }
 
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch project" },
       { status: 500 },
@@ -88,10 +88,23 @@ export async function PUT(
     // Create an authenticated client with the user's token for RLS
     const authenticatedSupabase = createAuthenticatedClient(token);
 
-    // Cast body to any to avoid overly strict generic typing issues
+    // Define type for project update data
+    type ProjectUpdateData = {
+      name?: string;
+      slug?: string;
+      url?: string;
+      description?: string;
+      tech_stack?: string[];
+      cover_image_url?: string;
+      gallery_images?: string[];
+      category?: "professional" | "personal";
+      is_featured?: boolean;
+    };
+
+    // Cast body to proper type for project update
     const { data, error } = await authenticatedSupabase
       .from("projects")
-      .update(body as any)
+      .update(body as unknown as ProjectUpdateData)
       .eq("id", id)
       .select();
 
@@ -104,7 +117,7 @@ export async function PUT(
     }
 
     return NextResponse.json(data[0]);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to update project" },
       { status: 500 },

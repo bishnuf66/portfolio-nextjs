@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
 import {
-  Upload,
   X,
   Edit2,
   Trash2,
@@ -24,30 +23,17 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "@/hooks/useProjects";
-import {
-  useBlogs,
-  useCreateBlog,
-  useUpdateBlog,
-  useDeleteBlog,
-} from "@/hooks/useBlogs";
-import {
-  useTestimonials,
-  useCreateTestimonial,
-  useUpdateTestimonial,
-  useDeleteTestimonial,
-} from "@/hooks/useTestimonials";
-import { Blog, Testimonial } from "@/types/blog";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
-import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const Dashboard = () => {
   const { isDarkMode } = useStore();
   const { signOut } = useAuth();
 
   // TanStack Query hooks
-  const { data: projects = [], isLoading, error } = useProjects();
+  const { data: projects = [], isLoading } = useProjects();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
@@ -68,11 +54,7 @@ const Dashboard = () => {
     category: "professional" as "professional" | "personal",
     is_featured: false,
   });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [originalImages, setOriginalImages] = useState<{
     cover_image_url: string;
     gallery_images: string[];
@@ -343,10 +325,6 @@ const Dashboard = () => {
       category: "professional",
       is_featured: false,
     });
-    setImageFile(null);
-    setCoverImageFile(null);
-    setGalleryFiles([]);
-    setUploadedImages([]);
     setOriginalImages({ cover_image_url: "", gallery_images: [] });
     setImagesToDelete([]);
     setPendingUploads({ cover: null, gallery: [] });
@@ -564,21 +542,17 @@ const Dashboard = () => {
                       <label className="block text-sm font-medium mb-1">
                         Description
                       </label>
-                      <textarea
-                        required
-                        rows={3}
-                        value={formData.description}
-                        onChange={(e) =>
+                      <RichTextEditor
+                        content={formData.description}
+                        onChange={(description) =>
                           setFormData((prev) => ({
                             ...prev,
-                            description: e.target.value,
+                            description,
                           }))
                         }
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
+                        placeholder="Describe your project..."
+                        maxLength={2000}
+                        height="200px"
                       />
                     </div>
 
@@ -803,9 +777,12 @@ const Dashboard = () => {
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            {project.description}
-                          </p>
+                          <div
+                            className="text-sm text-gray-600 dark:text-gray-400 mb-2 prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{
+                              __html: project.description,
+                            }}
+                          />
                           <div className="flex flex-wrap gap-2 mb-2">
                             {project.tech_stack.map((tech, index) => (
                               <span

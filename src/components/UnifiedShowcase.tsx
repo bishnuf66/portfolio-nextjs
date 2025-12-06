@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, Suspense } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import useStore from "@/store/store";
 import {
@@ -18,7 +18,6 @@ import {
   Layers,
   Terminal,
   Zap,
-  Cpu,
 } from "lucide-react";
 import ThreeCanvas from "./ThreeCanvas";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";

@@ -15,6 +15,7 @@ export interface Blog {
 export interface Testimonial {
     id: string;
     name: string;
+    slug: string;
     role: string;
     company?: string;
     content: string;
