@@ -8,7 +8,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { Mail, Send, User, MessageSquare, Linkedin, Github } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { MovingBorder } from "@/components/ui/MovingBorder";
-import Design from "./Design";
 
 const Contact = () => {
   const { isDarkMode } = useStore();
@@ -73,10 +72,7 @@ const Contact = () => {
       className={`relative min-h-screen py-20 px-4 sm:px-6 lg:px-8 ${isDarkMode ? "bg-black" : "bg-gray-50"
         }`}
     >
-      {/* Particles Background */}
-      <Design />
-
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
