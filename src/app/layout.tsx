@@ -21,39 +21,65 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio | Bishnu bk",
+  metadataBase: new URL("https://www.bishnubk.com.np"),
+  title: {
+    default: "Bishnu BK - Full Stack Developer & Creative Coder",
+    template: "%s | Bishnu BK",
+  },
   description:
-    "Professional portfolio showcasing my projects, skills, and experience in web development",
+    "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies. Explore my projects, blog, and technical expertise.",
   keywords: [
-    "portfolio",
-    "web developer",
-    "projects",
-    "software engineer",
-    "next.js",
-    "react",
-    "nodejs",
-    "express",
-    "mongodb",
-    "tailwindcss",
-    "typescript",
-    "nextjs",
+    "Bishnu BK",
+    "Full Stack Developer",
+    "Web Developer",
+    "React Developer",
+    "Next.js Developer",
+    "Node.js Developer",
+    "TypeScript",
+    "JavaScript",
+    "Portfolio",
+    "Software Engineer",
+    "Frontend Developer",
+    "Backend Developer",
+    "MongoDB",
+    "PostgreSQL",
+    "Tailwind CSS",
+    "Three.js",
+    "Web Development",
+    "Nepal Developer",
   ],
-  authors: [{ name: "Bishnu bk" }],
-  creator: "Bishnu bk",
-  publisher: "Bishnu bk",
+  authors: [{ name: "Bishnu BK", url: "https://www.bishnubk.com.np" }],
+  creator: "Bishnu BK",
+  publisher: "Bishnu BK",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: "Portfolio | Bishnu bk",
-    description:
-      "Professional portfolio showcasing my projects, skills, and experience in web development",
     type: "website",
     locale: "en_US",
-    siteName: "Portfolio",
+    url: "https://www.bishnubk.com.np",
+    title: "Bishnu BK - Full Stack Developer & Creative Coder",
+    description:
+      "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
+    siteName: "Bishnu BK Portfolio",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Bishnu BK - Full Stack Developer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Portfolio | Bishnu bk",
+    title: "Bishnu BK - Full Stack Developer & Creative Coder",
     description:
-      "Professional portfolio showcasing my projects, skills, and experience in web development",
+      "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
+    creator: "@bishnubk",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -66,7 +92,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-
   verification: {
     google:
       "google-site-verification=4fLQ3r82bIt2QQeYAGicv9sAG2rTL7zCRzXWBxVS_Og",
@@ -74,6 +99,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.bishnubk.com.np",
   },
+  category: "technology",
 };
 
 export default function RootLayout({
@@ -81,8 +107,45 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Bishnu BK",
+    url: "https://www.bishnubk.com.np",
+    jobTitle: "Full Stack Developer",
+    description:
+      "Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies",
+    sameAs: [
+      "https://github.com/bishnuf66",
+      "https://linkedin.com/in/bishnubk",
+    ],
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Bishnu BK Portfolio",
+    url: "https://www.bishnubk.com.np",
+    description:
+      "Professional portfolio showcasing projects, skills, and experience in web development",
+    author: {
+      "@type": "Person",
+      name: "Bishnu BK",
+    },
+  };
+
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

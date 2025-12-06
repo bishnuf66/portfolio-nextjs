@@ -5,12 +5,34 @@ import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateProjectData } from "@/lib/validation";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { data, error } = await supabasePublic
+    const { searchParams } = new URL(request.url);
+    const featured = searchParams.get("featured");
+    const limit = searchParams.get("limit");
+    const category = searchParams.get("category");
+
+    let query = supabasePublic
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });
+
+    // Filter by featured status
+    if (featured === "true") {
+      query = query.eq("is_featured", true);
+    }
+
+    // Filter by category
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    // Limit results
+    if (limit) {
+      query = query.limit(parseInt(limit));
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

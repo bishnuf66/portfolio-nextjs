@@ -5,7 +5,7 @@ import Link from "next/link";
 import useStore from "@/store/store";
 import { useBlogs } from "@/hooks/useBlogs";
 import { BlogCardSkeleton } from "@/components/LoadingSkeleton";
-import { Calendar, User, Tag } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 
 export default function BlogPage() {
     const { isDarkMode } = useStore();
