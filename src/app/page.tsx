@@ -5,11 +5,10 @@ import Home from "../components/Home";
 import Contact from "../components/Contact";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import FeaturedBlogs from "@/components/FeaturedBlogs";
-import ThreeCanvas from "@/components/ThreeCanvas";
 import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
 import ThreeJsShowcase from "@/components/ThreeJsShowcase";
-import CreativeShowcase from "@/components/CreativeShowcase";
+import UnifiedShowcase from "@/components/UnifiedShowcase";
 import { BookOpen, Code2 } from "lucide-react";
 
 export default function HomePage() {
@@ -23,6 +22,9 @@ export default function HomePage() {
       {/* Main Content */}
       <div className="relative z-10">
         <Home />
+
+        {/* Unified Showcase - Skills, Tech Stack, Solar System */}
+        <UnifiedShowcase />
 
         {/* Featured Projects Section */}
         <div
@@ -43,10 +45,6 @@ export default function HomePage() {
               >
                 Showcasing my best work and technical expertise
               </p>
-            </div>
-
-            <div className="flex justify-center items-center mb-12">
-              <ThreeCanvas />
             </div>
 
             <FeaturedProjects />
@@ -77,8 +75,6 @@ export default function HomePage() {
             <FeaturedBlogs />
           </div>
         </div>
-
-        <CreativeShowcase />
 
         <Testimonials />
 
