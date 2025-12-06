@@ -9,8 +9,8 @@ import useStore from "@/store/store";
 
 const Design = () => {
   const { isDarkMode } = useStore();
-  const particleColor = isDarkMode ? "#ffffff" : "#000000";
-  const linksColor = isDarkMode ? "#ffffff" : "#000000";
+  const particleColor = isDarkMode ? "#ffffff" : "#6366f1"; // Purple in light mode
+  const linksColor = isDarkMode ? "#ffffff" : "#8b5cf6"; // Lighter purple for links
 
   const particlesInit = useCallback(async (engine: any) => {
     await loadSlim(engine);
@@ -50,7 +50,7 @@ const Design = () => {
               color: linksColor,
               distance: 150,
               enable: true,
-              opacity: 0.2,
+              opacity: isDarkMode ? 0.2 : 0.3,
               width: 1,
             },
             collisions: { enable: false },
@@ -62,10 +62,10 @@ const Design = () => {
             },
             number: {
               density: { enable: true, area: 1500 },
-              value: 50,
+              value: 80,
             },
             opacity: {
-              value: 0.3,
+              value: isDarkMode ? 0.3 : 0.5,
             },
             shape: { type: "circle" },
             size: { value: { min: 1, max: 2 } },

@@ -40,10 +40,10 @@ const Home = () => {
       {/* Hero Section with 3D Spline */}
       <div id="home" className="relative w-full min-h-screen overflow-hidden">
         {/* Background with Spotlight */}
-        <div className="absolute inset-0 bg-black/96">
+        <div className={`absolute inset-0 ${isDarkMode ? "bg-black/96" : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"}`}>
           <Spotlight
             className="-top-40 left-0 md:left-60 md:-top-20"
-            fill="white"
+            fill={isDarkMode ? "white" : "rgba(139, 92, 246, 0.3)"}
           />
         </div>
 
@@ -69,13 +69,13 @@ const Home = () => {
                   />
                 </h1>
 
-                <p className="text-xl md:text-2xl text-neutral-300 leading-relaxed">
+                <p className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "text-neutral-300" : "text-gray-700"}`}>
                   Crafting digital experiences that blend{" "}
-                  <span className="text-blue-400 font-semibold">
+                  <span className={`font-semibold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>
                     creativity
                   </span>{" "}
                   with{" "}
-                  <span className="text-purple-400 font-semibold">
+                  <span className={`font-semibold ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}>
                     functionality
                   </span>
                   . Building solutions that tell a story.
@@ -90,7 +90,10 @@ const Home = () => {
                   </a>
                   <a
                     href="/#contact"
-                    className="px-8 py-3 border-2 border-neutral-500 rounded-full text-neutral-300 font-semibold hover:border-purple-500 hover:text-purple-400 transition-all duration-300"
+                    className={`px-8 py-3 border-2 rounded-full font-semibold transition-all duration-300 ${isDarkMode
+                      ? "border-neutral-500 text-neutral-300 hover:border-purple-500 hover:text-purple-400"
+                      : "border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600"
+                      }`}
                   >
                     Get In Touch
                   </a>
@@ -99,18 +102,18 @@ const Home = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 pt-8">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-400">24+</div>
-                    <div className="text-sm text-neutral-400">Projects</div>
+                    <div className={`text-3xl font-bold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>24+</div>
+                    <div className={`text-sm ${isDarkMode ? "text-neutral-400" : "text-gray-600"}`}>Projects</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-purple-400">
+                    <div className={`text-3xl font-bold ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}>
                       3+
                     </div>
-                    <div className="text-sm text-neutral-400">Years Exp</div>
+                    <div className={`text-sm ${isDarkMode ? "text-neutral-400" : "text-gray-600"}`}>Years Exp</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-pink-400">∞</div>
-                    <div className="text-sm text-neutral-400">Ideas</div>
+                    <div className={`text-3xl font-bold ${isDarkMode ? "text-pink-400" : "text-pink-600"}`}>∞</div>
+                    <div className={`text-sm ${isDarkMode ? "text-neutral-400" : "text-gray-600"}`}>Ideas</div>
                   </div>
                 </div>
               </div>
@@ -129,14 +132,26 @@ const Home = () => {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
-          <div className="w-6 h-10 border-2 border-neutral-400 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-neutral-400 rounded-full mt-2"></div>
+          <div className={`w-6 h-10 border-2 rounded-full flex justify-center ${isDarkMode ? "border-neutral-400" : "border-gray-400"}`}>
+            <div className={`w-1 h-3 rounded-full mt-2 ${isDarkMode ? "bg-neutral-400" : "bg-gray-400"}`}></div>
           </div>
         </div>
       </div>
 
-      {/* Parallax Mountain Section */}
-      <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Parallax Mountain Section with Gradient Overlays */}
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* Top gradient overlay - blends with hero section above */}
+        <div className={`absolute top-0 left-0 right-0 h-32 z-20 pointer-events-none ${isDarkMode
+            ? "bg-gradient-to-b from-black via-black/80 to-transparent"
+            : "bg-gradient-to-b from-gray-50 via-gray-50/80 to-transparent"
+          }`}></div>
+
+        {/* Bottom gradient overlay - blends with section below */}
+        <div className={`absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none ${isDarkMode
+            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
+            : "bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent"
+          }`}></div>
+
         <div
           className="w-full h-full origin-center transition-transform duration-100 ease-out"
           style={{
@@ -156,14 +171,19 @@ const Home = () => {
               priority
               onLoad={() => setImageLoaded(true)}
             />
-            <div className="absolute inset-0 bg-linear-to-b from-black/50 via-transparent to-black/80"></div>
+            {/* Image overlay for better text contrast */}
+            <div className={`absolute inset-0 ${isDarkMode
+                ? "bg-gradient-to-b from-black/60 via-black/40 to-black/60"
+                : "bg-gradient-to-b from-white/40 via-white/20 to-white/40"
+              }`}></div>
           </div>
         </div>
 
         {/* Overlay Content */}
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <div className="text-center px-4 max-w-4xl">
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h2 className={`text-4xl md:text-6xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
+              }`}>
               <Typewriter
                 words={["Building the Future", "One Line at a Time"]}
                 loop={0}
@@ -174,7 +194,8 @@ const Home = () => {
                 delaySpeed={2000}
               />
             </h2>
-            <p className="text-xl md:text-2xl text-neutral-200">
+            <p className={`text-xl md:text-2xl ${isDarkMode ? "text-neutral-200" : "text-gray-700"
+              }`}>
               Every project is a journey. Every challenge is an opportunity.
             </p>
           </div>

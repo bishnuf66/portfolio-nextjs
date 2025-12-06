@@ -7,7 +7,6 @@ import FeaturedProjects from "@/components/FeaturedProjects";
 import FeaturedBlogs from "@/components/FeaturedBlogs";
 import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
-import ThreeJsShowcase from "@/components/ThreeJsShowcase";
 import UnifiedShowcase from "@/components/UnifiedShowcase";
 import { BookOpen, Code2 } from "lucide-react";
 
@@ -79,8 +78,6 @@ export default function HomePage() {
         <Testimonials />
 
         <SpaceShooterGame />
-
-        <ThreeJsShowcase />
 
         <Contact />
       </div>

@@ -14,7 +14,7 @@ export const GlowingStarsBackgroundCard = ({
         <div
             onMouseEnter={() => setMouseEnter(true)}
             onMouseLeave={() => setMouseEnter(false)}
-            className={`relative bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] p-8 rounded-xl border border-[#2a2e37] ${className}`}
+            className={`relative bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] p-8 rounded-xl border border-[#2a2e37] overflow-hidden h-full ${className}`}
         >
             <div className="flex justify-center items-center">
                 <Illustration mouseEnter={mouseEnter} />
@@ -68,10 +68,10 @@ const Illustration = ({ mouseEnter }: { mouseEnter: boolean }) => {
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
                             className={`transition-all duration-300 ${mouseEnter
-                                    ? isGlowing
-                                        ? "fill-white opacity-100"
-                                        : "fill-gray-700 opacity-50"
-                                    : "fill-gray-700 opacity-30"
+                                ? isGlowing
+                                    ? "fill-white opacity-100"
+                                    : "fill-gray-700 opacity-50"
+                                : "fill-gray-700 opacity-30"
                                 }`}
                             style={{
                                 animationDelay: `${delay}s`,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, Suspense } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import useStore from "@/store/store";
 import {
@@ -10,10 +10,24 @@ import {
     SplitTextReveal,
     ScrollScale,
 } from "./ScrollReveal";
-import { Code2, Rocket, Database, Globe, Layers, Terminal, Zap } from "lucide-react";
+import { Code2, Rocket, Database, Globe, Layers, Terminal, Zap, Cpu } from "lucide-react";
 import ThreeCanvas from "./ThreeCanvas";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { GlowingStarsBackgroundCard } from "@/components/ui/GlowingStars";
+import dynamic from "next/dynamic";
+
+// Dynamically import the solar system to avoid SSR issues
+const TechSolarSystem = dynamic(() => import("@/components/TechSolarSystem"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-[600px]">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-400">Loading Solar System...</p>
+            </div>
+        </div>
+    )
+});
 
 export default function UnifiedShowcase() {
     const { isDarkMode } = useStore();
@@ -32,12 +46,16 @@ export default function UnifiedShowcase() {
                 }`}
         >
             {/* Hero Section with Solar System */}
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-20">
+            <section className={`relative min-h-screen flex items-center justify-center overflow-hidden py-20 ${isDarkMode ? "bg-black" : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+                }`}>
                 <motion.div
                     style={{ y: backgroundY }}
                     className="absolute inset-0 z-0"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl"></div>
+                    <div className={`absolute inset-0 blur-3xl ${isDarkMode
+                        ? "bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"
+                        : "bg-gradient-to-br from-blue-200/30 via-purple-200/30 to-pink-200/30"
+                        }`}></div>
                 </motion.div>
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12 items-center">
@@ -50,7 +68,7 @@ export default function UnifiedShowcase() {
                             </ParallaxText>
                             <SplitTextReveal
                                 text="Building digital experiences that blend creativity with functionality. Every pixel matters. Every interaction counts."
-                                className="text-xl md:text-2xl leading-relaxed opacity-80"
+                                className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "opacity-80" : "text-gray-700"}`}
                             />
                         </div>
                     </ScrollReveal>
@@ -135,87 +153,97 @@ export default function UnifiedShowcase() {
                 </div>
             </section>
 
-            {/* Tech Stack Showcase */}
+            {/* Tech Stack Showcase with Solar System */}
             <section className={`py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
                 <div className="max-w-7xl mx-auto px-4 md:px-8">
                     <ScrollFade>
                         <div className="text-center mb-16">
-                            <h2 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
-                                Tech Stack
-                            </h2>
-                            <p className="text-xl opacity-70">
-                                Technologies I use to bring ideas to life
+                            <div className="flex items-center justify-center gap-3 mb-4">
+                                <Globe size={40} className={isDarkMode ? "text-blue-400" : "text-blue-600"} />
+                                <h2 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
+                                    Tech Stack
+                                </h2>
+                                <Rocket size={40} className={isDarkMode ? "text-cyan-400" : "text-cyan-600"} />
+                            </div>
+                            <p className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                Explore my technology universe - Interactive 3D solar system
                             </p>
                         </div>
                     </ScrollFade>
 
                     <div className="grid md:grid-cols-3 gap-8 mb-16">
                         <ScrollReveal direction="up" delay={0.1}>
-                            <GlowingStarsBackgroundCard>
-                                <div className="text-center">
-                                    <h3 className="text-2xl font-bold text-white mb-4">
-                                        Frontend
-                                    </h3>
-                                    <div className="flex flex-wrap gap-2 justify-center">
-                                        {[
-                                            "React",
-                                            "Next.js",
-                                            "TypeScript",
-                                            "Tailwind CSS",
-                                            "Framer Motion",
-                                        ].map((tech) => (
-                                            <span
-                                                key={tech}
-                                                className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm"
-                                            >
-                                                {tech}
-                                            </span>
-                                        ))}
+                            <div className="h-full">
+                                <GlowingStarsBackgroundCard>
+                                    <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
+                                        <h3 className="text-2xl font-bold text-white mb-4">
+                                            Frontend
+                                        </h3>
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {[
+                                                "React",
+                                                "Next.js",
+                                                "TypeScript",
+                                                "Tailwind CSS",
+                                                "Framer Motion",
+                                            ].map((tech) => (
+                                                <span
+                                                    key={tech}
+                                                    className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm"
+                                                >
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </GlowingStarsBackgroundCard>
+                                </GlowingStarsBackgroundCard>
+                            </div>
                         </ScrollReveal>
 
                         <ScrollReveal direction="up" delay={0.2}>
-                            <GlowingStarsBackgroundCard>
-                                <div className="text-center">
-                                    <h3 className="text-2xl font-bold text-white mb-4">Backend</h3>
-                                    <div className="flex flex-wrap gap-2 justify-center">
-                                        {[
-                                            "Node.js",
-                                            "Express",
-                                            "MongoDB",
-                                            "PostgreSQL",
-                                            "Supabase",
-                                        ].map((tech) => (
-                                            <span
-                                                key={tech}
-                                                className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm"
-                                            >
-                                                {tech}
-                                            </span>
-                                        ))}
+                            <div className="h-full">
+                                <GlowingStarsBackgroundCard>
+                                    <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
+                                        <h3 className="text-2xl font-bold text-white mb-4">Backend</h3>
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {[
+                                                "Node.js",
+                                                "Express",
+                                                "MongoDB",
+                                                "PostgreSQL",
+                                                "Supabase",
+                                            ].map((tech) => (
+                                                <span
+                                                    key={tech}
+                                                    className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm"
+                                                >
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </GlowingStarsBackgroundCard>
+                                </GlowingStarsBackgroundCard>
+                            </div>
                         </ScrollReveal>
 
                         <ScrollReveal direction="up" delay={0.3}>
-                            <GlowingStarsBackgroundCard>
-                                <div className="text-center">
-                                    <h3 className="text-2xl font-bold text-white mb-4">Tools</h3>
-                                    <div className="flex flex-wrap gap-2 justify-center">
-                                        {["Git", "Docker", "Vercel", "AWS", "Figma"].map((tech) => (
-                                            <span
-                                                key={tech}
-                                                className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm"
-                                            >
-                                                {tech}
-                                            </span>
-                                        ))}
+                            <div className="h-full">
+                                <GlowingStarsBackgroundCard>
+                                    <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
+                                        <h3 className="text-2xl font-bold text-white mb-4">Tools</h3>
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {["Git", "Docker", "Vercel", "AWS", "Figma"].map((tech) => (
+                                                <span
+                                                    key={tech}
+                                                    className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm"
+                                                >
+                                                    {tech}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            </GlowingStarsBackgroundCard>
+                                </GlowingStarsBackgroundCard>
+                            </div>
                         </ScrollReveal>
                     </div>
 
@@ -251,6 +279,13 @@ export default function UnifiedShowcase() {
                             </ScrollReveal>
                         ))}
                     </div>
+
+                    {/* Interactive 3D Solar System */}
+                    <ScrollFade>
+                        <div className="mt-20">
+                            <TechSolarSystem />
+                        </div>
+                    </ScrollFade>
                 </div>
             </section>
 
