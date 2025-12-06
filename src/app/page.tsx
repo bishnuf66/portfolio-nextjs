@@ -1,6 +1,5 @@
 "use client";
 import useStore from "../store/store";
-import Design from "../components/Design";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
 import FeaturedProjects from "@/components/FeaturedProjects";
@@ -15,9 +14,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen w-full relative">
-      {/* Background Particles */}
-      <Design />
-
       {/* Main Content */}
       <div className="relative z-10">
         <Home />

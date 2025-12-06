@@ -5,16 +5,31 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiSun, FiMoon, FiMenu, FiX } from "react-icons/fi";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const scrollPosition = useScrollPosition();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setIsScrolled(scrollPosition > 50);
   }, [scrollPosition]);
+
+  // Handle hash navigation on page load
+  useEffect(() => {
+    if (pathname === "/" && window.location.hash === "#contact") {
+      setTimeout(() => {
+        const contactSection = document.getElementById("contact");
+        if (contactSection) {
+          contactSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [pathname]);
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -22,6 +37,21 @@ const Header = () => {
     { name: "Blog", href: "/blog" },
     { name: "Contact", href: "/#contact" },
   ];
+
+  const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (pathname === "/") {
+      // Already on home page, just scroll to contact
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Navigate to home page with contact hash
+      router.push("/#contact");
+    }
+    setIsMenuOpen(false);
+  };
 
   return (
     <motion.header
@@ -58,6 +88,7 @@ const Header = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 href={item.href}
+                onClick={item.name === "Contact" ? handleContactClick : undefined}
                 className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
                   } hover:text-primary transition-colors relative group`}
               >
@@ -127,7 +158,7 @@ const Header = () => {
                     href={item.href}
                     className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
                       } hover:text-primary transition-colors`}
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={item.name === "Contact" ? handleContactClick : () => setIsMenuOpen(false)}
                   >
                     {item.name}
                   </motion.a>

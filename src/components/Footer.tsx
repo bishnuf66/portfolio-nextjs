@@ -3,6 +3,7 @@
 import React from "react";
 import useStore from "@/store/store";
 import { Github, Linkedin, Mail, Heart, ArrowUp, Code2 } from "lucide-react";
+import Design from "./Design";
 
 const Footer = () => {
   const { isDarkMode } = useStore();
@@ -144,6 +145,8 @@ const Footer = () => {
           </button>
         </div>
       </div>
+
+
     </footer>
   );
 };

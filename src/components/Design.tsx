@@ -3,31 +3,31 @@
 import { useCallback } from "react";
 import dynamic from "next/dynamic";
 import { loadSlim } from "tsparticles-slim";
+import useStore from "@/store/store";
 
 const Particles = dynamic(() => import("react-tsparticles"), { ssr: false });
-import useStore from "@/store/store";
 
 const Design = () => {
   const { isDarkMode } = useStore();
-  const particleColor = isDarkMode ? "#ffffff" : "#6366f1"; // Purple in light mode
-  const linksColor = isDarkMode ? "#ffffff" : "#8b5cf6"; // Lighter purple for links
+  const particleColor = isDarkMode ? "#ffffff" : "#6366f1";
+  const linksColor = isDarkMode ? "#ffffff" : "#8b5cf6";
 
   const particlesInit = useCallback(async (engine: any) => {
     await loadSlim(engine);
   }, []);
 
   const particlesLoaded = useCallback(async (container: any) => {
-    // Particles loaded
+    console.log("Particles loaded in footer:", container);
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="absolute inset-0 pointer-events-none z-0"> {/* z-0 instead of z-50 */}
       <Particles
-        id="tsparticles"
+        id="tsparticles-footer"
         init={particlesInit}
         loaded={particlesLoaded}
         options={{
-          fullScreen: { enable: false },
+          fullScreen: { enable: false }, // Keep as false for container mode
           fpsLimit: 60,
           interactivity: {
             events: {
@@ -71,6 +71,13 @@ const Design = () => {
             size: { value: { min: 1, max: 2 } },
           },
           detectRetina: true,
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
         }}
       />
     </div>
