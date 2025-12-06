@@ -147,7 +147,7 @@ const Home = () => {
         >
           <div className="relative w-full h-full">
             <Image
-              src="/coding-workspace.jpg"
+              src="/coding2.png"
               alt="Coding workspace"
               fill
               unoptimized
