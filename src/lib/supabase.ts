@@ -14,6 +14,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export interface Project {
   id: string;
   name: string;
+  slug: string;
   url: string;
   description: string;
   tech_stack: string[];

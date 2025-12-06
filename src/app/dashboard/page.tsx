@@ -3,7 +3,19 @@
 import React, { useState } from "react";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
-import { Upload, X, Edit2, Trash2, Plus, LogOut, BarChart3, FolderKanban, BookOpen, MessageSquare, Star } from "lucide-react";
+import {
+  Upload,
+  X,
+  Edit2,
+  Trash2,
+  Plus,
+  LogOut,
+  BarChart3,
+  FolderKanban,
+  BookOpen,
+  MessageSquare,
+  Star,
+} from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
 import {
@@ -40,11 +52,14 @@ const Dashboard = () => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
-  const [activeTab, setActiveTab] = useState<"projects" | "analytics" | "blogs" | "testimonials">("projects");
+  const [activeTab, setActiveTab] = useState<
+    "projects" | "analytics" | "blogs" | "testimonials"
+  >("projects");
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState({
     name: "",
+    slug: "",
     url: "",
     description: "",
     tech_stack: "",
@@ -267,6 +282,7 @@ const Dashboard = () => {
     setEditingProject(project);
     setFormData({
       name: project.name,
+      slug: project.slug || "",
       url: project.url,
       description: project.description,
       tech_stack: project.tech_stack.join(", "),
@@ -318,6 +334,7 @@ const Dashboard = () => {
   const resetForm = () => {
     setFormData({
       name: "",
+      slug: "",
       url: "",
       description: "",
       tech_stack: "",
@@ -341,6 +358,13 @@ const Dashboard = () => {
     await signOut();
   };
 
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -351,8 +375,9 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-        } p-8`}
+      className={`min-h-screen ${
+        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      } p-8`}
     >
       <div className="max-w-7xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
@@ -381,48 +406,52 @@ const Dashboard = () => {
         <div className="flex gap-4 mb-8 border-b border-gray-700 overflow-x-auto">
           <button
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "projects"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : isDarkMode
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
+              activeTab === "projects"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : isDarkMode
                 ? "text-gray-400 hover:text-white"
                 : "text-gray-600 hover:text-gray-900"
-              }`}
+            }`}
           >
             <FolderKanban size={20} />
             Projects
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "blogs"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : isDarkMode
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
+              activeTab === "blogs"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : isDarkMode
                 ? "text-gray-400 hover:text-white"
                 : "text-gray-600 hover:text-gray-900"
-              }`}
+            }`}
           >
             <BookOpen size={20} />
             Blogs
           </button>
           <button
             onClick={() => setActiveTab("testimonials")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "testimonials"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : isDarkMode
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
+              activeTab === "testimonials"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : isDarkMode
                 ? "text-gray-400 hover:text-white"
                 : "text-gray-600 hover:text-gray-900"
-              }`}
+            }`}
           >
             <MessageSquare size={20} />
             Testimonials
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${activeTab === "analytics"
-              ? "border-b-2 border-blue-500 text-blue-500"
-              : isDarkMode
+            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
+              activeTab === "analytics"
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : isDarkMode
                 ? "text-gray-400 hover:text-white"
                 : "text-gray-600 hover:text-gray-900"
-              }`}
+            }`}
           >
             <BarChart3 size={20} />
             Analytics
@@ -441,8 +470,9 @@ const Dashboard = () => {
             {showForm && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div
-                  className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+                  className={`${
+                    isDarkMode ? "bg-gray-800" : "bg-white"
+                  } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
                 >
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold">
@@ -465,14 +495,47 @@ const Dashboard = () => {
                         type="text"
                         required
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, name: e.target.value }))
-                        }
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        onChange={(e) => {
+                          const name = e.target.value;
+                          setFormData((prev) => ({
+                            ...prev,
+                            name,
+                            slug: prev.slug || generateSlug(name),
+                          }));
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Slug
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.slug}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            slug: e.target.value,
+                          }))
+                        }
+                        placeholder="project-url-friendly-name"
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        URL-friendly version of the project name (lowercase,
+                        hyphens only)
+                      </p>
                     </div>
 
                     <div>
@@ -484,12 +547,16 @@ const Dashboard = () => {
                         required
                         value={formData.url}
                         onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, url: e.target.value }))
+                          setFormData((prev) => ({
+                            ...prev,
+                            url: e.target.value,
+                          }))
                         }
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
                     </div>
 
@@ -507,10 +574,11 @@ const Dashboard = () => {
                             description: e.target.value,
                           }))
                         }
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
                     </div>
 
@@ -529,10 +597,11 @@ const Dashboard = () => {
                             tech_stack: e.target.value,
                           }))
                         }
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
                     </div>
 
@@ -545,13 +614,16 @@ const Dashboard = () => {
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            category: e.target.value as "professional" | "personal",
+                            category: e.target.value as
+                              | "professional"
+                              | "personal",
                           }))
                         }
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       >
                         <option value="professional">Professional</option>
                         <option value="personal">Personal</option>
@@ -577,7 +649,8 @@ const Dashboard = () => {
                             Featured Project
                           </span>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Show this project on the homepage (max 6 recommended)
+                            Show this project on the homepage (max 6
+                            recommended)
                           </p>
                         </div>
                       </label>
@@ -596,10 +669,11 @@ const Dashboard = () => {
                             handleCoverImageChange(file);
                           }
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
                       {formData.cover_image_url && (
                         <div className="mt-2 relative inline-block">
@@ -632,10 +706,11 @@ const Dashboard = () => {
                             handleGalleryImageUpload(e.target.files);
                           }
                         }}
-                        className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                          ? "bg-gray-700 border-gray-600"
-                          : "bg-white border-gray-300"
-                          }`}
+                        className={`w-full px-3 py-2 border rounded-lg ${
+                          isDarkMode
+                            ? "bg-gray-700 border-gray-600"
+                            : "bg-white border-gray-300"
+                        }`}
                       />
                       {formData.gallery_images.length > 0 && (
                         <div className="mt-2">
@@ -673,8 +748,8 @@ const Dashboard = () => {
                         {uploading
                           ? "Processing..."
                           : editingProject
-                            ? "Update Project"
-                            : "Add Project"}
+                          ? "Update Project"
+                          : "Add Project"}
                       </button>
                       <button
                         type="button"
@@ -693,15 +768,18 @@ const Dashboard = () => {
               {projects.map((project) => (
                 <div
                   key={project.id}
-                  className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } rounded-lg p-6 shadow-lg ${project.is_featured ? "ring-2 ring-yellow-500" : ""
-                    }`}
+                  className={`${
+                    isDarkMode ? "bg-gray-800" : "bg-white"
+                  } rounded-lg p-6 shadow-lg ${
+                    project.is_featured ? "ring-2 ring-yellow-500" : ""
+                  }`}
                 >
                   <div className="flex gap-6">
                     <div className="relative">
                       <img
                         src={
-                          project.cover_image_url ?? "/project-images/placeholder.png"
+                          project.cover_image_url ??
+                          "/project-images/placeholder.png"
                         }
                         alt={project.name}
                         className="w-24 h-24 object-cover rounded-lg"
@@ -716,7 +794,9 @@ const Dashboard = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold">{project.name}</h3>
+                            <h3 className="text-xl font-bold">
+                              {project.name}
+                            </h3>
                             {project.is_featured && (
                               <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-semibold">
                                 FEATURED
@@ -747,6 +827,9 @@ const Dashboard = () => {
                             </a>
                             <span className="text-gray-500">
                               {project.category}
+                            </span>
+                            <span className="text-gray-400">
+                              Slug: {project.slug || "N/A"}
                             </span>
                           </div>
                         </div>

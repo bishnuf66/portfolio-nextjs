@@ -30,9 +30,10 @@ export const useBlog = (slug: string) => {
                 .from("blogs")
                 .select("*")
                 .eq("slug", slug)
-                .single();
+                .maybeSingle(); // Use maybeSingle() instead of single() to handle empty results
 
             if (error) throw error;
+            if (!data) return null; // Return null if no blog found
             return data as Blog;
         },
         enabled: !!slug,
