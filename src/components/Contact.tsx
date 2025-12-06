@@ -86,142 +86,23 @@ const Contact = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Contact Info */}
-          <div className="space-y-8">
-            <div>
-              <h3
-                className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
-              >
-                Get in Touch
-              </h3>
-              <p
-                className={`text-lg mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-              >
-                I'm always open to discussing new projects, creative ideas, or
-                opportunities to be part of your vision.
-              </p>
-            </div>
 
-            {/* Contact Cards */}
-            <div className="space-y-4">
-              <BackgroundGradient className="rounded-[22px] p-1">
-                <div
-                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
-                    }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-500/10 rounded-lg">
-                      <Mail className="w-6 h-6 text-blue-500" />
-                    </div>
-                    <div>
-                      <h4
-                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
-                          }`}
-                      >
-                        Email
-                      </h4>
-                      <a
-                        href="mailto:your.email@example.com"
-                        className="text-blue-500 hover:text-blue-600"
-                      >
-                        your.email@example.com
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </BackgroundGradient>
-
-              <BackgroundGradient className="rounded-[22px] p-1">
-                <div
-                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
-                    }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-purple-500/10 rounded-lg">
-                      <MapPin className="w-6 h-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <h4
-                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
-                          }`}
-                      >
-                        Location
-                      </h4>
-                      <p
-                        className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
-                          }`}
-                      >
-                        Your City, Country
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </BackgroundGradient>
-
-              <BackgroundGradient className="rounded-[22px] p-1">
-                <div
-                  className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
-                    }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-pink-500/10 rounded-lg">
-                      <Phone className="w-6 h-6 text-pink-500" />
-                    </div>
-                    <div>
-                      <h4
-                        className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-900"
-                          }`}
-                      >
-                        Phone
-                      </h4>
-                      <a
-                        href="tel:+1234567890"
-                        className="text-pink-500 hover:text-pink-600"
-                      >
-                        +1 (234) 567-890
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </BackgroundGradient>
-            </div>
-
-            {/* Social Links */}
-            <div>
-              <h4
-                className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
-              >
-                Connect on Social
-              </h4>
-              <div className="flex gap-4">
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
-                      ? "bg-gray-800 hover:bg-blue-600"
-                      : "bg-gray-200 hover:bg-blue-500"
-                    } hover:scale-110`}
-                >
-                  <Linkedin className="w-6 h-6" />
-                </a>
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
-                      ? "bg-gray-800 hover:bg-purple-600"
-                      : "bg-gray-200 hover:bg-purple-500"
-                    } hover:scale-110`}
-                >
-                  <Github className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
+        {/* Contact Info */}
+        <div className="space-y-8">
+          <div>
+            <h3
+              className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+            >
+              Get in Touch
+            </h3>
+            <p
+              className={`text-lg mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+            >
+              I'm always open to discussing new projects, creative ideas, or
+              opportunities to be part of your vision.
+            </p>
           </div>
 
           {/* Contact Form */}
@@ -252,8 +133,8 @@ const Contact = () => {
                       id="name"
                       required
                       className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
-                          ? "bg-gray-900 border-gray-700 text-white focus:border-blue-500"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500"
+                        ? "bg-gray-900 border-gray-700 text-white focus:border-blue-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500"
                         } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
                       placeholder="Your name"
                       value={formData.name}
@@ -275,8 +156,8 @@ const Contact = () => {
                       id="email"
                       required
                       className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
-                          ? "bg-gray-900 border-gray-700 text-white focus:border-purple-500"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500"
+                        ? "bg-gray-900 border-gray-700 text-white focus:border-purple-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500"
                         } focus:ring-2 focus:ring-purple-500/20 focus:outline-none`}
                       placeholder="your.email@example.com"
                       value={formData.email}
@@ -298,8 +179,8 @@ const Contact = () => {
                       rows={5}
                       required
                       className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${isDarkMode
-                          ? "bg-gray-900 border-gray-700 text-white focus:border-pink-500"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-pink-500"
+                        ? "bg-gray-900 border-gray-700 text-white focus:border-pink-500"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-pink-500"
                         } focus:ring-2 focus:ring-pink-500/20 focus:outline-none`}
                       placeholder="Tell me about your project..."
                       value={formData.message}
@@ -330,7 +211,43 @@ const Contact = () => {
               </div>
             </BackgroundGradient>
           </div>
+
+          {/* Social Links */}
+          <div>
+            <h4
+              className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+            >
+              Connect on Social
+            </h4>
+            <div className="flex gap-4">
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
+                  ? "bg-gray-800 hover:bg-blue-600"
+                  : "bg-gray-200 hover:bg-blue-500"
+                  } hover:scale-110`}
+              >
+                <Linkedin className="w-6 h-6" />
+              </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
+                  ? "bg-gray-800 hover:bg-purple-600"
+                  : "bg-gray-200 hover:bg-purple-500"
+                  } hover:scale-110`}
+              >
+                <Github className="w-6 h-6" />
+              </a>
+            </div>
+          </div>
         </div>
+
+
       </div>
     </div>
   );

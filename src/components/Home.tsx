@@ -89,7 +89,7 @@ const Home = () => {
                     View My Work
                   </a>
                   <a
-                    href="#contact"
+                    href="/#contact"
                     className="px-8 py-3 border-2 border-neutral-500 rounded-full text-neutral-300 font-semibold hover:border-purple-500 hover:text-purple-400 transition-all duration-300"
                   >
                     Get In Touch
