@@ -35,8 +35,9 @@ export default function HomePage() {
                 </h2>
               </div>
               <p
-                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
+                className={`text-xl ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
               >
                 Showcasing my best work and technical expertise
               </p>
@@ -60,8 +61,9 @@ export default function HomePage() {
                 </h2>
               </div>
               <p
-                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
+                className={`text-xl ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
               >
                 Thoughts, tutorials, and insights on web development
               </p>
