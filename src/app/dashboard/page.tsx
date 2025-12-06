@@ -51,6 +51,7 @@ const Dashboard = () => {
     cover_image_url: "",
     gallery_images: [] as string[],
     category: "professional" as "professional" | "personal",
+    is_featured: false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
@@ -272,6 +273,7 @@ const Dashboard = () => {
       cover_image_url: project.cover_image_url || "",
       gallery_images: project.gallery_images || [],
       category: project.category,
+      is_featured: project.is_featured || false,
     });
     // Track original images for cleanup
     setOriginalImages({
@@ -322,6 +324,7 @@ const Dashboard = () => {
       cover_image_url: "",
       gallery_images: [],
       category: "professional",
+      is_featured: false,
     });
     setImageFile(null);
     setCoverImageFile(null);
@@ -556,6 +559,31 @@ const Dashboard = () => {
                     </div>
 
                     <div>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.is_featured}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              is_featured: e.target.checked,
+                            }))
+                          }
+                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <div>
+                          <span className="text-sm font-medium flex items-center gap-2">
+                            <Star size={16} className="text-yellow-500" />
+                            Featured Project
+                          </span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Show this project on the homepage (max 6 recommended)
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-medium mb-1">
                         Cover Image
                       </label>
@@ -666,20 +694,35 @@ const Dashboard = () => {
                 <div
                   key={project.id}
                   className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } rounded-lg p-6 shadow-lg`}
+                    } rounded-lg p-6 shadow-lg ${project.is_featured ? "ring-2 ring-yellow-500" : ""
+                    }`}
                 >
                   <div className="flex gap-6">
-                    <img
-                      src={
-                        project.cover_image_url ?? "/project-images/placeholder.png"
-                      }
-                      alt={project.name}
-                      className="w-24 h-24 object-cover rounded-lg"
-                    />
+                    <div className="relative">
+                      <img
+                        src={
+                          project.cover_image_url ?? "/project-images/placeholder.png"
+                        }
+                        alt={project.name}
+                        className="w-24 h-24 object-cover rounded-lg"
+                      />
+                      {project.is_featured && (
+                        <div className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full p-1">
+                          <Star size={16} fill="currentColor" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-xl font-bold mb-2">{project.name}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-xl font-bold">{project.name}</h3>
+                            {project.is_featured && (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-semibold">
+                                FEATURED
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {project.description}
                           </p>

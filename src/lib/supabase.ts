@@ -20,6 +20,7 @@ export interface Project {
   cover_image_url: string;
   gallery_images: string[];
   category: "professional" | "personal";
+  is_featured?: boolean;
   created_at: string;
   updated_at: string;
 }

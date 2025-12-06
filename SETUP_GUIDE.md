@@ -52,7 +52,16 @@ Or use the migration file:
 ```
 
 ### Step 2: Mark Projects as Featured
-In your Supabase dashboard or via SQL:
+
+**Option A: Using Dashboard (Easiest)** ⭐
+1. Go to `/dashboard`
+2. Click "Edit" on any project
+3. Check the "Featured Project" checkbox
+4. Click "Update Project"
+5. Repeat for 6 projects total
+
+**Option B: Using SQL**
+In your Supabase dashboard:
 
 ```sql
 -- Mark your best projects as featured
@@ -60,6 +69,8 @@ UPDATE projects
 SET is_featured = true 
 WHERE id IN ('project-id-1', 'project-id-2', 'project-id-3');
 ```
+
+See [DASHBOARD_FEATURED_GUIDE.md](./DASHBOARD_FEATURED_GUIDE.md) for detailed instructions.
 
 ### Step 3: Add Cover Images (Optional but Recommended)
 ```sql

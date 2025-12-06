@@ -11,8 +11,15 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS cover_image_url TEXT;
 ```
 
 ### 2. Mark Featured Projects
+
+**Via Dashboard (Recommended):**
+1. Go to `/dashboard`
+2. Edit any project
+3. Check "Featured Project" ✅
+4. Save
+
+**Via SQL:**
 ```sql
--- Mark your top 6 projects
 UPDATE projects SET is_featured = true WHERE id IN ('id1', 'id2', 'id3', 'id4', 'id5', 'id6');
 ```
 

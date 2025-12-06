@@ -4,7 +4,7 @@ import React from "react";
 import useStore from "@/store/store";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
-import { ExternalLink, Code } from "lucide-react";
+import { ExternalLink, Code, Star } from "lucide-react";
 import Image from "next/image";
 
 interface ProjectCardProps {
@@ -14,6 +14,7 @@ interface ProjectCardProps {
   techStack: string;
   description: string;
   link: string;
+  isFeatured?: boolean;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -23,6 +24,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   techStack,
   description,
   link,
+  isFeatured = false,
 }) => {
   const { isDarkMode } = useStore();
 
@@ -37,9 +39,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         {/* Project Title */}
         <CardItem
           translateZ="50"
-          className="text-xl font-bold text-neutral-600 dark:text-white"
+          className="text-xl font-bold text-neutral-600 dark:text-white flex items-center gap-2"
         >
           {name}
+          {isFeatured && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-semibold rounded-full">
+              <Star size={12} fill="currentColor" />
+              Featured
+            </span>
+          )}
         </CardItem>
 
         {/* Description */}
