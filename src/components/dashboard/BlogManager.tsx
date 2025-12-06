@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import useStore from "@/store/store";
 import { Blog } from "@/types/blog";
 import {
@@ -151,9 +152,9 @@ export default function BlogManager() {
           <div
             className={`${
               isDarkMode ? "bg-gray-800" : "bg-white"
-            } rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto`}
+            } rounded-lg w-full max-w-3xl h-[80vh] flex flex-col overflow-hidden`}
           >
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-2xl font-bold">
                 {editingBlog ? "Edit Blog Post" : "Add New Blog Post"}
               </h2>
@@ -165,174 +166,195 @@ export default function BlogManager() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => {
-                    const title = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      title,
-                      slug: prev.slug || generateSlug(title),
-                    }));
-                  }}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Slug</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Excerpt
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  value={formData.excerpt}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      excerpt: e.target.value,
-                    }))
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Content
-                </label>
-                <RichTextEditor
-                  content={formData.content}
-                  onChange={(content) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      content,
-                    }))
-                  }
-                  placeholder="Write your blog content here..."
-                  maxLength={50000}
-                  height="400px"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Cover Image
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const url = await handleImageUpload(file);
+            <div className="flex-1 overflow-y-auto p-6">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-4"
+                id="blog-form"
+              >
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => {
+                      const title = e.target.value;
                       setFormData((prev) => ({
                         ...prev,
-                        cover_image_url: url,
+                        title,
+                        slug:
+                          prev.slug === generateSlug(prev.title)
+                            ? generateSlug(title)
+                            : prev.slug,
                       }));
-                    }
-                  }}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-                {formData.cover_image_url && (
-                  <img
-                    src={formData.cover_image_url}
-                    alt="Cover Preview"
-                    className="mt-2 w-full h-48 object-cover rounded"
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
                   />
-                )}
-              </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Author</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.author}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, author: e.target.value }))
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Slug</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                    }
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="React, Next.js, TypeScript"
-                  value={formData.tags}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, tags: e.target.value }))
-                  }
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    isDarkMode
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Excerpt
+                  </label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        excerpt: e.target.value,
+                      }))
+                    }
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="published"
-                  checked={formData.published}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      published: e.target.checked,
-                    }))
-                  }
-                  className="w-4 h-4"
-                />
-                <label htmlFor="published" className="text-sm font-medium">
-                  Publish immediately
-                </label>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Content
+                  </label>
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        content,
+                      }))
+                    }
+                    placeholder="Write your blog content here..."
+                    maxLength={50000}
+                    height="400px"
+                  />
+                </div>
 
-              <div className="flex gap-2 pt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Cover Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = await handleImageUpload(file);
+                        setFormData((prev) => ({
+                          ...prev,
+                          cover_image_url: url,
+                        }));
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                  {formData.cover_image_url && (
+                    <Image
+                      src={formData.cover_image_url}
+                      alt="Cover Preview"
+                      width={800}
+                      height={192}
+                      className="mt-2 w-full h-48 object-cover rounded"
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Author
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.author}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        author: e.target.value,
+                      }))
+                    }
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Tags (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="React, Next.js, TypeScript"
+                    value={formData.tags}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, tags: e.target.value }))
+                    }
+                    className={`w-full px-3 py-2 border rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-white border-gray-300"
+                    }`}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="published"
+                    checked={formData.published}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        published: e.target.checked,
+                      }))
+                    }
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="published" className="text-sm font-medium">
+                    Publish immediately
+                  </label>
+                </div>
+              </form>
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex gap-2">
                 <button
+                  form="blog-form"
                   type="submit"
                   disabled={uploading}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
@@ -351,7 +373,7 @@ export default function BlogManager() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -366,9 +388,11 @@ export default function BlogManager() {
           >
             <div className="flex gap-6">
               {blog.cover_image_url && (
-                <img
+                <Image
                   src={blog.cover_image_url}
                   alt={blog.title}
+                  width={128}
+                  height={128}
                   className="w-32 h-32 object-cover rounded-lg"
                 />
               )}

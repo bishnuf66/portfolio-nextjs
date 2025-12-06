@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
 import {
@@ -289,14 +290,14 @@ const Dashboard = () => {
 
     // Find project to get its images for cleanup
     const projectToDelete = projects.find((p) => p.id === id);
-    const imagesToDelete = [];
+    const localImagesToDelete = [];
 
     if (projectToDelete) {
       if (projectToDelete.cover_image_url) {
-        imagesToDelete.push(projectToDelete.cover_image_url);
+        localImagesToDelete.push(projectToDelete.cover_image_url);
       }
       if (projectToDelete.gallery_images) {
-        imagesToDelete.push(...projectToDelete.gallery_images);
+        localImagesToDelete.push(...projectToDelete.gallery_images);
       }
     }
 
@@ -304,8 +305,8 @@ const Dashboard = () => {
       await deleteProject.mutateAsync(id);
 
       // Delete associated images
-      if (imagesToDelete.length > 0) {
-        await cleanupOrphanedImages(imagesToDelete);
+      if (localImagesToDelete.length > 0) {
+        await cleanupOrphanedImages(localImagesToDelete);
       }
     } catch (error) {
       console.error("Failed to delete project:", error);
@@ -446,13 +447,13 @@ const Dashboard = () => {
         ) : (
           <>
             {showForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8">
                 <div
                   className={`${
                     isDarkMode ? "bg-gray-800" : "bg-white"
-                  } rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+                  } rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col`}
                 >
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-2xl font-bold">
                       {editingProject ? "Edit Project" : "Add New Project"}
                     </h2>
@@ -464,257 +465,266 @@ const Dashboard = () => {
                     </button>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Project Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={(e) => {
-                          const name = e.target.value;
-                          setFormData((prev) => ({
-                            ...prev,
-                            name,
-                            slug: prev.slug || generateSlug(name),
-                          }));
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Slug
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.slug}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            slug: e.target.value,
-                          }))
-                        }
-                        placeholder="project-url-friendly-name"
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        URL-friendly version of the project name (lowercase,
-                        hyphens only)
-                      </p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Project URL
-                      </label>
-                      <input
-                        type="url"
-                        required
-                        value={formData.url}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            url: e.target.value,
-                          }))
-                        }
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Description
-                      </label>
-                      <RichTextEditor
-                        content={formData.description}
-                        onChange={(description) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            description,
-                          }))
-                        }
-                        placeholder="Describe your project..."
-                        maxLength={2000}
-                        height="200px"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Tech Stack (comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="React, Node.js, MongoDB"
-                        value={formData.tech_stack}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            tech_stack: e.target.value,
-                          }))
-                        }
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Category
-                      </label>
-                      <select
-                        value={formData.category}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            category: e.target.value as
-                              | "professional"
-                              | "personal",
-                          }))
-                        }
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="personal">Personal</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="flex items-center gap-3 cursor-pointer">
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <form
+                      onSubmit={handleSubmit}
+                      className="space-y-4"
+                      id="project-form"
+                    >
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Project Name
+                        </label>
                         <input
-                          type="checkbox"
-                          checked={formData.is_featured}
+                          type="text"
+                          required
+                          value={formData.name}
+                          onChange={(e) => {
+                            const name = e.target.value;
+                            setFormData((prev) => ({
+                              ...prev,
+                              name,
+                              slug: generateSlug(name), // Always update slug when name changes
+                            }));
+                          }}
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Slug
+                        </label>
+                        <div
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600 text-gray-300"
+                              : "bg-gray-100 border-gray-300 text-gray-700"
+                          }`}
+                        >
+                          {formData.slug}
+                        </div>
+                        <input
+                          type="hidden"
+                          name="slug"
+                          value={formData.slug}
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Automatically generated from project name
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Project URL
+                        </label>
+                        <input
+                          type="url"
+                          required
+                          value={formData.url}
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
-                              is_featured: e.target.checked,
+                              url: e.target.value,
                             }))
                           }
-                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
                         />
-                        <div>
-                          <span className="text-sm font-medium flex items-center gap-2">
-                            <Star size={16} className="text-yellow-500" />
-                            Featured Project
-                          </span>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Show this project on the homepage (max 6
-                            recommended)
-                          </p>
-                        </div>
-                      </label>
-                    </div>
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Cover Image
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleCoverImageChange(file);
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Description
+                        </label>
+                        <RichTextEditor
+                          content={formData.description}
+                          onChange={(description) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              description,
+                            }))
                           }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                      {formData.cover_image_url && (
-                        <div className="mt-2 relative inline-block">
-                          <img
-                            src={formData.cover_image_url}
-                            alt="Cover Preview"
-                            className="w-32 h-32 object-cover rounded"
+                          placeholder="Describe your project..."
+                          maxLength={2000}
+                          height="200px"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Tech Stack (comma-separated)
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="React, Node.js, MongoDB"
+                          value={formData.tech_stack}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              tech_stack: e.target.value,
+                            }))
+                          }
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Category
+                        </label>
+                        <select
+                          value={formData.category}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              category: e.target.value as
+                                | "professional"
+                                | "personal",
+                            }))
+                          }
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        >
+                          <option value="professional">Professional</option>
+                          <option value="personal">Personal</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.is_featured}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                is_featured: e.target.checked,
+                              }))
+                            }
+                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                           />
-                          <button
-                            type="button"
-                            onClick={removeCoverImage}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Gallery Images (multiple)
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => {
-                          if (e.target.files) {
-                            handleGalleryImageUpload(e.target.files);
-                          }
-                        }}
-                        className={`w-full px-3 py-2 border rounded-lg ${
-                          isDarkMode
-                            ? "bg-gray-700 border-gray-600"
-                            : "bg-white border-gray-300"
-                        }`}
-                      />
-                      {formData.gallery_images.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-sm font-medium mb-1">
-                            Gallery Preview:
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {formData.gallery_images.map((url, index) => (
-                              <div key={index} className="relative">
-                                <img
-                                  src={url}
-                                  alt={`Gallery ${index + 1}`}
-                                  className="w-20 h-20 object-cover rounded"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => removeGalleryImage(index)}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
-                                >
-                                  <X size={12} />
-                                </button>
-                              </div>
-                            ))}
+                          <div>
+                            <span className="text-sm font-medium flex items-center gap-2">
+                              <Star size={16} className="text-yellow-500" />
+                              Featured Project
+                            </span>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Show this project on the homepage (max 6
+                              recommended)
+                            </p>
                           </div>
-                        </div>
-                      )}
-                    </div>
+                        </label>
+                      </div>
 
-                    <div className="flex gap-2 pt-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Cover Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleCoverImageChange(file);
+                            }
+                          }}
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        {formData.cover_image_url && (
+                          <div className="mt-2 relative inline-block">
+                            <Image
+                              src={formData.cover_image_url}
+                              alt="Cover Preview"
+                              width={128}
+                              height={128}
+                              className="w-32 h-32 object-cover rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={removeCoverImage}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1">
+                          Gallery Images (multiple)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              handleGalleryImageUpload(e.target.files);
+                            }
+                          }}
+                          className={`w-full px-3 py-2 border rounded-lg ${
+                            isDarkMode
+                              ? "bg-gray-700 border-gray-600"
+                              : "bg-white border-gray-300"
+                          }`}
+                        />
+                        {formData.gallery_images.length > 0 && (
+                          <div className="mt-2">
+                            <p className="text-sm font-medium mb-1">
+                              Gallery Preview:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {formData.gallery_images.map((url, index) => (
+                                <div key={index} className="relative">
+                                  <Image
+                                    src={url}
+                                    alt={`Gallery ${index + 1}`}
+                                    width={80}
+                                    height={80}
+                                    className="w-20 h-20 object-cover rounded"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeGalleryImage(index)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+                    <div className="flex gap-2">
                       <button
+                        form="project-form"
                         type="submit"
                         disabled={uploading}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
@@ -733,7 +743,7 @@ const Dashboard = () => {
                         Cancel
                       </button>
                     </div>
-                  </form>
+                  </div>
                 </div>
               </div>
             )}
@@ -750,12 +760,14 @@ const Dashboard = () => {
                 >
                   <div className="flex gap-6">
                     <div className="relative">
-                      <img
+                      <Image
                         src={
                           project.cover_image_url ??
                           "/project-images/placeholder.png"
                         }
                         alt={project.name}
+                        width={96}
+                        height={96}
                         className="w-24 h-24 object-cover rounded-lg"
                       />
                       {project.is_featured && (
