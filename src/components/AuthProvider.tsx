@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 interface AuthContextType {
   user: User | null;
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const {
           data: { session },
           error,
-        } = await supabase.auth.getSession();
+        } = await getSupabase().auth.getSession();
         console.log("AuthProvider: Initial session", {
           user: session?.user?.email,
           error,
@@ -45,6 +45,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
       } catch (error) {
         console.error("AuthProvider: Error getting initial session", error);
+        // Don't throw, just set user to null and continue
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -55,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = getSupabase().auth.onAuthStateChange((event, session) => {
       console.log("AuthProvider: Auth state changed", {
         event,
         user: session?.user?.email,
@@ -82,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     console.log("AuthProvider: Signing out");
-    await supabase.auth.signOut();
+    await getSupabase().auth.signOut();
   };
 
   console.log("AuthProvider: Current state", { user: user?.email, loading });

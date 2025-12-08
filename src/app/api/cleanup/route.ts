@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: Request) {
     try {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
                     const filePath = pathParts.slice(bucketIndex + 1).join("/");
 
                     if (filePath) {
-                        const { error } = await supabase.storage
+                        const { error } = await getSupabase().storage
                             .from("project-images")
                             .remove([filePath]);
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
             message: "Cleanup completed",
             deletedImages,
         });
-    } catch (error) {
+    } catch {
         return NextResponse.json(
             { error: "Failed to cleanup images" },
             { status: 500 },

@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { Testimonial } from "@/types/blog";
 
 export const useTestimonials = (publishedOnly = true) => {
     return useQuery({
         queryKey: ["testimonials", publishedOnly],
         queryFn: async () => {
-            let query = supabase
+            let query = getSupabase()
                 .from("testimonials")
                 .select("*")
                 .order("created_at", { ascending: false });
@@ -32,7 +32,7 @@ export const useCreateTestimonial = () => {
                 "id" | "created_at" | "updated_at"
             >,
         ) => {
-            const { data, error } = await supabase
+            const { data, error } = await getSupabase()
                 .from("testimonials")
                 .insert([testimonialData])
                 .select()
@@ -58,7 +58,7 @@ export const useUpdateTestimonial = () => {
             id: string;
             testimonialData: Partial<Testimonial>;
         }) => {
-            const { data, error } = await supabase
+            const { data, error } = await getSupabase()
                 .from("testimonials")
                 .update({
                     ...testimonialData,
@@ -82,7 +82,7 @@ export const useDeleteTestimonial = () => {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase
+            const { error } = await getSupabase()
                 .from("testimonials")
                 .delete()
                 .eq("id", id);

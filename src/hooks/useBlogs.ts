@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { Blog } from "@/types/blog";
 
 export const useBlogs = (publishedOnly = true) => {
     return useQuery({
         queryKey: ["blogs", publishedOnly],
         queryFn: async () => {
-            let query = supabase
+            let query = getSupabase()
                 .from("blogs")
                 .select("*")
                 .order("created_at", { ascending: false });
@@ -26,7 +26,7 @@ export const useBlog = (slug: string) => {
     return useQuery({
         queryKey: ["blog", slug],
         queryFn: async () => {
-            const { data, error } = await supabase
+            const { data, error } = await getSupabase()
                 .from("blogs")
                 .select("*")
                 .eq("slug", slug)
@@ -47,7 +47,7 @@ export const useCreateBlog = () => {
         mutationFn: async (
             blogData: Omit<Blog, "id" | "created_at" | "updated_at">,
         ) => {
-            const { data, error } = await supabase
+            const { data, error } = await getSupabase()
                 .from("blogs")
                 .insert([blogData])
                 .select()
@@ -73,7 +73,7 @@ export const useUpdateBlog = () => {
             id: string;
             blogData: Partial<Blog>;
         }) => {
-            const { data, error } = await supabase
+            const { data, error } = await getSupabase()
                 .from("blogs")
                 .update({ ...blogData, updated_at: new Date().toISOString() })
                 .eq("id", id)
@@ -94,7 +94,7 @@ export const useDeleteBlog = () => {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase.from("blogs").delete().eq(
+            const { error } = await getSupabase().from("blogs").delete().eq(
                 "id",
                 id,
             );

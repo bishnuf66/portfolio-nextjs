@@ -24,52 +24,55 @@ const Design = ({ id = "tsparticles-default" }: DesignProps) => {
     // Removed console.log to prevent unnecessary re-renders
   }, []);
 
-  const particlesOptions = useMemo(() => ({
-    fullScreen: { enable: false },
-    fpsLimit: 60,
-    interactivity: {
-      events: {
-        onClick: { enable: false },
-        onHover: { enable: true, mode: "grab" },
-        resize: true,
-      },
-      modes: {
-        grab: {
-          distance: 140,
-          links: {
-            opacity: 0.5,
+  const particlesOptions = useMemo(
+    () => ({
+      fullScreen: { enable: false },
+      fpsLimit: 60,
+      interactivity: {
+        events: {
+          onClick: { enable: false },
+          onHover: { enable: true, mode: "grab" },
+          resize: true,
+        },
+        modes: {
+          grab: {
+            distance: 140,
+            links: {
+              opacity: 0.5,
+            },
           },
         },
       },
-    },
-    particles: {
-      color: { value: particleColor },
-      links: {
-        color: linksColor,
-        distance: 150,
-        enable: true,
-        opacity: isDarkMode ? 0.2 : 0.3,
-        width: 1,
+      particles: {
+        color: { value: particleColor },
+        links: {
+          color: linksColor,
+          distance: 150,
+          enable: true,
+          opacity: isDarkMode ? 0.2 : 0.3,
+          width: 1,
+        },
+        collisions: { enable: false },
+        move: {
+          enable: true,
+          outModes: { default: "out" as const },
+          speed: 1,
+          straight: false,
+        },
+        number: {
+          density: { enable: true, area: 1500 },
+          value: 80,
+        },
+        opacity: {
+          value: isDarkMode ? 0.3 : 0.5,
+        },
+        shape: { type: "circle" },
+        size: { value: { min: 1, max: 2 } },
       },
-      collisions: { enable: false },
-      move: {
-        enable: true,
-        outModes: { default: "out" },
-        speed: 1,
-        straight: false,
-      },
-      number: {
-        density: { enable: true, area: 1500 },
-        value: 80,
-      },
-      opacity: {
-        value: isDarkMode ? 0.3 : 0.5,
-      },
-      shape: { type: "circle" },
-      size: { value: { min: 1, max: 2 } },
-    },
-    detectRetina: true,
-  }), [particleColor, linksColor, isDarkMode]);
+      detectRetina: true,
+    }),
+    [particleColor, linksColor, isDarkMode]
+  );
 
   return (
     <div className="absolute inset-0 pointer-events-none z-0">
@@ -79,11 +82,11 @@ const Design = ({ id = "tsparticles-default" }: DesignProps) => {
         loaded={particlesLoaded}
         options={particlesOptions}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
+          width: "100%",
+          height: "100%",
         }}
       />
     </div>

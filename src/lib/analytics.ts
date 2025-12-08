@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 
 // Generate or get session ID
 export const getSessionId = (): string => {
@@ -115,7 +115,7 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
 
         console.log("Tracking page view:", { pagePath, sessionId });
 
-        const { data, error } = await supabase.from("analytics").insert(
+        const { data, error } = await getSupabase().from("analytics").insert(
             analyticsData,
         );
 
@@ -152,13 +152,13 @@ export const trackProjectView = async (projectId: string) => {
         const locationInfo = await getLocationInfo();
         const deviceInfo = getDeviceInfo();
 
-        const { error } = await supabase.from("project_views").insert({
+        const { error } = await getSupabase().from("project_views").insert({
             project_id: projectId,
             session_id: sessionId,
             visitor_id: visitorId,
             country: locationInfo.country,
             city: locationInfo.city,
-            device_type: deviceInfo.deviceType,
+            device_type: deviceInfo.device_type,
             referrer: document.referrer,
         });
 
@@ -204,12 +204,13 @@ export const trackSectionInteraction = async (
     try {
         const sessionId = getSessionId();
 
-        const { error } = await supabase.from("section_interactions").insert({
-            session_id: sessionId,
-            section_name: sectionName,
-            interaction_type: interactionType,
-            metadata: metadata || {},
-        });
+        const { error } = await getSupabase().from("section_interactions")
+            .insert({
+                session_id: sessionId,
+                section_name: sectionName,
+                interaction_type: interactionType,
+                metadata: metadata || {},
+            });
 
         if (error) {
             // Silently fail if table doesn't exist
@@ -229,7 +230,7 @@ export const trackTimeOnPage = (pagePath: string) => {
 
         try {
             // Update the most recent analytics entry for this session and page
-            const { error } = await supabase
+            const { error } = await getSupabase()
                 .from("analytics")
                 .update({ duration_seconds: duration })
                 .eq("session_id", sessionId)
@@ -241,7 +242,8 @@ export const trackTimeOnPage = (pagePath: string) => {
                 // Silently fail
             }
         } catch (error) {
-            // Silently fail
+            // Silently fail if Supabase is not available
+            console.debug("Analytics tracking skipped:", error);
         }
     };
 

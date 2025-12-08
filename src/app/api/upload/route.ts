@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = fileName;
 
-    const { data, error } = await supabase.storage
+    const { error } = await getSupabase().storage
       .from(bucket)
       .upload(filePath, file);
 
@@ -25,10 +25,10 @@ export async function POST(request: Request) {
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(filePath);
+    } = getSupabase().storage.from(bucket).getPublicUrl(filePath);
 
     return NextResponse.json({ imageUrl: publicUrl });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to upload image" },
       { status: 500 },

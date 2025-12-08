@@ -2,6 +2,23 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 
+interface AnalyticsData {
+    id: string;
+    visitor_id: string;
+    page_path: string;
+    country?: string;
+    device_type?: string;
+    duration?: number;
+    duration_seconds?: number;
+    created_at: string;
+    // Add other fields from your analytics table as needed
+}
+
+interface ProjectView {
+    project_id: string;
+    viewed_at: string;
+}
+
 export async function GET(request: Request) {
     try {
         let supabase = await createClient();
@@ -62,11 +79,14 @@ export async function GET(request: Request) {
             dateFilter = new Date(0); // All time
         }
 
-        // Fetch analytics data
+        // Fetch analytics data with type
         const { data: analyticsData, error: analyticsError } = await supabase
             .from("analytics")
             .select("*")
-            .gte("created_at", dateFilter.toISOString());
+            .gte("created_at", dateFilter.toISOString()) as unknown as {
+                data: AnalyticsData[] | null;
+                error: Error | null;
+            };
 
         if (analyticsError) {
             console.error("Analytics fetch error:", analyticsError);
@@ -156,8 +176,10 @@ export async function GET(request: Request) {
         // Project views
         const { data: projectViewsData } = await supabase
             .from("project_views")
-            .select("project_id")
-            .gte("viewed_at", dateFilter.toISOString());
+            .select("project_id, viewed_at")
+            .gte("viewed_at", dateFilter.toISOString()) as {
+                data: ProjectView[] | null;
+            };
 
         const projectViewCount: Record<string, number> = {};
         projectViewsData?.forEach((pv) => {
@@ -198,9 +220,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { supabase } = await import("@/lib/supabase");
+        const { getSupabase } = await import("@/lib/supabase");
 
-        const { error } = await supabase.from("analytics").insert(body);
+        const { error } = await getSupabase().from("analytics").insert(body);
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });

@@ -4,6 +4,9 @@ import { supabasePublic } from "@/lib/supabase-public";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateProjectData } from "@/lib/validation";
+import { Database } from "@/lib/database.types";
+
+type ProjectUpdateData = Database["public"]["Tables"]["projects"]["Update"];
 
 export async function GET(
   request: Request,
@@ -12,7 +15,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const { data, error } = await supabasePublic
+    const { data, error } = await supabasePublic()
       .from("projects")
       .select("*")
       .eq("id", id)
@@ -88,23 +91,10 @@ export async function PUT(
     // Create an authenticated client with the user's token for RLS
     const authenticatedSupabase = createAuthenticatedClient(token);
 
-    // Define type for project update data
-    type ProjectUpdateData = {
-      name?: string;
-      slug?: string;
-      url?: string;
-      description?: string;
-      tech_stack?: string[];
-      cover_image_url?: string;
-      gallery_images?: string[];
-      category?: "professional" | "personal";
-      is_featured?: boolean;
-    };
-
-    // Cast body to proper type for project update
+    // Update the project with proper typing
     const { data, error } = await authenticatedSupabase
       .from("projects")
-      .update(body as unknown as ProjectUpdateData)
+      .update<ProjectUpdateData>(body)
       .eq("id", id)
       .select();
 

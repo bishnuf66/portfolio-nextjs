@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const limit = searchParams.get("limit");
     const category = searchParams.get("category");
 
-    let query = supabasePublic
+    let query = supabasePublic()
       .from("projects")
       .select("*")
       .order("created_at", { ascending: false });

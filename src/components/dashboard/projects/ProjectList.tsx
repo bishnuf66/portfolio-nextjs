@@ -1,18 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { Star, Edit2, Trash2 } from "lucide-react";
-
-type Project = {
-  id: string;
-  name: string;
-  slug: string;
-  url: string;
-  description: string;
-  tech_stack: string[];
-  category: string;
-  is_featured: boolean;
-  cover_image_url: string | null;
-};
+import { Project } from "@/lib/supabase";
 
 interface ProjectListProps {
   projects: Project[];
