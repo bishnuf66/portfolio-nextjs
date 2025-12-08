@@ -1,347 +1,65 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Project } from "@/lib/supabase";
 import useStore from "@/store/store";
 import {
-  X,
-  Edit2,
-  Trash2,
   Plus,
   LogOut,
   BarChart3,
   FolderKanban,
   BookOpen,
   MessageSquare,
-  Star,
 } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
 import {
   useProjects,
-  useCreateProject,
-  useUpdateProject,
   useDeleteProject,
 } from "@/hooks/useProjects";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
-import RichTextEditor from "@/components/RichTextEditor";
+import ProjectList from "@/components/dashboard/projects/ProjectList";
 
 const Dashboard = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { isDarkMode } = useStore();
   const { signOut } = useAuth();
 
   // TanStack Query hooks
   const { data: projects = [], isLoading } = useProjects();
-  const createProject = useCreateProject();
-  const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
 
   const [activeTab, setActiveTab] = useState<
     "projects" | "analytics" | "blogs" | "testimonials"
-  >("projects");
-  const [showForm, setShowForm] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    url: "",
-    description: "",
-    tech_stack: "",
-    cover_image_url: "",
-    gallery_images: [] as string[],
-    category: "professional" as "professional" | "personal",
-    is_featured: false,
-  });
-  const [uploading, setUploading] = useState(false);
-  const [originalImages, setOriginalImages] = useState<{
-    cover_image_url: string;
-    gallery_images: string[];
-  }>({ cover_image_url: "", gallery_images: [] });
-  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
-  const [pendingUploads, setPendingUploads] = useState<{
-    cover: File | null;
-    gallery: File[];
-  }>({ cover: null, gallery: [] });
+  >((searchParams?.get("tab") as any) || "projects");
 
-  const handleImageUpload = async (file: File, type: "cover" | "gallery") => {
-    if (type === "cover") {
-      setPendingUploads((prev) => ({ ...prev, cover: file }));
-      // Create preview URL for immediate UI update
-      const previewUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, cover_image_url: previewUrl }));
-    } else {
-      setPendingUploads((prev) => ({
-        ...prev,
-        gallery: [...prev.gallery, file],
-      }));
-      // Create preview URLs for immediate UI update
-      const previewUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({
-        ...prev,
-        gallery_images: [...prev.gallery_images, previewUrl],
-      }));
-    }
-  };
 
-  const uploadPendingImages = async () => {
-    let newCoverUrl = "";
-    const uploadedGalleryUrls = [];
 
-    // Upload cover image if pending
-    if (pendingUploads.cover) {
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", pendingUploads.cover);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        newCoverUrl = data.imageUrl;
-      }
-    }
-
-    // Upload gallery images if pending
-    for (const file of pendingUploads.gallery) {
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        uploadedGalleryUrls.push(data.imageUrl);
-      }
-    }
-
-    return { coverUrl: newCoverUrl, galleryUrls: uploadedGalleryUrls };
-  };
-
-  const cleanupOrphanedImages = async (imageUrls: string[]) => {
-    try {
-      await fetch("/api/cleanup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imageUrls }),
-      });
-    } catch (error) {
-      console.error("Failed to cleanup images:", error);
-    }
-  };
-
-  const handleGalleryImageUpload = async (files: FileList) => {
-    const fileArray = Array.from(files);
-    for (const file of fileArray) {
-      await handleImageUpload(file, "gallery");
-    }
-  };
-
-  const handleCoverImageChange = async (file: File) => {
-    // Simply handle the new image upload
-    // Deletion of old image will be handled in handleSubmit
-    await handleImageUpload(file, "cover");
-  };
-
-  const removeCoverImage = () => {
-    // Clear cover image and pending upload
-    // Deletion of original will be handled in handleSubmit
-    setFormData((prev) => ({ ...prev, cover_image_url: "" }));
-    setPendingUploads((prev) => ({ ...prev, cover: null }));
-  };
-
-  const removeGalleryImage = async (index: number) => {
-    const imageToRemove = formData.gallery_images[index];
-
-    // Remove from form data
-    setFormData((prev) => ({
-      ...prev,
-      gallery_images: prev.gallery_images.filter((_, i) => i !== index),
-    }));
-
-    // Mark real image for deletion (not blob URLs)
-    if (imageToRemove && !imageToRemove.startsWith("blob:")) {
-      setImagesToDelete((prev) => [...prev, imageToRemove]);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUploading(true);
-
-    try {
-      // Build list of images to delete
-      const toDelete: string[] = [];
-
-      // Check if cover image was changed or removed
-      if (
-        originalImages.cover_image_url &&
-        originalImages.cover_image_url !== formData.cover_image_url
-      ) {
-        // Original cover image exists and is different from current
-        // Delete the original if it's a real URL (not a blob)
-        if (!originalImages.cover_image_url.startsWith("blob:")) {
-          toDelete.push(originalImages.cover_image_url);
-        }
-      }
-
-      // Find gallery images that were removed
-      const currentGalleryUrls = formData.gallery_images.filter(
-        (url) => !url.startsWith("blob:")
-      );
-      const originalGalleryUrls = originalImages.gallery_images;
-
-      const removedGalleryImages = originalGalleryUrls.filter(
-        (originalUrl) => !currentGalleryUrls.includes(originalUrl)
-      );
-
-      if (removedGalleryImages.length > 0) {
-        toDelete.push(...removedGalleryImages);
-      }
-
-      // Upload pending images and get actual URLs
-      const { coverUrl, galleryUrls } = await uploadPendingImages();
-
-      // Prepare final URLs, using uploaded URLs or existing non-blob URLs
-      const finalCoverImageUrl =
-        coverUrl ||
-        (formData.cover_image_url.startsWith("blob:")
-          ? ""
-          : formData.cover_image_url);
-
-      const finalGalleryImages = [
-        ...formData.gallery_images.filter((url) => !url.startsWith("blob:")),
-        ...galleryUrls,
-      ];
-
-      const projectData = {
-        ...formData,
-        cover_image_url: finalCoverImageUrl,
-        gallery_images: finalGalleryImages,
-        tech_stack: formData.tech_stack
-          .split(",")
-          .map((tech) => tech.trim())
-          .filter(Boolean),
-      };
-
-      try {
-        if (editingProject) {
-          await updateProject.mutateAsync({
-            id: editingProject.id,
-            projectData,
-          });
-        } else {
-          await createProject.mutateAsync(projectData);
-        }
-
-        // Delete marked images on successful save
-        if (toDelete.length > 0) {
-          console.log("Deleting images:", toDelete);
-          await cleanupOrphanedImages(toDelete);
-        }
-        resetForm();
-      } catch (error) {
-        console.error("Failed to save project:", error);
-        alert("Failed to save project");
-      }
-    } catch (error) {
-      console.error("Failed to save project:", error);
-      alert("Failed to save project");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleEdit = (project: Project) => {
-    setEditingProject(project);
-    setFormData({
-      name: project.name,
-      slug: project.slug || "",
-      url: project.url,
-      description: project.description,
-      tech_stack: project.tech_stack.join(", "),
-      cover_image_url: project.cover_image_url || "",
-      gallery_images: project.gallery_images || [],
-      category: project.category,
-      is_featured: project.is_featured || false,
-    });
-    // Track original images for cleanup
-    setOriginalImages({
-      cover_image_url: project.cover_image_url || "",
-      gallery_images: project.gallery_images || [],
-    });
-    // Clear any pending uploads and deletion queue
-    setPendingUploads({ cover: null, gallery: [] });
-    setImagesToDelete([]);
-    setShowForm(true);
+    router.push(`/dashboard/projects/edit/${project.id}`);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
-
-    // Find project to get its images for cleanup
-    const projectToDelete = projects.find((p) => p.id === id);
-    const localImagesToDelete = [];
-
-    if (projectToDelete) {
-      if (projectToDelete.cover_image_url) {
-        localImagesToDelete.push(projectToDelete.cover_image_url);
+    if (confirm("Are you sure you want to delete this project?")) {
+      try {
+        await deleteProject.mutateAsync(id);
+      } catch (error) {
+        console.error("Error deleting project:", error);
       }
-      if (projectToDelete.gallery_images) {
-        localImagesToDelete.push(...projectToDelete.gallery_images);
-      }
-    }
-
-    try {
-      await deleteProject.mutateAsync(id);
-
-      // Delete associated images
-      if (localImagesToDelete.length > 0) {
-        await cleanupOrphanedImages(localImagesToDelete);
-      }
-    } catch (error) {
-      console.error("Failed to delete project:", error);
-      alert("Failed to delete project");
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      slug: "",
-      url: "",
-      description: "",
-      tech_stack: "",
-      cover_image_url: "",
-      gallery_images: [],
-      category: "professional",
-      is_featured: false,
-    });
-    setOriginalImages({ cover_image_url: "", gallery_images: [] });
-    setImagesToDelete([]);
-    setPendingUploads({ cover: null, gallery: [] });
-    setEditingProject(null);
-    setShowForm(false);
+  const handleAddProject = () => {
+    router.push("/dashboard/projects/add");
   };
 
   const handleSignOut = async () => {
     await signOut();
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
   };
 
   if (isLoading) {
@@ -354,9 +72,8 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-      } p-8`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+        } p-8`}
     >
       <div className="max-w-7xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
@@ -364,7 +81,7 @@ const Dashboard = () => {
           <div className="flex gap-4">
             {activeTab === "projects" && (
               <button
-                onClick={() => setShowForm(true)}
+                onClick={handleAddProject}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus size={20} />
@@ -382,58 +99,54 @@ const Dashboard = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8 border-b border-gray-700 overflow-x-auto">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
           <button
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
-              activeTab === "projects"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : isDarkMode
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`px-4 py-2 font-medium ${activeTab === "projects"
+              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
           >
-            <FolderKanban size={20} />
-            Projects
-          </button>
-          <button
-            onClick={() => setActiveTab("blogs")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
-              activeTab === "blogs"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : isDarkMode
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <BookOpen size={20} />
-            Blogs
-          </button>
-          <button
-            onClick={() => setActiveTab("testimonials")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
-              activeTab === "testimonials"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : isDarkMode
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <MessageSquare size={20} />
-            Testimonials
+            <div className="flex items-center gap-2">
+              <FolderKanban size={18} />
+              Projects
+            </div>
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-2 px-6 py-3 font-semibold transition-all whitespace-nowrap ${
-              activeTab === "analytics"
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : isDarkMode
-                ? "text-gray-400 hover:text-white"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`px-4 py-2 font-medium ${activeTab === "analytics"
+              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
           >
-            <BarChart3 size={20} />
-            Analytics
+            <div className="flex items-center gap-2">
+              <BarChart3 size={18} />
+              Analytics
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab("blogs")}
+            className={`px-4 py-2 font-medium ${activeTab === "blogs"
+              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
+          >
+            <div className="flex items-center gap-2">
+              <BookOpen size={18} />
+              Blog Posts
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab("testimonials")}
+            className={`px-4 py-2 font-medium ${activeTab === "testimonials"
+              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
+          >
+            <div className="flex items-center gap-2">
+              <MessageSquare size={18} />
+              Testimonials
+            </div>
           </button>
         </div>
 
@@ -445,404 +158,12 @@ const Dashboard = () => {
         ) : activeTab === "testimonials" ? (
           <TestimonialManager />
         ) : (
-          <>
-            {showForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8">
-                <div
-                  className={`${
-                    isDarkMode ? "bg-gray-800" : "bg-white"
-                  } rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col`}
-                >
-                  <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-2xl font-bold">
-                      {editingProject ? "Edit Project" : "Add New Project"}
-                    </h2>
-                    <button
-                      onClick={resetForm}
-                      className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-6">
-                    <form
-                      onSubmit={handleSubmit}
-                      className="space-y-4"
-                      id="project-form"
-                    >
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Project Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={(e) => {
-                            const name = e.target.value;
-                            setFormData((prev) => ({
-                              ...prev,
-                              name,
-                              slug: generateSlug(name), // Always update slug when name changes
-                            }));
-                          }}
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Slug
-                        </label>
-                        <div
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600 text-gray-300"
-                              : "bg-gray-100 border-gray-300 text-gray-700"
-                          }`}
-                        >
-                          {formData.slug}
-                        </div>
-                        <input
-                          type="hidden"
-                          name="slug"
-                          value={formData.slug}
-                        />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          Automatically generated from project name
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Project URL
-                        </label>
-                        <input
-                          type="url"
-                          required
-                          value={formData.url}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              url: e.target.value,
-                            }))
-                          }
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Description
-                        </label>
-                        <RichTextEditor
-                          content={formData.description}
-                          onChange={(description) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              description,
-                            }))
-                          }
-                          placeholder="Describe your project..."
-                          maxLength={2000}
-                          height="200px"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Tech Stack (comma-separated)
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="React, Node.js, MongoDB"
-                          value={formData.tech_stack}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              tech_stack: e.target.value,
-                            }))
-                          }
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Category
-                        </label>
-                        <select
-                          value={formData.category}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              category: e.target.value as
-                                | "professional"
-                                | "personal",
-                            }))
-                          }
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        >
-                          <option value="professional">Professional</option>
-                          <option value="personal">Personal</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="flex items-center gap-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.is_featured}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                is_featured: e.target.checked,
-                              }))
-                            }
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                          />
-                          <div>
-                            <span className="text-sm font-medium flex items-center gap-2">
-                              <Star size={16} className="text-yellow-500" />
-                              Featured Project
-                            </span>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Show this project on the homepage (max 6
-                              recommended)
-                            </p>
-                          </div>
-                        </label>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Cover Image
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleCoverImageChange(file);
-                            }
-                          }}
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        />
-                        {formData.cover_image_url && (
-                          <div className="mt-2 relative inline-block">
-                            <Image
-                              src={formData.cover_image_url}
-                              alt="Cover Preview"
-                              width={128}
-                              height={128}
-                              className="w-32 h-32 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={removeCoverImage}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Gallery Images (multiple)
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={(e) => {
-                            if (e.target.files) {
-                              handleGalleryImageUpload(e.target.files);
-                            }
-                          }}
-                          className={`w-full px-3 py-2 border rounded-lg ${
-                            isDarkMode
-                              ? "bg-gray-700 border-gray-600"
-                              : "bg-white border-gray-300"
-                          }`}
-                        />
-                        {formData.gallery_images.length > 0 && (
-                          <div className="mt-2">
-                            <p className="text-sm font-medium mb-1">
-                              Gallery Preview:
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {formData.gallery_images.map((url, index) => (
-                                <div key={index} className="relative">
-                                  <Image
-                                    src={url}
-                                    alt={`Gallery ${index + 1}`}
-                                    width={80}
-                                    height={80}
-                                    className="w-20 h-20 object-cover rounded"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => removeGalleryImage(index)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </form>
-                  </div>
-
-                  <div className="border-t border-gray-200 dark:border-gray-700 p-6">
-                    <div className="flex gap-2">
-                      <button
-                        form="project-form"
-                        type="submit"
-                        disabled={uploading}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                      >
-                        {uploading
-                          ? "Processing..."
-                          : editingProject
-                          ? "Update Project"
-                          : "Add Project"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetForm}
-                        className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="grid gap-6">
-              {projects.map((project) => (
-                <div
-                  key={project.id}
-                  className={`${
-                    isDarkMode ? "bg-gray-800" : "bg-white"
-                  } rounded-lg p-6 shadow-lg ${
-                    project.is_featured ? "ring-2 ring-yellow-500" : ""
-                  }`}
-                >
-                  <div className="flex gap-6">
-                    <div className="relative">
-                      <Image
-                        src={
-                          project.cover_image_url ??
-                          "/project-images/placeholder.png"
-                        }
-                        alt={project.name}
-                        width={96}
-                        height={96}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
-                      {project.is_featured && (
-                        <div className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full p-1">
-                          <Star size={16} fill="currentColor" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold">
-                              {project.name}
-                            </h3>
-                            {project.is_featured && (
-                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-semibold">
-                                FEATURED
-                              </span>
-                            )}
-                          </div>
-                          <div
-                            className="text-sm text-gray-600 dark:text-gray-400 mb-2 prose prose-sm max-w-none"
-                            dangerouslySetInnerHTML={{
-                              __html: project.description,
-                            }}
-                          />
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {project.tech_stack.map((tech, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="flex gap-4 text-sm">
-                            <a
-                              href={project.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              View Project
-                            </a>
-                            <span className="text-gray-500">
-                              {project.category}
-                            </span>
-                            <span className="text-gray-400">
-                              Slug: {project.slug || "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(project)}
-                            className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(project.id)}
-                            className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+          <ProjectList
+            projects={projects}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            isDarkMode={isDarkMode}
+          />
         )}
       </div>
     </div>
