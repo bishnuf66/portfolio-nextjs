@@ -71,7 +71,14 @@ export const getDeviceInfo = () => {
 // Get location info from IP
 export const getLocationInfo = async () => {
     try {
-        const response = await fetch("https://ipapi.co/json/");
+        const response = await fetch("https://ipapi.co/json/", {
+            signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         return {
             country: data.country_name,
@@ -82,7 +89,11 @@ export const getLocationInfo = async () => {
             ip_address: data.ip,
         };
     } catch (error) {
-        console.error("Failed to get location:", error);
+        // Silently fail - location info is not critical
+        console.warn(
+            "Could not fetch location info:",
+            error instanceof Error ? error.message : "Unknown error",
+        );
         return {};
     }
 };
