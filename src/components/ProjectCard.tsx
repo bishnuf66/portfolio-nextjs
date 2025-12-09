@@ -52,13 +52,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         {/* Description */}
         <CardItem
-          as="p"
+          as="div"
           translateZ="60"
           className={`text-sm max-w-sm mt-2 ${isDarkMode ? "text-neutral-300" : "text-neutral-500"
-            }`}
-        >
-          {description}
-        </CardItem>
+            } prose prose-sm max-w-none`}
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
 
         {/* Project Image with Gradient Border */}
         <CardItem translateZ="100" className="w-full mt-4">
