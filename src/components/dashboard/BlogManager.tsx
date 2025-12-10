@@ -11,12 +11,24 @@ import {
 } from "@/hooks/useBlogs";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { Edit2, Trash2, Plus } from "lucide-react";
+import { usePagination } from "@/hooks/usePagination";
+import Pagination from "@/components/ui/Pagination";
 
 export default function BlogManager() {
   const router = useRouter();
   const { isDarkMode } = useStore();
   const { data: blogs = [], isLoading } = useBlogs(false);
   const deleteBlog = useDeleteBlog();
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    goToPage,
+  } = usePagination({
+    data: blogs,
+    itemsPerPage: 5,
+  });
 
   const handleEdit = (blog: Blog) => {
     router.push(`/dashboard/blogs/edit/${blog.id}`);
@@ -50,7 +62,7 @@ export default function BlogManager() {
       </div>
 
       <div className="grid gap-6">
-        {blogs.map((blog) => (
+        {paginatedData.map((blog) => (
           <div
             key={blog.id}
             className={`${isDarkMode ? "bg-gray-800" : "bg-white"
@@ -73,8 +85,8 @@ export default function BlogManager() {
                       <h3 className="text-xl font-bold">{blog.title}</h3>
                       <span
                         className={`px-2 py-1 text-xs rounded ${blog.published
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                           }`}
                       >
                         {blog.published ? "Published" : "Draft"}
@@ -118,6 +130,25 @@ export default function BlogManager() {
           </div>
         ))}
       </div>
+
+      {blogs.length === 0 ? (
+        <div className="text-center py-12">
+          <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>
+            📝
+          </div>
+          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            No blog posts found. Create your first blog post!
+          </p>
+        </div>
+      ) : (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          itemsPerPage={5}
+          totalItems={blogs.length}
+        />
+      )}
     </>
   );
 }

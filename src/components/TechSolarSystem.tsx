@@ -11,7 +11,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { EffectComposer, Bloom, Vignette, Noise } from "@react-three/postprocessing";
-import { Code, Cpu, Globe, Database, Terminal, Search } from "lucide-react";
+import { Code, Cpu, Globe, Database, Terminal, Search, Server, Cloud, Settings, TrendingUp } from "lucide-react";
 import useStore from "@/store/store";
 
 // Sun Component
@@ -222,12 +222,57 @@ export default function TechSolarSystem() {
             description: "Database - NoSQL document storage",
         },
         {
+            name: "VPS Hosting",
+            color: "#FF6B35",
+            emissive: "#E55100",
+            radius: 0.6,
+            distance: 8.5,
+            speed: 0.12,
+            rotationSpeed: 0.4,
+            techIcon: <Server size={16} className="text-[#FF6B35]" />,
+            description: "Deployment - Virtual Private Server hosting",
+        },
+        {
+            name: "Cloud Deploy",
+            color: "#4285F4",
+            emissive: "#1976D2",
+            radius: 0.65,
+            distance: 10,
+            speed: 0.1,
+            rotationSpeed: 0.3,
+            techIcon: <Cloud size={16} className="text-[#4285F4]" />,
+            description: "Infrastructure - Cloud deployment & scaling",
+        },
+        {
+            name: "cPanel",
+            color: "#FF6C2C",
+            emissive: "#F57C00",
+            radius: 0.5,
+            distance: 11.5,
+            speed: 0.08,
+            rotationSpeed: 0.5,
+            techIcon: <Settings size={16} className="text-[#FF6C2C]" />,
+            description: "Management - Web hosting control panel",
+        },
+        {
+            name: "SEO",
+            color: "#34A853",
+            emissive: "#2E7D32",
+            radius: 0.55,
+            distance: 13,
+            speed: 0.06,
+            rotationSpeed: 0.6,
+            hasRing: true,
+            techIcon: <TrendingUp size={16} className="text-[#34A853]" />,
+            description: "Optimization - Search Engine Optimization",
+        },
+        {
             name: "ThreeJS",
             color: "#049EF4",
             emissive: "#0369A1",
             radius: 0.65,
-            distance: 8.5,
-            speed: 0.12,
+            distance: 14.5,
+            speed: 0.05,
             rotationSpeed: 0.6,
             techIcon: <Globe size={16} className="text-[#049EF4]" />,
             description: "3D Library - WebGL renderer",
@@ -302,17 +347,17 @@ export default function TechSolarSystem() {
                 </div>
             </div>
 
-            <div className={`mt-8 grid grid-cols-2 md:grid-cols-5 gap-4`}>
+            <div className={`mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4`}>
                 {planets.map((planet) => (
                     <div
                         key={planet.name}
                         className={`p-4 rounded-lg backdrop-blur-sm transition-all ${activePlanet === planet.name
-                                ? isDarkMode
-                                    ? 'bg-blue-500/20 border-2 border-blue-500'
-                                    : 'bg-blue-100 border-2 border-blue-600'
-                                : isDarkMode
-                                    ? 'bg-gray-800/50 border border-gray-700 hover:bg-gray-800'
-                                    : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
+                            ? isDarkMode
+                                ? 'bg-blue-500/20 border-2 border-blue-500'
+                                : 'bg-blue-100 border-2 border-blue-600'
+                            : isDarkMode
+                                ? 'bg-gray-800/50 border border-gray-700 hover:bg-gray-800'
+                                : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
                             }`}
                     >
                         <div className="flex items-center gap-3 mb-2">

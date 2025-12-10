@@ -7,7 +7,8 @@ import FeaturedBlogs from "@/components/FeaturedBlogs";
 import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
 import UnifiedShowcase from "@/components/UnifiedShowcase";
-import { BookOpen, Code2 } from "lucide-react";
+import TechStackGrid from "@/components/TechStackGrid";
+import { BookOpen, Code2, Layers } from "lucide-react";
 
 export default function HomePage() {
   const { isDarkMode } = useStore();
@@ -20,6 +21,14 @@ export default function HomePage() {
 
         {/* Unified Showcase - Skills, Tech Stack, Solar System */}
         <UnifiedShowcase />
+
+        {/* Technology Stack Section */}
+        <div
+          id="tech-stack"
+          className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+        >
+          <TechStackGrid />
+        </div>
 
         {/* Featured Projects Section */}
         <div
@@ -35,9 +44,8 @@ export default function HomePage() {
                 </h2>
               </div>
               <p
-                className={`text-xl ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Showcasing my best work and technical expertise
               </p>
@@ -61,9 +69,8 @@ export default function HomePage() {
                 </h2>
               </div>
               <p
-                className={`text-xl ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Thoughts, tutorials, and insights on web development
               </p>

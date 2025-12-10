@@ -7,6 +7,8 @@ import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
 import ProjectCard from "@/components/ProjectCard";
 import { Project } from "@/lib/supabase";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
+import { usePagination } from "@/hooks/usePagination";
+import Pagination from "@/components/ui/Pagination";
 
 type TabType = "all" | "professional" | "personal";
 
@@ -35,6 +37,16 @@ export default function ProjectsPage() {
     const filteredProjects = projects.filter((project) => {
         if (activeTab === "all") return true;
         return project.category === activeTab;
+    });
+
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goToPage,
+    } = usePagination({
+        data: filteredProjects,
+        itemsPerPage: 6,
     });
 
     const professionalCount = projects.filter((p) => p.category === "professional").length;
@@ -178,7 +190,7 @@ export default function ProjectsPage() {
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filteredProjects.map((project) => (
+                            {paginatedData.map((project) => (
                                 <ProjectCard
                                     key={project.id}
                                     id={project.id}
@@ -192,16 +204,14 @@ export default function ProjectsPage() {
                             ))}
                         </div>
 
-                        {/* Project Count */}
-                        <div className="text-center mt-12">
-                            <p
-                                className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                                    }`}
-                            >
-                                Showing {filteredProjects.length} {activeTab === "all" ? "" : activeTab}{" "}
-                                {filteredProjects.length === 1 ? "project" : "projects"}
-                            </p>
-                        </div>
+                        {/* Pagination */}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={goToPage}
+                            itemsPerPage={6}
+                            totalItems={filteredProjects.length}
+                        />
                     </>
                 )}
             </div>

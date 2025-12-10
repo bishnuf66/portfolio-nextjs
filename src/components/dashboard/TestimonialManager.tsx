@@ -11,12 +11,24 @@ import {
 } from "@/hooks/useTestimonials";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import { Edit2, Trash2, Plus, Star } from "lucide-react";
+import { usePagination } from "@/hooks/usePagination";
+import Pagination from "@/components/ui/Pagination";
 
 export default function TestimonialManager() {
   const router = useRouter();
   const { isDarkMode } = useStore();
   const { data: testimonials = [], isLoading } = useTestimonials(false);
   const deleteTestimonial = useDeleteTestimonial();
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    goToPage,
+  } = usePagination({
+    data: testimonials,
+    itemsPerPage: 5,
+  });
 
   const handleEdit = (testimonial: Testimonial) => {
     router.push(`/dashboard/testimonials/edit/${testimonial.id}`);
@@ -50,7 +62,7 @@ export default function TestimonialManager() {
       </div>
 
       <div className="grid gap-6">
-        {testimonials.map((testimonial) => (
+        {paginatedData.map((testimonial) => (
           <div
             key={testimonial.id}
             className={`${isDarkMode ? "bg-gray-800" : "bg-white"
@@ -80,8 +92,8 @@ export default function TestimonialManager() {
                       <h3 className="text-xl font-bold">{testimonial.name}</h3>
                       <span
                         className={`px-2 py-1 text-xs rounded ${testimonial.published
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
                           }`}
                       >
                         {testimonial.published ? "Published" : "Draft"}
@@ -130,6 +142,25 @@ export default function TestimonialManager() {
           </div>
         ))}
       </div>
+
+      {testimonials.length === 0 ? (
+        <div className="text-center py-12">
+          <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>
+            💬
+          </div>
+          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            No testimonials found. Add your first testimonial!
+          </p>
+        </div>
+      ) : (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={goToPage}
+          itemsPerPage={5}
+          totalItems={testimonials.length}
+        />
+      )}
     </>
   );
 }
