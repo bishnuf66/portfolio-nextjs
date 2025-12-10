@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import useStore from "../store/store";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
@@ -8,10 +9,42 @@ import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
 import UnifiedShowcase from "@/components/UnifiedShowcase";
 import TechStackGrid from "@/components/TechStackGrid";
-import { BookOpen, Code2, Layers } from "lucide-react";
+import { BookOpen, Code2 } from "lucide-react";
 
 export default function HomePage() {
   const { isDarkMode } = useStore();
+
+  // Handle hash navigation on page load and route changes
+  useEffect(() => {
+    const handleHashNavigation = () => {
+      const hash = window.location.hash.substring(1); // Remove the # symbol
+      if (hash) {
+        // Small delay to ensure the page has rendered
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            const headerOffset = 80;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: "smooth"
+            });
+          }
+        }, 100);
+      }
+    };
+
+    // Handle on initial load
+    handleHashNavigation();
+
+    // Handle hash changes (when user clicks browser back/forward)
+    window.addEventListener('hashchange', handleHashNavigation);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashNavigation);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen w-full relative">
