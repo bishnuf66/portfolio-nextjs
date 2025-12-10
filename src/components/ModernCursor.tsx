@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import useStore from "@/store/store";
 
 interface CursorState {
@@ -33,25 +33,19 @@ const ModernCursor = () => {
         cursorType: "default",
     });
     const [particles, setParticles] = useState<Particle[]>([]);
-    const [trail, setTrail] = useState<Array<{ x: number; y: number; timestamp: number }>>([]);
+    const [trail, setTrail] = useState<Array<{ x: number; y: number; timestamp: number; opacity: number; scale: number }>>([]);
 
     const particleIdRef = useRef(0);
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | undefined>(undefined);
     const lastMousePos = useRef({ x: 0, y: 0 });
 
     // Check if device is mobile
-    const [isMobile, setIsMobile] = useState(false);
-    useEffect(() => {
-        const checkMobile = () => {
-            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-            setIsMobile(isMobileDevice || isTouchDevice);
-        };
-
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    const [isMobile] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        return isMobileDevice || isTouchDevice;
+    });
 
     // Create click particles
     const createClickParticles = useCallback((x: number, y: number) => {
@@ -81,10 +75,19 @@ const ModernCursor = () => {
 
     // Update trail
     const updateTrail = useCallback((x: number, y: number) => {
-        const now = Date.now();
+        const now = performance.now();
         setTrail(prev => {
-            const newTrail = [{ x, y, timestamp: now }, ...prev.slice(0, 20)];
-            return newTrail.filter(point => now - point.timestamp < 500);
+            const newTrail = [{ x, y, timestamp: now, opacity: 1, scale: 1 }, ...prev.slice(0, 20)];
+            return newTrail
+                .map(point => {
+                    const age = (now - point.timestamp) / 500;
+                    return {
+                        ...point,
+                        opacity: Math.max(0, 1 - age),
+                        scale: Math.max(0.1, 1 - age)
+                    };
+                })
+                .filter(point => point.opacity > 0);
         });
     }, []);
 
@@ -130,9 +133,25 @@ const ModernCursor = () => {
                 }))
                 .filter(particle => particle.life > 0)
         );
-
-        animationRef.current = requestAnimationFrame(animate);
     }, []);
+
+    // Start animation loop
+    useEffect(() => {
+        if (isMobile) return;
+
+        const animateLoop = () => {
+            animate();
+            animationRef.current = requestAnimationFrame(animateLoop);
+        };
+
+        animateLoop();
+
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
+    }, [animate, isMobile]);
 
     useEffect(() => {
         if (isMobile) return;
@@ -183,8 +202,7 @@ const ModernCursor = () => {
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mouseover", handleMouseEnter);
 
-        // Start animation
-        animate();
+
 
         return () => {
             document.removeEventListener("mousemove", handleMouseMove);
@@ -192,17 +210,13 @@ const ModernCursor = () => {
             document.removeEventListener("mouseup", handleMouseUp);
             document.removeEventListener("mouseover", handleMouseEnter);
 
-            if (animationRef.current) {
-                cancelAnimationFrame(animationRef.current);
-            }
-
             // Restore default cursor
             document.body.style.cursor = "auto";
             allElements.forEach(el => {
                 (el as HTMLElement).style.cursor = "";
             });
         };
-    }, [isMobile, detectCursorType, updateTrail, createClickParticles, animate]);
+    }, [isMobile, detectCursorType, updateTrail, createClickParticles]);
 
     if (isMobile) return null;
 
@@ -230,27 +244,21 @@ const ModernCursor = () => {
     };
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
+        <div className="fixed inset-0 pointer-events-none z-9999 overflow-hidden">
             {/* Trail Effect */}
-            {trail.map((point, index) => {
-                const age = (Date.now() - point.timestamp) / 500;
-                const opacity = Math.max(0, 1 - age);
-                const scale = Math.max(0.1, 1 - age);
-
-                return (
-                    <div
-                        key={`${point.timestamp}-${index}`}
-                        className="absolute w-1 h-1 rounded-full transition-opacity duration-100"
-                        style={{
-                            left: point.x - 2,
-                            top: point.y - 2,
-                            backgroundColor: getCursorColor(),
-                            opacity: opacity * 0.4,
-                            transform: `scale(${scale})`,
-                        }}
-                    />
-                );
-            })}
+            {trail.map((point, index) => (
+                <div
+                    key={`${point.timestamp}-${index}`}
+                    className="absolute w-1 h-1 rounded-full transition-opacity duration-100"
+                    style={{
+                        left: point.x - 2,
+                        top: point.y - 2,
+                        backgroundColor: getCursorColor(),
+                        opacity: point.opacity * 0.4,
+                        transform: `scale(${point.scale})`,
+                    }}
+                />
+            ))}
 
             {/* Particles */}
             {particles.map((particle) => {

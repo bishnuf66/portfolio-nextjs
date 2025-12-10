@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const ModernCursor = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -13,14 +13,18 @@ const ModernCursor = () => {
 
     const rippleIdRef = useRef(0);
     const trailIdRef = useRef(0);
-    const animationFrameRef = useRef<number>();
+    const animationFrameRef = useRef<number | undefined>(undefined);
 
     // Check if device supports hover
-    const [supportsHover, setSupportsHover] = useState(true);
+    const [supportsHover, setSupportsHover] = useState(() => {
+        if (typeof window === 'undefined') return true;
+        return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    });
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+
         const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-        setSupportsHover(mediaQuery.matches);
 
         const handleChange = (e: MediaQueryListEvent) => {
             setSupportsHover(e.matches);
@@ -149,7 +153,7 @@ const ModernCursor = () => {
     };
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[9999]">
+        <div className="fixed inset-0 pointer-events-none z-9999">
             {/* Animated Trail */}
             {trail.map((point, index) => {
                 const opacity = (index / trail.length) * 0.6;

@@ -76,13 +76,13 @@ const Contact = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Let's Connect
+            Let&apos;s Connect
           </h2>
           <p
             className={`text-xl md:text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
               }`}
           >
-            Have a project in mind? Let's make it happen together
+            Have a project in mind? Let&apos;s make it happen together
           </p>
         </div>
 
@@ -100,7 +100,7 @@ const Contact = () => {
               className={`text-lg mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"
                 }`}
             >
-              I'm always open to discussing new projects, creative ideas, or
+              I&apos;m always open to discussing new projects, creative ideas, or
               opportunities to be part of your vision.
             </p>
           </div>

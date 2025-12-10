@@ -58,8 +58,8 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
                     >
                         <div
                             className={`relative max-w-lg w-full rounded-2xl p-8 shadow-2xl ${isDarkMode
-                                    ? "bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700"
-                                    : "bg-gradient-to-br from-white to-gray-50 border border-gray-200"
+                                ? "bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700"
+                                : "bg-gradient-to-br from-white to-gray-50 border border-gray-200"
                                 }`}
                         >
                             {/* Decorative Elements */}
@@ -122,7 +122,7 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
                                                 className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"
                                                     }`}
                                             >
-                                                We don't collect names, emails, or personal information
+                                                We don&apos;t collect names, emails, or personal information
                                             </p>
                                         </div>
                                     </div>
@@ -156,8 +156,8 @@ export default function CookieConsent({ onAccept, onReject }: CookieConsentProps
                                     <button
                                         onClick={handleReject}
                                         className={`flex-1 px-6 py-3 rounded-lg font-semibold border-2 transition-all duration-300 ${isDarkMode
-                                                ? "border-gray-600 text-gray-300 hover:bg-gray-800"
-                                                : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                                            ? "border-gray-600 text-gray-300 hover:bg-gray-800"
+                                            : "border-gray-300 text-gray-700 hover:bg-gray-100"
                                             }`}
                                     >
                                         Reject

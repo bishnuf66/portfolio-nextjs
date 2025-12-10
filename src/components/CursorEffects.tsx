@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import useStore from "@/store/store";
 
 interface Particle {
@@ -22,7 +22,7 @@ const CursorEffects = () => {
     const [particles, setParticles] = useState<Particle[]>([]);
     const [trail, setTrail] = useState<Array<{ x: number; y: number; opacity: number }>>([]);
     const particleIdRef = useRef(0);
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | undefined>(undefined);
 
     // Create particles on click
     const createParticles = useCallback((x: number, y: number) => {
@@ -113,15 +113,14 @@ const CursorEffects = () => {
     }, [updateTrail, createParticles, updateParticles]);
 
     // Don't render on mobile
-    const [isMobile, setIsMobile] = useState(false);
-    useEffect(() => {
-        setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    }, []);
+    const [isMobile] = useState(() =>
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    );
 
     if (isMobile) return null;
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[9999]">
+        <div className="fixed inset-0 pointer-events-none z-9999">
             {/* Trail Effect */}
             {trail.map((point, index) => (
                 <div
