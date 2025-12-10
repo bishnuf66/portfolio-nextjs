@@ -73,7 +73,7 @@ const Footer = () => {
             </h4>
             <div className="flex gap-4">
               <a
-                href="https://github.com/bishnuf66/portfolio-nextjs/"
+                href={process.env.NEXT_PUBLIC_GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-2 rounded-lg transition-all ${isDarkMode
@@ -84,7 +84,7 @@ const Footer = () => {
                 <Github className="w-5 h-5" />
               </a>
               <a
-                href="www.linkedin.com/in/bishnu-bk-820b09243"
+                href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-2 rounded-lg transition-all ${isDarkMode
@@ -95,7 +95,7 @@ const Footer = () => {
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
-                href="mailto:bishowkarmabishnu2024@gmail.com"
+                href={`mailto:${process.env.NEXT_PUBLIC_MY_EMAIL}`}
                 className={`p-2 rounded-lg transition-all ${isDarkMode
                   ? "bg-gray-800 hover:bg-purple-600"
                   : "bg-gray-100 hover:bg-purple-500 hover:text-white"
@@ -123,7 +123,7 @@ const Footer = () => {
             </p>
 
             <a
-              href="https://github.com/bishnuf66"
+              href={process.env.NEXT_PUBLIC_MY_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className={`text-sm flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isDarkMode

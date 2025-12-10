@@ -222,7 +222,7 @@ const Contact = () => {
             </h4>
             <div className="flex gap-4">
               <a
-                href="https://linkedin.com"
+                href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
@@ -233,7 +233,7 @@ const Contact = () => {
                 <Linkedin className="w-6 h-6" />
               </a>
               <a
-                href="https://github.com"
+                href={process.env.NEXT_PUBLIC_MY_EMAIL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
