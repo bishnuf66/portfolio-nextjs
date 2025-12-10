@@ -181,8 +181,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                 value={formData.name}
                                 onChange={handleNameChange}
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                                        : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     } focus:outline-none focus:ring-1`}
                             />
                         </div>
@@ -191,8 +191,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                             <label className="block text-sm font-medium mb-2">Slug</label>
                             <div
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 text-gray-300"
-                                        : "bg-gray-100 border-gray-300 text-gray-700"
+                                    ? "bg-gray-700 border-gray-600 text-gray-300"
+                                    : "bg-gray-100 border-gray-300 text-gray-700"
                                     }`}
                             >
                                 {formData.slug}
@@ -217,8 +217,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                                        : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     } focus:outline-none focus:ring-1`}
                                 placeholder="https://example.com"
                             />
@@ -260,8 +260,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                                        : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     } focus:outline-none focus:ring-1`}
                             />
                         </div>
@@ -302,8 +302,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                                        : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     } focus:outline-none focus:ring-1`}
                             >
                                 <option value="professional">Professional</option>
@@ -325,8 +325,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     }
                                 }}
                                 className={`w-full px-3 py-2 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 file:bg-gray-600 file:text-white"
-                                        : "bg-white border-gray-300 file:bg-gray-100 file:text-gray-700"
+                                    ? "bg-gray-700 border-gray-600 file:bg-gray-600 file:text-white"
+                                    : "bg-white border-gray-300 file:bg-gray-100 file:text-gray-700"
                                     }`}
                             />
                             {formData.cover_image_url && (
@@ -364,8 +364,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     }
                                 }}
                                 className={`w-full px-3 py-2 border rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 file:bg-gray-600 file:text-white"
-                                        : "bg-white border-gray-300 file:bg-gray-100 file:text-gray-700"
+                                    ? "bg-gray-700 border-gray-600 file:bg-gray-600 file:text-white"
+                                    : "bg-white border-gray-300 file:bg-gray-100 file:text-gray-700"
                                     }`}
                             />
                             {formData.gallery_images.length > 0 && (
