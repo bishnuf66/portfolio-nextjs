@@ -233,7 +233,7 @@ const Contact = () => {
                 <Linkedin className="w-6 h-6" />
               </a>
               <a
-                href={process.env.NEXT_PUBLIC_MY_EMAIL}
+                href={process.env.NEXT_PUBLIC_MY_GITHUB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
