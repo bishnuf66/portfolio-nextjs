@@ -13,7 +13,10 @@ import {
     TrendingUp,
     Layers,
     Smartphone,
-    Palette
+    Palette,
+    Zap,
+    HardDrive,
+    Image
 } from "lucide-react";
 import useStore from "@/store/store";
 
@@ -36,18 +39,28 @@ const TechStackGrid = () => {
             gradient: "from-green-500 to-emerald-500",
             technologies: [
                 { name: "Node.js", icon: Cpu, color: "#68A063", description: "Runtime" },
-                { name: "MongoDB", icon: Database, color: "#47A248", description: "NoSQL Database" },
                 { name: "Supabase", icon: Database, color: "#3ECF8E", description: "Backend as a Service" },
+                { name: "Edge Functions", icon: Zap, color: "#3ECF8E", description: "Serverless Functions" },
                 { name: "PostgreSQL", icon: Database, color: "#336791", description: "SQL Database" },
             ]
         },
         {
-            title: "Deployment & Hosting",
+            title: "Cloud Infrastructure",
             gradient: "from-purple-500 to-pink-500",
             technologies: [
+                { name: "AWS EC2", icon: Server, color: "#FF9900", description: "Virtual Servers" },
+                { name: "AWS S3", icon: HardDrive, color: "#FF9900", description: "Object Storage" },
+                { name: "Azure", icon: Cloud, color: "#0078D4", description: "Microsoft Cloud" },
                 { name: "VPS Hosting", icon: Server, color: "#FF6B35", description: "Virtual Private Server" },
-                { name: "Cloud Deploy", icon: Cloud, color: "#4285F4", description: "Cloud Infrastructure" },
-                { name: "Vercel", icon: Globe, color: "#000000", description: "Frontend Hosting" },
+            ]
+        },
+        {
+            title: "Storage & Media",
+            gradient: "from-indigo-500 to-purple-500",
+            technologies: [
+                { name: "Supabase Storage", icon: HardDrive, color: "#3ECF8E", description: "File Storage" },
+                { name: "Cloudinary", icon: Image, color: "#3448C5", description: "Media Management" },
+                { name: "MongoDB", icon: Database, color: "#47A248", description: "NoSQL Database" },
                 { name: "cPanel", icon: Settings, color: "#FF6C2C", description: "Hosting Management" },
             ]
         },
@@ -74,7 +87,7 @@ const TechStackGrid = () => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {techCategories.map((category, categoryIndex) => (
                     <div
                         key={categoryIndex}
@@ -133,13 +146,15 @@ const TechStackGrid = () => {
                     {[
                         "Responsive Design", "API Integration", "Database Design", "Performance Optimization",
                         "Security Best Practices", "CI/CD", "Testing", "Code Review", "Agile Development",
-                        "Version Control (Git)", "Docker", "Linux Administration"
+                        "Version Control (Git)", "Docker", "Linux Administration", "AWS Lambda", "Serverless Architecture",
+                        "CDN Configuration", "SSL/TLS", "Load Balancing", "Auto Scaling", "Backup Strategies",
+                        "Monitoring & Logging", "DevOps", "Infrastructure as Code"
                     ].map((skill, index) => (
                         <span
                             key={index}
                             className={`px-4 py-2 rounded-full text-sm font-medium ${isDarkMode
-                                    ? "bg-blue-900/50 text-blue-200 border border-blue-700"
-                                    : "bg-blue-100 text-blue-800 border border-blue-200"
+                                ? "bg-blue-900/50 text-blue-200 border border-blue-700"
+                                : "bg-blue-100 text-blue-800 border border-blue-200"
                                 } hover:scale-105 transition-transform duration-200`}
                         >
                             {skill}
