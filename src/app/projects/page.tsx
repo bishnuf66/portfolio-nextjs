@@ -9,6 +9,7 @@ import { Project } from "@/lib/supabase";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
+import { getSafeImageUrl } from "@/utils/imageUtils";
 
 type TabType = "all" | "professional" | "personal";
 
@@ -194,7 +195,7 @@ export default function ProjectsPage() {
                                 <ProjectCard
                                     key={project.id}
                                     id={project.id}
-                                    image={project.cover_image_url ?? "/project-images/placeholder.png"}
+                                    image={getSafeImageUrl(project.cover_image_url)}
                                     name={project.name}
                                     techStack={project.tech_stack.join(", ")}
                                     description={project.description}

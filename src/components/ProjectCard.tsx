@@ -6,6 +6,7 @@ import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { ExternalLink, Code, Star } from "lucide-react";
 import Image from "next/image";
+import { getSafeImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
 
 interface ProjectCardProps {
   id: string;
@@ -27,6 +28,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   isFeatured = false,
 }) => {
   const { isDarkMode } = useStore();
+  const safeImageUrl = getSafeImageUrl(image);
+  const handleImageError = createImageErrorHandler();
 
   return (
     <CardContainer className="inter-var w-full">
@@ -54,7 +57,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <CardItem
           as="div"
           translateZ="60"
-          className={`text-sm max-w-sm mt-2 ${isDarkMode ? "text-neutral-300" : "text-neutral-500"
+          className={`text-sm max-w-sm mt-2 line-clamp-1 ${isDarkMode ? "text-neutral-300" : "text-neutral-500"
             } prose prose-sm max-w-none`}
           dangerouslySetInnerHTML={{ __html: description }}
         />
@@ -64,10 +67,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
             <div className="relative w-full h-60 rounded-2xl overflow-hidden">
               <Image
-                src={image}
+                src={safeImageUrl}
                 alt={name}
                 fill
                 className="object-cover group-hover/card:scale-110 transition-transform duration-500"
+                onError={handleImageError}
               />
               {/* Overlay on hover */}
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">

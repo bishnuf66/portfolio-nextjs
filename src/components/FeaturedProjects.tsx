@@ -7,6 +7,7 @@ import Link from "next/link";
 import useStore from "@/store/store";
 import { ProjectCardSkeleton } from "./LoadingSkeleton";
 import { Sparkles } from "lucide-react";
+import { getSafeImageUrl } from "@/utils/imageUtils";
 
 const FeaturedProjects = () => {
     const { isDarkMode } = useStore();
@@ -56,7 +57,7 @@ const FeaturedProjects = () => {
                     <ProjectCard
                         key={project.id}
                         id={project.id}
-                        image={project.cover_image_url ?? "/project-images/placeholder.png"}
+                        image={getSafeImageUrl(project.cover_image_url)}
                         name={project.name}
                         techStack={project.tech_stack.join(", ")}
                         description={project.description}
@@ -69,8 +70,8 @@ const FeaturedProjects = () => {
                 <Link
                     href="/projects"
                     className={`inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${isDarkMode
-                            ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50 text-white"
-                            : "bg-gradient-to-r from-blue-500 to-purple-500 hover:shadow-lg hover:shadow-blue-500/50 text-white"
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                        : "bg-gradient-to-r from-blue-500 to-purple-500 hover:shadow-lg hover:shadow-blue-500/50 text-white"
                         }`}
                 >
                     <Sparkles size={20} />
