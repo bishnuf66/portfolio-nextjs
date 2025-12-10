@@ -10,6 +10,8 @@ import QueryProvider from "@/components/QueryProvider";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+import SimpleCursor from "@/components/SimpleCursor";
+import CursorToggle from "@/components/CursorToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -159,6 +161,8 @@ export default function RootLayout({
                   {children}
                   <Footer />
                   <ConsentManager />
+                  <SimpleCursor />
+                  <CursorToggle />
                   <ToastContainer
                     position="top-right"
                     autoClose={3000}
