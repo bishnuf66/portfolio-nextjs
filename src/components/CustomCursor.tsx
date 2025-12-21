@@ -1,251 +1,194 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import useStore from "@/store/store";
 
 const CustomCursor = () => {
     const { isDarkMode } = useStore();
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [isClicking, setIsClicking] = useState(false);
-    const [isHovering, setIsHovering] = useState(false);
-    const [cursorVariant, setCursorVariant] = useState("default");
     const cursorRef = useRef<HTMLDivElement>(null);
-    const trailRef = useRef<HTMLDivElement>(null);
+    const cursorDotRef = useRef<HTMLDivElement>(null);
+    const animationFrameRef = useRef<number | null>(null);
+    const [isEnabled, setIsEnabled] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem("customCursorEnabled");
+            return stored !== null ? JSON.parse(stored) : true;
+        }
+        return true;
+    });
+
+    // Use refs for position to avoid re-renders
+    const mousePositionRef = useRef({ x: 0, y: 0 });
+    const targetPositionRef = useRef({ x: 0, y: 0 });
+    const cursorVariantRef = useRef("default");
+
+    // Listen for cursor toggle events
+    useEffect(() => {
+        const handleCursorToggle = (e: CustomEvent) => {
+            setIsEnabled(e.detail.enabled);
+        };
+
+        window.addEventListener('cursorToggle', handleCursorToggle as EventListener);
+        return () => {
+            window.removeEventListener('cursorToggle', handleCursorToggle as EventListener);
+        };
+    }, []);
+
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+        mousePositionRef.current.x = e.clientX;
+        mousePositionRef.current.y = e.clientY;
+    }, []);
+
+    const handleMouseDown = useCallback(() => {
+        if (cursorRef.current) {
+            cursorRef.current.style.transform += ' scale(0.8)';
+        }
+    }, []);
+
+    const handleMouseUp = useCallback(() => {
+        if (cursorRef.current) {
+            cursorRef.current.style.transform = cursorRef.current.style.transform.replace(' scale(0.8)', '');
+        }
+    }, []);
+
+    const handleMouseOver = useCallback((e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        let newVariant = "default";
+
+        // Simplified element checking
+        if (target.closest("button, a, [role='button']") || target.classList.contains("cursor-pointer")) {
+            newVariant = "pointer";
+        } else if (target.closest("input, textarea, [contenteditable='true']")) {
+            newVariant = "text";
+        }
+
+        if (newVariant !== cursorVariantRef.current) {
+            cursorVariantRef.current = newVariant;
+
+            if (cursorRef.current) {
+                const cursor = cursorRef.current;
+
+                switch (newVariant) {
+                    case "pointer":
+                        cursor.style.width = "50px";
+                        cursor.style.height = "50px";
+                        cursor.style.backgroundColor = "rgba(59, 130, 246, 0.8)";
+                        cursor.style.borderColor = "rgba(59, 130, 246, 0.5)";
+                        break;
+                    case "text":
+                        cursor.style.width = "30px";
+                        cursor.style.height = "30px";
+                        cursor.style.backgroundColor = "rgba(34, 197, 94, 0.8)";
+                        cursor.style.borderColor = "rgba(34, 197, 94, 0.5)";
+                        break;
+                    default:
+                        cursor.style.width = "40px";
+                        cursor.style.height = "40px";
+                        cursor.style.backgroundColor = isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)";
+                        cursor.style.borderColor = isDarkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
+                        break;
+                }
+            }
+        }
+    }, [isDarkMode]);
 
     useEffect(() => {
-        const updateMousePosition = (e: MouseEvent) => {
-            setMousePosition({ x: e.clientX, y: e.clientY });
+        // Check if mobile or cursor is disabled
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile || !isEnabled) {
+            // Restore default cursor
+            document.body.style.cursor = "auto";
+            document.documentElement.style.cursor = "auto";
+            return;
+        }
+
+        // Animation loop function
+        const animate = () => {
+            if (!cursorRef.current || !cursorDotRef.current) return;
+
+            // Smooth interpolation for main cursor
+            targetPositionRef.current.x += (mousePositionRef.current.x - targetPositionRef.current.x) * 0.15;
+            targetPositionRef.current.y += (mousePositionRef.current.y - targetPositionRef.current.y) * 0.15;
+
+            // Update main cursor position
+            cursorRef.current.style.transform = `translate3d(${targetPositionRef.current.x - 20}px, ${targetPositionRef.current.y - 20}px, 0)`;
+
+            // Update dot position (faster follow)
+            cursorDotRef.current.style.transform = `translate3d(${mousePositionRef.current.x - 4}px, ${mousePositionRef.current.y - 4}px, 0)`;
+
+            animationFrameRef.current = requestAnimationFrame(animate);
         };
-
-        const handleMouseDown = () => {
-            setIsClicking(true);
-        };
-
-        const handleMouseUp = () => {
-            setIsClicking(false);
-        };
-
-        const handleMouseEnter = (e: MouseEvent) => {
-            const target = e.target as HTMLElement;
-
-            // Check for interactive elements
-            if (
-                target.tagName === "BUTTON" ||
-                target.tagName === "A" ||
-                target.closest("button") ||
-                target.closest("a") ||
-                target.classList.contains("cursor-pointer") ||
-                target.style.cursor === "pointer"
-            ) {
-                setIsHovering(true);
-                setCursorVariant("pointer");
-            } else if (
-                target.tagName === "INPUT" ||
-                target.tagName === "TEXTAREA" ||
-                target.contentEditable === "true"
-            ) {
-                setCursorVariant("text");
-            } else {
-                setIsHovering(false);
-                setCursorVariant("default");
-            }
-        };
-
-        // Add event listeners
-        document.addEventListener("mousemove", updateMousePosition);
-        document.addEventListener("mousedown", handleMouseDown);
-        document.addEventListener("mouseup", handleMouseUp);
-        document.addEventListener("mouseover", handleMouseEnter);
 
         // Hide default cursor
         document.body.style.cursor = "none";
         document.documentElement.style.cursor = "none";
 
+        // Add event listeners with passive option for better performance
+        document.addEventListener("mousemove", handleMouseMove, { passive: true });
+        document.addEventListener("mousedown", handleMouseDown, { passive: true });
+        document.addEventListener("mouseup", handleMouseUp, { passive: true });
+        document.addEventListener("mouseover", handleMouseOver, { passive: true });
+
+        // Start animation loop
+        animate();
+
         return () => {
-            document.removeEventListener("mousemove", updateMousePosition);
+            // Cleanup
+            document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mousedown", handleMouseDown);
             document.removeEventListener("mouseup", handleMouseUp);
-            document.removeEventListener("mouseover", handleMouseEnter);
+            document.removeEventListener("mouseover", handleMouseOver);
+
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
 
             // Restore default cursor
             document.body.style.cursor = "auto";
             document.documentElement.style.cursor = "auto";
         };
-    }, []);
+    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleMouseOver, isEnabled]);
 
-    // Don't render on mobile devices
-    useEffect(() => {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-            navigator.userAgent
-        );
-
-        if (isMobile) {
-            document.body.style.cursor = "auto";
-            document.documentElement.style.cursor = "auto";
-        }
-    }, []);
-
-    const getCursorSize = () => {
-        switch (cursorVariant) {
-            case "pointer":
-                return isClicking ? 60 : 50;
-            case "text":
-                return 30;
-            default:
-                return isClicking ? 40 : 32;
-        }
-    };
-
-    const getCursorColor = () => {
-        if (isDarkMode) {
-            switch (cursorVariant) {
-                case "pointer":
-                    return "rgba(59, 130, 246, 0.8)"; // Blue
-                case "text":
-                    return "rgba(34, 197, 94, 0.8)"; // Green
-                default:
-                    return "rgba(255, 255, 255, 0.8)";
-            }
-        } else {
-            switch (cursorVariant) {
-                case "pointer":
-                    return "rgba(59, 130, 246, 0.8)"; // Blue
-                case "text":
-                    return "rgba(34, 197, 94, 0.8)"; // Green
-                default:
-                    return "rgba(0, 0, 0, 0.8)";
-            }
-        }
-    };
+    // Don't render on mobile or when disabled
+    const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile || !isEnabled) return null;
 
     return (
         <>
             {/* Main Cursor */}
             <div
                 ref={cursorRef}
-                className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference"
+                className="fixed top-0 left-0 pointer-events-none z-9999 rounded-full border-2 mix-blend-difference"
                 style={{
-                    transform: `translate(${mousePosition.x - getCursorSize() / 2}px, ${mousePosition.y - getCursorSize() / 2
-                        }px)`,
-                    transition: isClicking
-                        ? "all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-                        : "all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    width: "40px",
+                    height: "40px",
+                    backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)",
+                    borderColor: isDarkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)",
+                    transition: "width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease",
+                    willChange: "transform",
                 }}
-            >
-                <div
-                    className="rounded-full border-2"
-                    style={{
-                        width: `${getCursorSize()}px`,
-                        height: `${getCursorSize()}px`,
-                        backgroundColor: getCursorColor(),
-                        borderColor: isDarkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)",
-                        transform: isClicking ? "scale(0.8)" : "scale(1)",
-                        transition: "all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    }}
-                />
-            </div>
+            />
 
-            {/* Cursor Trail */}
+            {/* Cursor Dot */}
             <div
-                ref={trailRef}
-                className="fixed top-0 left-0 pointer-events-none z-[9998]"
+                ref={cursorDotRef}
+                className="fixed top-0 left-0 pointer-events-none z-9998 w-2 h-2 rounded-full"
                 style={{
-                    transform: `translate(${mousePosition.x - 4}px, ${mousePosition.y - 4}px)`,
-                    transition: "all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+                    backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.9)" : "rgba(0, 0, 0, 0.9)",
+                    willChange: "transform",
                 }}
-            >
-                <div
-                    className="w-2 h-2 rounded-full"
-                    style={{
-                        backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)",
-                        transform: isClicking ? "scale(2)" : "scale(1)",
-                        transition: "all 0.1s ease-out",
-                    }}
-                />
-            </div>
-
-            {/* Click Ripple Effect */}
-            {isClicking && (
-                <div
-                    className="fixed top-0 left-0 pointer-events-none z-[9997]"
-                    style={{
-                        transform: `translate(${mousePosition.x - 25}px, ${mousePosition.y - 25}px)`,
-                    }}
-                >
-                    <div
-                        className="w-12 h-12 rounded-full border-2 animate-ping"
-                        style={{
-                            borderColor: getCursorColor(),
-                            animationDuration: "0.6s",
-                        }}
-                    />
-                </div>
-            )}
-
-            {/* Hover Glow Effect */}
-            {isHovering && (
-                <div
-                    className="fixed top-0 left-0 pointer-events-none z-[9996]"
-                    style={{
-                        transform: `translate(${mousePosition.x - 30}px, ${mousePosition.y - 30}px)`,
-                        transition: "all 0.3s ease-out",
-                    }}
-                >
-                    <div
-                        className="w-16 h-16 rounded-full opacity-30 animate-pulse"
-                        style={{
-                            background: `radial-gradient(circle, ${getCursorColor()} 0%, transparent 70%)`,
-                            animationDuration: "2s",
-                        }}
-                    />
-                </div>
-            )}
-
-            {/* Cursor Text Indicator */}
-            {cursorVariant === "text" && (
-                <div
-                    className="fixed top-0 left-0 pointer-events-none z-[9999] text-xs font-medium"
-                    style={{
-                        transform: `translate(${mousePosition.x + 20}px, ${mousePosition.y - 10}px)`,
-                        color: isDarkMode ? "white" : "black",
-                        transition: "all 0.2s ease-out",
-                    }}
-                >
-                    TEXT
-                </div>
-            )}
-
-            {/* Cursor Pointer Indicator */}
-            {cursorVariant === "pointer" && (
-                <div
-                    className="fixed top-0 left-0 pointer-events-none z-[9999]"
-                    style={{
-                        transform: `translate(${mousePosition.x - 8}px, ${mousePosition.y - 8}px)`,
-                        transition: "all 0.2s ease-out",
-                    }}
-                >
-                    <div
-                        className="w-4 h-4 rounded-full"
-                        style={{
-                            backgroundColor: getCursorColor(),
-                            transform: isClicking ? "scale(1.5)" : "scale(1)",
-                            transition: "all 0.1s ease-out",
-                        }}
-                    />
-                </div>
-            )}
+            />
 
             <style jsx global>{`
-        * {
-          cursor: none !important;
-        }
-        
-        @media (max-width: 768px) {
-          * {
-            cursor: auto !important;
-          }
-        }
-      `}</style>
+                * {
+                    cursor: none !important;
+                }
+                
+                @media (max-width: 768px) {
+                    * {
+                        cursor: auto !important;
+                    }
+                }
+            `}</style>
         </>
     );
 };

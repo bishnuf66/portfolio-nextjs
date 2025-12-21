@@ -11,6 +11,7 @@ import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import SimpleCursor from "@/components/SimpleCursor";
+import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 
 const geistSans = Geist({
@@ -162,7 +163,7 @@ export default function RootLayout({
                   {children}
                   <Footer />
                   <ConsentManager />
-                  <SimpleCursor />
+                  <CustomCursor />
                   <ToastContainer
                     position="top-right"
                     autoClose={3000}
