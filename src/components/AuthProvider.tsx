@@ -13,7 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  signOut: async () => {},
+  signOut: async () => { },
 });
 
 export const useAuth = () => {
@@ -29,8 +29,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("AuthProvider: Initializing auth");
-
     // Get initial session
     const getInitialSession = async () => {
       try {
@@ -38,14 +36,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: { session },
           error,
         } = await getSupabase().auth.getSession();
-        console.log("AuthProvider: Initial session", {
-          user: session?.user?.email,
-          error,
-        });
+        if (error) {
+          throw error;
+        }
+
+
         setUser(session?.user ?? null);
       } catch (error) {
         console.error("AuthProvider: Error getting initial session", error);
-        // Don't throw, just set user to null and continue
         setUser(null);
       } finally {
         setLoading(false);
@@ -58,19 +56,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = getSupabase().auth.onAuthStateChange((event, session) => {
-      console.log("AuthProvider: Auth state changed", {
-        event,
-        user: session?.user?.email,
-      });
-
-      // Handle token refresh events
-      if (event === "TOKEN_REFRESHED") {
-        console.log("AuthProvider: Token refreshed");
-      }
 
       // Handle sign out events
       if (event === "SIGNED_OUT") {
-        console.log("AuthProvider: User signed out");
         setUser(null);
       } else {
         setUser(session?.user ?? null);
@@ -83,11 +71,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    console.log("AuthProvider: Signing out");
     await getSupabase().auth.signOut();
   };
 
-  console.log("AuthProvider: Current state", { user: user?.email, loading });
 
   return (
     <AuthContext.Provider value={{ user, loading, signOut }}>

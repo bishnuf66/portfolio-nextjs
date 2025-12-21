@@ -18,6 +18,7 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
     const [scrollProgress, setScrollProgress] = useState(0);
     const rafRef = useRef<number | null>(null);
     const lastScrollY = useRef(0);
+    const lastProgressRef = useRef(0);
 
     const handleScroll = useCallback(() => {
         // Cancel previous animation frame
@@ -38,6 +39,7 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
             // Prevent division by zero
             if (totalHeight <= 0) {
                 setScrollProgress(0);
+                lastProgressRef.current = 0;
                 return;
             }
 
@@ -45,10 +47,10 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
             const clampedProgress = Math.min(100, Math.max(0, progress));
 
             // Only update state if progress actually changed significantly
-            setScrollProgress(prev => {
-                const diff = Math.abs(prev - clampedProgress);
-                return diff > 0.1 ? clampedProgress : prev;
-            });
+            if (Math.abs(lastProgressRef.current - clampedProgress) > 0.1) {
+                lastProgressRef.current = clampedProgress;
+                setScrollProgress(clampedProgress);
+            }
         });
     }, []);
 

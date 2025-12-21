@@ -129,8 +129,6 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
             ...locationInfo,
         };
 
-        console.log("Tracking page view:", { pagePath, sessionId });
-
         const { data, error } = await getSupabase().from("analytics").insert(
             analyticsData,
         );
