@@ -18,12 +18,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   handleEdit,
   handleDelete,
 }) => {
-  const {
-    currentPage,
-    totalPages,
-    paginatedData,
-    goToPage,
-  } = usePagination({
+  const { currentPage, totalPages, paginatedData, goToPage } = usePagination({
     data: projects,
     itemsPerPage: 5,
   });
@@ -34,15 +29,20 @@ const ProjectList: React.FC<ProjectListProps> = ({
         {paginatedData.map((project) => (
           <div
             key={project.id}
-            className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 shadow-lg ${project.is_featured ? "ring-2 ring-yellow-500" : ""
-              }`}
+            className={`${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            } rounded-lg p-6 shadow-lg ${
+              project.is_featured ? "ring-2 ring-yellow-500" : ""
+            }`}
           >
             <div className="flex gap-6">
               <div className="relative">
                 <Image
                   src={
-                    project.cover_image_url ?? "/project-images/placeholder.png"
+                    project.cover_image_url &&
+                    project.cover_image_url.trim() !== ""
+                      ? project.cover_image_url
+                      : "/project-images/placeholder.png"
                   }
                   alt={project.name}
                   width={96}
@@ -120,10 +120,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
 
       {projects.length === 0 ? (
         <div className="text-center py-12">
-          <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>
+          <div
+            className={`text-6xl mb-4 ${
+              isDarkMode ? "text-gray-700" : "text-gray-300"
+            }`}
+          >
             📁
           </div>
-          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+          <p
+            className={`text-xl ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             No projects found. Create your first project!
           </p>
         </div>
