@@ -11,6 +11,7 @@ import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
 import { getSafeImageUrl } from "@/utils/imageUtils";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import SEOContent from "@/components/SEOContent";
 
 type TabType = "all" | "professional" | "personal";
 type SortField = "name" | "created_at" | "is_featured";
@@ -142,6 +143,9 @@ export default function ProjectsPage() {
 
     return (
         <div className={getPageClasses()}>
+            {/* SEO Content */}
+            <SEOContent page="projects" />
+
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}
                 <AnimatedSection animation="fadeIn" className="text-center mb-12">

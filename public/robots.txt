@@ -1,6 +1,34 @@
-# Allow all crawlers
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://www.bishnubk.com.np/sitemap.xml 
+# Sitemap
+Sitemap: https://www.bishnubk.com.np/sitemap.xml
+
+# Specific crawling instructions
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block admin areas
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+
+# Allow important pages
+Allow: /projects/
+Allow: /blog/
+Allow: /contact/
+
+# SEO-friendly URLs
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp

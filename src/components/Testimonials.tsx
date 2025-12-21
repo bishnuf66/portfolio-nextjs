@@ -103,13 +103,13 @@ export default function Testimonials() {
             <div className="max-w-7xl mx-auto px-4 md:px-8">
                 <AnimatedSection animation="fadeIn" className="text-center mb-16">
                     <h2 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                        Testimonials
+                        Client Testimonials
                     </h2>
                     <p
                         className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
                             }`}
                     >
-                        What people say about working with me
+                        What clients say about working with Nepal&lsquo;s top fullstack developer
                     </p>
                 </AnimatedSection>
 
@@ -314,6 +314,8 @@ export default function Testimonials() {
                             </button>
                         </div>
                     )}
+
+
                 </div>
             </div>
         </section>

@@ -11,10 +11,14 @@ import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { colorScheme } from "@/utils/colorUtils";
+import SEOContent from "@/components/SEOContent";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen w-full relative">
+      {/* SEO Content */}
+      <SEOContent page="home" />
+
       {/* Main Content */}
       <div className="relative z-10">
         <Home />
@@ -44,7 +48,7 @@ export default function HomePage() {
                 </h2>
               </div>
               <p className={`text-xl ${colorScheme.text.secondary}`}>
-                Showcasing my best work and technical expertise
+                Showcasing innovative web solutions by Nepal&apos;s top fullstack developer
               </p>
             </AnimatedSection>
 
@@ -66,7 +70,7 @@ export default function HomePage() {
                 </h2>
               </div>
               <p className={`text-xl ${colorScheme.text.secondary}`}>
-                Thoughts, tutorials, and insights on web development
+                Expert insights on modern web development from Nepal&apos;s leading developer
               </p>
             </AnimatedSection>
 

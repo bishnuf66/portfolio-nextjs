@@ -81,8 +81,11 @@ const Home = () => {
                   <Typewriter
                     words={[
                       "Bishnu BK",
-                      "Full Stack Developer",
-                      "Creative Coder",
+                      "Top Fullstack Developer Nepal",
+                      "Best Frontend Developer Nepal",
+                      "Expert Backend Developer Nepal",
+                      "React.js Expert Nepal",
+                      "Next.js Developer Nepal",
                     ]}
                     loop={0}
                     cursor
@@ -94,15 +97,15 @@ const Home = () => {
                 </h1>
 
                 <p className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "text-neutral-300" : "text-gray-700"}`}>
-                  Crafting digital experiences that blend{" "}
+                  Nepal's leading{" "}
                   <span className={`font-semibold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>
-                    creativity
+                    fullstack developer
                   </span>{" "}
-                  with{" "}
+                  specializing in{" "}
                   <span className={`font-semibold ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}>
-                    functionality
+                    React, Next.js & Node.js
                   </span>
-                  . Building solutions that tell a story.
+                  . Building modern web solutions in Kathmandu.
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">

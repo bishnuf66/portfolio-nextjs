@@ -11,6 +11,7 @@ import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
+import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,35 +37,49 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bishnubk.com.np"),
   title: {
-    default: "Bishnu BK - Full Stack Developer & Creative Coder",
-    template: "%s | Bishnu BK",
+    default: "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
+    template: "%s | Bishnu BK - Nepal's Leading Web Developer",
   },
   description:
-    "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies. Explore my projects, blog, and technical expertise.",
+    "Top Fullstack Developer in Nepal specializing in React, Next.js, Node.js, and modern web technologies. Best Frontend & Backend Developer Nepal. Expert in TypeScript, MongoDB, PostgreSQL. Professional web development services in Kathmandu, Nepal.",
   keywords: [
     "Bishnu BK",
-    "Full Stack Developer",
-    "Web Developer",
-    "React Developer",
-    "Next.js Developer",
-    "Node.js Developer",
-    "TypeScript",
-    "JavaScript",
-    "Portfolio",
-    "Software Engineer",
-    "Frontend Developer",
-    "Backend Developer",
-    "MongoDB",
-    "PostgreSQL",
-    "Tailwind CSS",
-    "Three.js",
-    "Web Development",
-    "Nepal Developer",
-    "UI/UX Design",
-    "API Development",
-    "Database Design",
-    "Responsive Design",
-    "Performance Optimization",
+    "Top Fullstack Developer Nepal",
+    "Best Frontend Developer Nepal",
+    "Expert Backend Developer Nepal",
+    "React Developer Nepal",
+    "Next.js Developer Nepal",
+    "Node.js Developer Nepal",
+    "TypeScript Developer Nepal",
+    "Full Stack Developer Kathmandu",
+    "Web Developer Nepal",
+    "Software Engineer Nepal",
+    "JavaScript Developer Nepal",
+    "MERN Stack Developer Nepal",
+    "Top Web Developer Nepal",
+    "Professional Developer Nepal",
+    "Freelance Developer Nepal",
+    "React.js Expert Nepal",
+    "Next.js Expert Nepal",
+    "MongoDB Developer Nepal",
+    "PostgreSQL Developer Nepal",
+    "Tailwind CSS Developer Nepal",
+    "Three.js Developer Nepal",
+    "API Development Nepal",
+    "Database Design Nepal",
+    "Responsive Design Nepal",
+    "UI/UX Developer Nepal",
+    "Modern Web Development Nepal",
+    "Best Programmer Nepal",
+    "Top Coder Nepal",
+    "Software Development Nepal",
+    "Web Application Developer Nepal",
+    "E-commerce Developer Nepal",
+    "Portfolio Website Developer Nepal",
+    "Custom Web Solutions Nepal",
+    "Kathmandu Web Developer",
+    "Nepal IT Professional",
+    "Tech Expert Nepal",
   ],
   authors: [{ name: "Bishnu BK", url: "https://www.bishnubk.com.np" }],
   creator: "Bishnu BK",
@@ -87,10 +102,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://www.bishnubk.com.np",
-    title: "Bishnu BK - Full Stack Developer & Creative Coder",
+    title: "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
     description:
-      "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
-    siteName: "Bishnu BK Portfolio",
+      "Top Fullstack Developer in Nepal specializing in React, Next.js, Node.js. Best Frontend & Backend Developer Nepal. Professional web development services in Kathmandu.",
+    siteName: "Bishnu BK - Nepal's Leading Web Developer",
     images: [
       {
         url: "/og-image.jpg",
@@ -110,9 +125,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bishnu BK - Full Stack Developer & Creative Coder",
+    title: "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
     description:
-      "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
+      "Top Fullstack Developer in Nepal specializing in React, Next.js, Node.js. Best Frontend & Backend Developer Nepal. Professional web development services.",
     creator: "@bishnubk",
     site: "@bishnubk",
     images: [
@@ -171,9 +186,9 @@ export default function RootLayout({
     "@type": "Person",
     name: "Bishnu BK",
     url: "https://www.bishnubk.com.np",
-    jobTitle: "Full Stack Developer",
+    jobTitle: "Top Fullstack Developer Nepal",
     description:
-      "Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies",
+      "Top Fullstack Developer in Nepal specializing in React, Next.js, Node.js, and modern web technologies. Best Frontend and Backend Developer in Nepal.",
     image: "https://www.bishnubk.com.np/og-image.jpg",
     email: "contact@bishnubk.com.np",
     knowsAbout: [
@@ -184,9 +199,14 @@ export default function RootLayout({
       "Node.js",
       "MongoDB",
       "PostgreSQL",
-      "Web Development",
       "Full Stack Development",
-      "UI/UX Design"
+      "Frontend Development Nepal",
+      "Backend Development Nepal",
+      "Web Development Nepal",
+      "MERN Stack Development",
+      "UI/UX Design",
+      "API Development",
+      "Database Design"
     ],
     sameAs: [
       "https://github.com/bishnuf66",
@@ -195,11 +215,12 @@ export default function RootLayout({
     ],
     address: {
       "@type": "PostalAddress",
+      addressLocality: "Kathmandu",
       addressCountry: "Nepal"
     },
     worksFor: {
       "@type": "Organization",
-      name: "Freelance Developer"
+      name: "Top Web Development Services Nepal"
     }
   };
 
@@ -231,39 +252,58 @@ export default function RootLayout({
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    name: "Bishnu BK - Web Development Services",
+    name: "Bishnu BK - Top Web Development Services Nepal",
     url: "https://www.bishnubk.com.np",
     logo: "https://www.bishnubk.com.np/logo.png",
-    description: "Professional web development services specializing in modern technologies",
+    description: "Top professional web development services in Nepal specializing in modern technologies. Best Fullstack, Frontend, and Backend development services in Kathmandu, Nepal.",
     founder: {
       "@type": "Person",
       name: "Bishnu BK"
     },
-    serviceType: "Web Development",
-    areaServed: "Worldwide",
+    serviceType: "Web Development Services Nepal",
+    areaServed: {
+      "@type": "Country",
+      name: "Nepal"
+    },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Kathmandu",
+      addressCountry: "Nepal"
+    },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Web Development Services",
+      name: "Professional Web Development Services Nepal",
       itemListElement: [
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
-            name: "Full Stack Development"
+            name: "Top Fullstack Development Nepal",
+            description: "Complete fullstack web development services using React, Next.js, Node.js"
           }
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
-            name: "Frontend Development"
+            name: "Best Frontend Development Nepal",
+            description: "Modern frontend development with React, Next.js, TypeScript"
           }
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
-            name: "Backend Development"
+            name: "Expert Backend Development Nepal",
+            description: "Robust backend development with Node.js, MongoDB, PostgreSQL"
+          }
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "MERN Stack Development Nepal",
+            description: "Complete MERN stack development services"
           }
         }
       ]
