@@ -10,7 +10,6 @@ import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { MovingBorder } from "@/components/ui/MovingBorder";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
 import { GlowingStarsBackgroundCard } from "@/components/ui/GlowingStars";
-import DownloadCVButton from "./DownloadCVButton";
 import {
   Code2,
   Rocket,
@@ -89,7 +88,7 @@ const Home = () => {
                   >
                     View My Work
                   </a>
-                  <DownloadCVButton />
+
                   <a
                     href="/#contact"
                     className={`px-8 py-3 border-2 rounded-full font-semibold transition-all duration-300 ${isDarkMode
