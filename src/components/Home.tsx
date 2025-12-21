@@ -13,6 +13,16 @@ const Home = () => {
   const [scrollY, setScrollY] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Track section views
+  React.useEffect(() => {
+    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+      trackSectionInteraction("hero-section", "view", {
+        hasSplineScene: true,
+        isDarkMode
+      });
+    });
+  }, [isDarkMode]);
+
   useEffect(() => {
     let ticking = false;
 

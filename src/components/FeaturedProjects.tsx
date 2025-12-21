@@ -14,6 +14,18 @@ const FeaturedProjects = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Track featured projects section view
+    React.useEffect(() => {
+        if (!loading && projects.length > 0) {
+            import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+                trackSectionInteraction("featured-projects", "view", {
+                    projectCount: projects.length,
+                    featuredCount: projects.filter(p => p.is_featured).length
+                });
+            });
+        }
+    }, [loading, projects]);
+
     useEffect(() => {
         fetchFeaturedProjects();
     }, []);

@@ -33,6 +33,17 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Track form submission attempt
+    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+      trackSectionInteraction("contact-form", "click", {
+        action: "submit",
+        hasName: !!formData.name,
+        hasEmail: !!formData.email,
+        hasMessage: !!formData.message,
+        messageLength: formData.message.length
+      });
+    });
+
     if (!formData.name || !formData.email || !formData.message) {
       toast.error("All fields are required.");
       setIsSubmitting(false);
@@ -119,7 +130,7 @@ const Contact = () => {
                 >
                   Send a Message
                 </h3>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6 enhanced-scrollbar">
                   <div>
                     <label
                       htmlFor="name"

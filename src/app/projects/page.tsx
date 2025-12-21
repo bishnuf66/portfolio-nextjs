@@ -171,8 +171,8 @@ export default function ProjectsPage() {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className={`w-full pl-10 pr-4 py-3 border rounded-lg ${isDarkMode
-                                            ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                                         } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                 />
                             </div>
@@ -184,8 +184,8 @@ export default function ProjectsPage() {
                                 value={itemsPerPage}
                                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
                                 className={`w-full px-3 py-3 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 text-white"
-                                        : "bg-white border-gray-300 text-gray-900"
+                                    ? "bg-gray-700 border-gray-600 text-white"
+                                    : "bg-white border-gray-300 text-gray-900"
                                     } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                             >
                                 <option value={6}>6 per page</option>
@@ -222,8 +222,8 @@ export default function ProjectsPage() {
                                 key={field}
                                 onClick={() => handleSort(field)}
                                 className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${sortField === field
-                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     }`}
                             >
                                 {label}
@@ -346,7 +346,7 @@ export default function ProjectsPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar">
                             {paginatedData.map((project) => (
                                 <ProjectCard
                                     key={project.id}

@@ -15,6 +15,19 @@ export default function BlogDetailPage() {
 
     const { data: blog, isLoading, error } = useBlog(slug);
 
+    // Track blog view
+    React.useEffect(() => {
+        if (blog && blog.id) {
+            import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+                trackSectionInteraction("blog-post", "view", {
+                    blogId: blog.id,
+                    blogTitle: blog.title,
+                    blogSlug: slug,
+                });
+            });
+        }
+    }, [blog, slug]);
+
     if (isLoading) {
         return (
             <div
@@ -54,8 +67,8 @@ export default function BlogDetailPage() {
                 <button
                     onClick={() => router.push("/blog")}
                     className={`flex items-center gap-2 mb-8 ${isDarkMode
-                            ? "text-gray-400 hover:text-white"
-                            : "text-gray-600 hover:text-gray-900"
+                        ? "text-gray-400 hover:text-white"
+                        : "text-gray-600 hover:text-gray-900"
                         } transition-colors`}
                 >
                     <ArrowLeft size={20} />
@@ -94,8 +107,8 @@ export default function BlogDetailPage() {
                             <span
                                 key={index}
                                 className={`px-3 py-1 rounded-full text-sm font-medium ${isDarkMode
-                                        ? "bg-blue-900 text-blue-200"
-                                        : "bg-blue-100 text-blue-800"
+                                    ? "bg-blue-900 text-blue-200"
+                                    : "bg-blue-100 text-blue-800"
                                     }`}
                             >
                                 <Tag size={14} className="inline mr-1" />

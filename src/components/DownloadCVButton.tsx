@@ -75,12 +75,23 @@ const DownloadCVButton = () => {
     );
   }
 
+  const handleCVClick = () => {
+    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+      trackSectionInteraction("cv-download", "click", {
+        cvId: activeCV?.id,
+        filename: activeCV?.original_filename,
+        source: "download-button"
+      });
+    });
+  };
+
   return (
     <a
       href={activeCV.file_url}
       download={activeCV.original_filename}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleCVClick}
     >
       <button
         type="button"

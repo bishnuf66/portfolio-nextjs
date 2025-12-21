@@ -11,6 +11,7 @@ import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import SimpleCursor from "@/components/SimpleCursor";
+import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -156,6 +157,7 @@ export default function RootLayout({
             <AuthProvider>
               <ThemeProvider>
                 <AnalyticsProvider>
+                  <ScrollProgressBar />
                   <Header />
                   {children}
                   <Footer />

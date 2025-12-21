@@ -13,6 +13,25 @@ export default function BlogPage() {
     const { isDarkMode } = useStore();
     const { data: blogs = [], isLoading } = useBlogs(true);
 
+    // Track blog list page view
+    React.useEffect(() => {
+        import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+            trackSectionInteraction("blog-list", "view", {
+                totalBlogs: blogs.length,
+            });
+        });
+    }, [blogs.length]);
+
+    const handleBlogClick = (blog: any) => {
+        import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+            trackSectionInteraction("blog-list", "click", {
+                blogId: blog.id,
+                blogTitle: blog.title,
+                blogSlug: blog.slug,
+            });
+        });
+    };
+
     const {
         currentPage,
         totalPages,
@@ -58,11 +77,12 @@ export default function BlogPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar">
                             {paginatedData.map((blog) => (
                                 <Link
                                     key={blog.id}
                                     href={`/blog/${blog.slug}`}
+                                    onClick={() => handleBlogClick(blog)}
                                     className={`${isDarkMode ? "bg-gray-800" : "bg-white"
                                         } rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2`}
                                 >

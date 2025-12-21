@@ -31,6 +31,27 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const safeImageUrl = getSafeImageUrl(image);
   const handleImageError = createImageErrorHandler();
 
+  const handleProjectClick = () => {
+    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+      trackSectionInteraction("project-card", "click", {
+        projectId: id,
+        projectName: name,
+        projectUrl: link,
+        source: "external-link"
+      });
+    });
+  };
+
+  const handleDetailsClick = () => {
+    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+      trackSectionInteraction("project-card", "click", {
+        projectId: id,
+        projectName: name,
+        source: "details-page"
+      });
+    });
+  };
+
   return (
     <CardContainer className="inter-var w-full">
       <CardBody
@@ -108,6 +129,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             href={link}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleProjectClick}
             className={`px-6 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 ${isDarkMode
               ? "bg-white text-black hover:bg-gray-100"
               : "bg-black text-white hover:bg-gray-800"
@@ -121,6 +143,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             translateZ={20}
             as="a"
             href={`/projects/${id}`}
+            onClick={handleDetailsClick}
             className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
               ? "border-white/20 text-white hover:bg-white/10"
               : "border-black/10 text-black hover:bg-black/5"
