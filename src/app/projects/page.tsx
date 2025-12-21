@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import useStore from "@/store/store";
-import { Briefcase, Code, Layers, Star } from "lucide-react";
+import { Briefcase, Code, Layers, Star, Search, SortAsc, SortDesc, Filter, X } from "lucide-react";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
 import ProjectCard from "@/components/ProjectCard";
 import { Project } from "@/lib/supabase";
@@ -12,12 +12,18 @@ import Pagination from "@/components/ui/Pagination";
 import { getSafeImageUrl } from "@/utils/imageUtils";
 
 type TabType = "all" | "professional" | "personal";
+type SortField = "name" | "created_at" | "is_featured";
+type SortOrder = "asc" | "desc";
 
 export default function ProjectsPage() {
     const { isDarkMode } = useStore();
     const [activeTab, setActiveTab] = useState<TabType>("all");
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortField, setSortField] = useState<SortField>("created_at");
+    const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+    const [itemsPerPage, setItemsPerPage] = useState(6);
 
     useEffect(() => {
         fetchProjects();
@@ -35,10 +41,49 @@ export default function ProjectsPage() {
         }
     };
 
-    const filteredProjects = projects.filter((project) => {
-        if (activeTab === "all") return true;
-        return project.category === activeTab;
-    });
+    const filteredProjects = useMemo(() => {
+        let filtered = projects.filter((project) => {
+            // Tab filter
+            const matchesTab = activeTab === "all" || project.category === activeTab;
+
+            // Search filter
+            const matchesSearch =
+                project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                project.tech_stack.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            return matchesTab && matchesSearch;
+        });
+
+        // Sort projects
+        filtered.sort((a, b) => {
+            let aValue: any;
+            let bValue: any;
+
+            switch (sortField) {
+                case "name":
+                    aValue = a.name.toLowerCase();
+                    bValue = b.name.toLowerCase();
+                    break;
+                case "created_at":
+                    aValue = new Date(a.created_at || 0);
+                    bValue = new Date(b.created_at || 0);
+                    break;
+                case "is_featured":
+                    aValue = a.is_featured ? 1 : 0;
+                    bValue = b.is_featured ? 1 : 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+            if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        return filtered;
+    }, [projects, activeTab, searchTerm, sortField, sortOrder]);
 
     const {
         currentPage,
@@ -47,32 +92,49 @@ export default function ProjectsPage() {
         goToPage,
     } = usePagination({
         data: filteredProjects,
-        itemsPerPage: 6,
+        itemsPerPage,
     });
 
     const professionalCount = projects.filter((p) => p.category === "professional").length;
     const personalCount = projects.filter((p) => p.category === "personal").length;
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
+        }
+    };
+
+    const clearFilters = () => {
+        setSearchTerm("");
+        setSortField("created_at");
+        setSortOrder("desc");
+    };
+
+    const hasActiveFilters = searchTerm || sortField !== "created_at" || sortOrder !== "desc";
 
     const tabs = [
         {
             id: "all" as TabType,
             label: "All Projects",
             icon: Layers,
-            count: projects.length,
+            count: filteredProjects.length,
             gradient: "from-blue-500 to-cyan-500",
         },
         {
             id: "professional" as TabType,
             label: "Professional",
             icon: Briefcase,
-            count: professionalCount,
+            count: filteredProjects.filter(p => p.category === "professional").length,
             gradient: "from-purple-500 to-blue-500",
         },
         {
             id: "personal" as TabType,
             label: "Personal",
             icon: Code,
-            count: personalCount,
+            count: filteredProjects.filter(p => p.category === "personal").length,
             gradient: "from-pink-500 to-purple-500",
         },
     ];
@@ -94,6 +156,89 @@ export default function ProjectsPage() {
                     >
                         Explore my work across professional client projects and personal experiments
                     </p>
+                </div>
+
+                {/* Search and Filter Controls */}
+                <div className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-8`}>
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        {/* Search */}
+                        <div className="flex-1">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                <input
+                                    type="text"
+                                    placeholder="Search projects by name, description, or tech stack..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className={`w-full pl-10 pr-4 py-3 border rounded-lg ${isDarkMode
+                                            ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                                        } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Items per page */}
+                        <div className="min-w-[120px]">
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                className={`w-full px-3 py-3 border rounded-lg ${isDarkMode
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-gray-900"
+                                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                            >
+                                <option value={6}>6 per page</option>
+                                <option value={9}>9 per page</option>
+                                <option value={12}>12 per page</option>
+                                <option value={18}>18 per page</option>
+                            </select>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {hasActiveFilters && (
+                            <button
+                                onClick={clearFilters}
+                                className="flex items-center gap-2 px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <X size={16} />
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Sort Controls */}
+                    <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                            <Filter size={16} />
+                            Sort by:
+                        </span>
+                        {[
+                            { field: "created_at" as SortField, label: "Date Created" },
+                            { field: "name" as SortField, label: "Name" },
+                            { field: "is_featured" as SortField, label: "Featured" },
+                        ].map(({ field, label }) => (
+                            <button
+                                key={field}
+                                onClick={() => handleSort(field)}
+                                className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${sortField === field
+                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    }`}
+                            >
+                                {label}
+                                {sortField === field && (
+                                    sortOrder === "asc" ? <SortAsc size={14} /> : <SortDesc size={14} />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Results Count */}
+                    <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                        Showing {filteredProjects.length} of {projects.length} projects
+                        {hasActiveFilters && " (filtered)"}
+                    </div>
                 </div>
 
                 {/* Tabs */}
@@ -169,7 +314,7 @@ export default function ProjectsPage() {
                 {/* Projects Grid */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                        {Array.from({ length: itemsPerPage }).map((_, i) => (
                             <ProjectCardSkeleton key={i} />
                         ))}
                     </div>
@@ -179,14 +324,25 @@ export default function ProjectsPage() {
                             className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"
                                 }`}
                         >
-                            📂
+                            {hasActiveFilters ? "🔍" : "📂"}
                         </div>
                         <p
                             className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"
                                 }`}
                         >
-                            No projects found in this category.
+                            {hasActiveFilters
+                                ? "No projects match your search criteria."
+                                : "No projects found in this category."
+                            }
                         </p>
+                        {hasActiveFilters && (
+                            <button
+                                onClick={clearFilters}
+                                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Clear Filters
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <>
@@ -210,7 +366,7 @@ export default function ProjectsPage() {
                             currentPage={currentPage}
                             totalPages={totalPages}
                             onPageChange={goToPage}
-                            itemsPerPage={6}
+                            itemsPerPage={itemsPerPage}
                             totalItems={filteredProjects.length}
                         />
                     </>

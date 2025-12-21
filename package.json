@@ -8,9 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "migrate": "node scripts/migrate-projects.js",
-    "seed": "node scripts/seed-content.js",
-    "seed:biryani": "node scripts/seed-biryani-adda.js",
-    "seed:projects": "node scripts/seed-multiple-projects.js"
+    "seed:biryani": "node scripts/seed-biryani-adda.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

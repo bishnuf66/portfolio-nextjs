@@ -4,6 +4,9 @@ export const useScrollPosition = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === "undefined") return;
+
     let ticking = false;
 
     const updatePosition = () => {
@@ -18,11 +21,16 @@ export const useScrollPosition = () => {
       }
     };
 
-    window.addEventListener("scroll", requestTick, { passive: true });
-    updatePosition();
+    // Set initial position
+    setScrollPosition(window.scrollY);
 
-    return () => window.removeEventListener("scroll", requestTick);
-  }, []);
+    // Add scroll listener
+    window.addEventListener("scroll", requestTick, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", requestTick);
+    };
+  }, []); // Empty dependency array is correct here
 
   return scrollPosition;
 };
