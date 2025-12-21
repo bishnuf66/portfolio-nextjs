@@ -19,6 +19,21 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Fix for scroll tracking libraries */
+body, #__next, main {
+  position: relative;
+}
+
+/* Ensure proper container positioning for scroll calculations */
+.scroll-container {
+  position: relative;
+}
+
+/* Fix for framer-motion scroll tracking */
+[data-scroll-container] {
+  position: relative !important;
+}
+
 /* Modern Unique Scrollbar Design */
 ::-webkit-scrollbar {
   width: 14px;

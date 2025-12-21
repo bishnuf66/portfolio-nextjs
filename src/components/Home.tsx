@@ -189,10 +189,10 @@ const Home = () => {
               src="/coding2.png"
               alt="Coding workspace"
               fill
-              unoptimized
               className={`object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
                 }`}
               priority
+              loading="eager"
               onLoad={() => setImageLoaded(true)}
             />
             {/* Image overlay for better text contrast */}

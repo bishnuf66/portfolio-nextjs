@@ -142,8 +142,6 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
             ) {
                 console.warn("Analytics tracking error:", error.message);
             }
-        } else {
-            console.log("Analytics tracked successfully");
         }
     } catch (error) {
         console.error("Analytics tracking exception:", error);
