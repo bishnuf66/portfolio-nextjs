@@ -191,10 +191,10 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
             const currentCoverUrl = formData.cover_image_url;
 
             // If editing an existing project and has a cover image, delete from storage
-            if (currentCoverUrl && initialData?.id && !currentCoverUrl.startsWith("blob:")) {
+            if (currentCoverUrl && initialData?.slug && !currentCoverUrl.startsWith("blob:")) {
                 try {
                     const token = localStorage.getItem("supabase_token");
-                    const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(currentCoverUrl)}`, {
+                    const response = await fetch(`/api/projects/${initialData.slug}/images?url=${encodeURIComponent(currentCoverUrl)}`, {
                         method: "DELETE",
                         headers: {
                             "Authorization": `Bearer ${token}`,
@@ -217,11 +217,11 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
 
     const removeGalleryImage = async (index: number) => {
         const imageUrl = formData.gallery_images[index];
-        if (imageUrl && initialData?.id) {
+        if (imageUrl && initialData?.slug) {
             // Call API to remove from database and storage
             try {
                 const token = localStorage.getItem("supabase_token");
-                const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(imageUrl)}`, {
+                const response = await fetch(`/api/projects/${initialData.slug}/images?url=${encodeURIComponent(imageUrl)}`, {
                     method: "DELETE",
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -268,11 +268,11 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
 
     const removeGalleryImageWithTitle = async (index: number) => {
         const imageWithTitle = formData.gallery_images_with_titles?.[index];
-        if (imageWithTitle && initialData?.id) {
+        if (imageWithTitle && initialData?.slug) {
             // Call API to remove from database and storage
             try {
                 const token = localStorage.getItem("supabase_token");
-                const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(imageWithTitle.url)}`, {
+                const response = await fetch(`/api/projects/${initialData.slug}/images?url=${encodeURIComponent(imageWithTitle.url)}`, {
                     method: "DELETE",
                     headers: {
                         "Authorization": `Bearer ${token}`,

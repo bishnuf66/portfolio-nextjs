@@ -1,6 +1,3 @@
-"use client";
-import { useEffect } from "react";
-import useStore from "../store/store";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
 import FeaturedProjects from "@/components/FeaturedProjects";
@@ -12,41 +9,9 @@ import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 
+export const revalidate = 3600; // Revalidate every hour
+
 export default function HomePage() {
-  const { isDarkMode } = useStore();
-
-  // Handle hash navigation on page load and route changes
-  useEffect(() => {
-    const handleHashNavigation = () => {
-      const hash = window.location.hash.substring(1); // Remove the # symbol
-      if (hash) {
-        // Small delay to ensure the page has rendered
-        setTimeout(() => {
-          const element = document.getElementById(hash);
-          if (element) {
-            const headerOffset = 80;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth"
-            });
-          }
-        }, 100);
-      }
-    };
-
-    // Handle on initial load
-    handleHashNavigation();
-
-    // Handle hash changes (when user clicks browser back/forward)
-    window.addEventListener('hashchange', handleHashNavigation);
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashNavigation);
-    };
-  }, []);
-
   return (
     <div className="min-h-screen w-full relative">
       {/* Main Content */}
@@ -59,7 +24,7 @@ export default function HomePage() {
         {/* Technology Stack Section */}
         <div
           id="tech-stack"
-          className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+          className={`py-20 bg-gray-900`}
         >
           <TechStackGrid />
         </div>
@@ -67,7 +32,7 @@ export default function HomePage() {
         {/* Featured Projects Section */}
         <div
           id="projects"
-          className={`py-20 ${isDarkMode ? "bg-black" : "bg-gray-50"}`}
+          className={`py-20 bg-black`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -77,10 +42,7 @@ export default function HomePage() {
                   Featured Projects
                 </h2>
               </div>
-              <p
-                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-              >
+              <p className="text-xl text-gray-300">
                 Showcasing my best work and technical expertise
               </p>
             </AnimatedSection>
@@ -92,7 +54,7 @@ export default function HomePage() {
         {/* Featured Blog Section */}
         <div
           id="blog"
-          className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}
+          className={`py-20 bg-gray-900`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -102,10 +64,7 @@ export default function HomePage() {
                   Latest Articles
                 </h2>
               </div>
-              <p
-                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-              >
+              <p className="text-xl text-gray-300">
                 Thoughts, tutorials, and insights on web development
               </p>
             </AnimatedSection>

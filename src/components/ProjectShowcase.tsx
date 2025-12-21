@@ -107,6 +107,7 @@ const ProjectShowcase = () => {
               <ProjectCard
                 key={project.id}
                 id={project.id}
+                slug={project.slug}
                 image={
                   project.cover_image_url ?? "/project-images/placeholder.png"
                 }
@@ -147,6 +148,7 @@ const ProjectShowcase = () => {
               <ProjectCard
                 key={project.id}
                 id={project.id}
+                slug={project.slug}
                 image={
                   project.cover_image_url ?? "/project-images/placeholder.png"
                 }

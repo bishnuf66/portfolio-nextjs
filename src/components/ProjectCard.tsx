@@ -10,6 +10,7 @@ import { getSafeImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
 
 interface ProjectCardProps {
   id: string;
+  slug: string;
   image: string;
   name: string;
   techStack: string;
@@ -20,6 +21,7 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   id,
+  slug,
   image,
   name,
   techStack,
@@ -143,7 +145,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <CardItem
             translateZ={20}
             as="a"
-            href={`/projects/${id}`}
+            href={`/projects/${slug}`}
             onClick={handleDetailsClick}
             className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
               ? "border-white/20 text-white hover:bg-white/10"

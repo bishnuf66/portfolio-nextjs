@@ -1,4 +1,4 @@
-    import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
@@ -6,10 +6,10 @@ import { deleteImageFromStorage } from "@/lib/storage-cleanup";
 
 export async function DELETE(
     request: Request,
-    { params }: { params: Promise<{ id: string }> },
+    { params }: { params: Promise<{ slug: string }> },
 ) {
     try {
-        const { id } = await params;
+        const { slug } = await params;
         const { searchParams } = new URL(request.url);
         const imageUrl = searchParams.get("url");
 
@@ -67,7 +67,7 @@ export async function DELETE(
         const { data: project, error: fetchError } = await authenticatedSupabase
             .from("projects")
             .select("gallery_images, gallery_images_with_titles")
-            .eq("id", id)
+            .eq("slug", slug)
             .single();
 
         if (fetchError) {
@@ -109,7 +109,7 @@ export async function DELETE(
                 gallery_images: updatedGalleryImages,
                 gallery_images_with_titles: updatedGalleryImagesWithTitles,
             })
-            .eq("id", id);
+            .eq("slug", slug);
 
         if (updateError) {
             return NextResponse.json({ error: updateError.message }, {

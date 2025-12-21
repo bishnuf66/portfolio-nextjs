@@ -1,81 +1,87 @@
-"use client";
-
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
-import useStore from "@/store/store";
-import { useBlog } from "@/hooks/useBlogs";
-import { BlogDetailSkeleton } from "@/components/LoadingSkeleton";
+import { getSupabase } from "@/lib/supabase";
 import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import Link from "next/link";
+import { Blog } from "@/types/blog";
+import { notFound } from "next/navigation";
 
-export default function BlogDetailPage() {
-    const { isDarkMode } = useStore();
-    const params = useParams();
-    const router = useRouter();
-    const slug = params.slug as string;
+export const revalidate = 3600; // Revalidate every hour
 
-    const { data: blog, isLoading, error } = useBlog(slug);
+async function getBlog(slug: string): Promise<Blog | null> {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("slug", slug)
+        .maybeSingle();
 
-    // Track blog view
-    React.useEffect(() => {
-        if (blog && blog.id) {
-            import("@/lib/analytics").then(({ trackSectionInteraction }) => {
-                trackSectionInteraction("blog-post", "view", {
-                    blogId: blog.id,
-                    blogTitle: blog.title,
-                    blogSlug: slug,
-                });
-            });
-        }
-    }, [blog, slug]);
-
-    if (isLoading) {
-        return (
-            <div
-                className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-                    }`}
-            >
-                <BlogDetailSkeleton />
-            </div>
-        );
+    if (error) {
+        console.error("Failed to fetch blog:", error);
+        return null;
     }
 
-    if (error || !blog) {
-        return (
-            <div
-                className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-                    } flex items-center justify-center`}
-            >
-                <AnimatedSection animation="fadeIn" className="text-center">
-                    <h1 className="text-4xl font-bold mb-4">Blog post not found</h1>
-                    <button
-                        onClick={() => router.push("/blog")}
-                        className="text-blue-500 hover:underline"
-                    >
-                        Back to blog
-                    </button>
-                </AnimatedSection>
-            </div>
-        );
+    return data as Blog | null;
+}
+
+async function getAllBlogSlugs(): Promise<string[]> {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+        .from("blogs")
+        .select("slug")
+        .eq("published", true);
+
+    if (error) {
+        console.error("Failed to fetch blog slugs:", error);
+        return [];
+    }
+
+    return data.map((item) => item.slug);
+}
+
+export async function generateStaticParams() {
+    const slugs = await getAllBlogSlugs();
+    return slugs.map((slug) => ({
+        slug,
+    }));
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+    const blog = await getBlog(params.slug);
+
+    if (!blog) {
+        return {
+            title: "Blog Post Not Found",
+        };
+    }
+
+    return {
+        title: blog.title,
+        description: blog.excerpt,
+    };
+}
+
+export default async function BlogDetailPage({
+    params,
+}: {
+    params: { slug: string };
+}) {
+    const blog = await getBlog(params.slug);
+
+    if (!blog) {
+        notFound();
     }
 
     return (
-        <div
-            className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-                } pt-20`}
-        >
+        <div className="min-h-screen bg-gray-900 text-white pt-20">
             <article className="max-w-4xl mx-auto px-4 md:px-8 py-16">
                 <AnimatedSection animation="slideRight">
-                    <button
-                        onClick={() => router.push("/blog")}
-                        className={`flex items-center gap-2 mb-8 ${isDarkMode
-                            ? "text-gray-400 hover:text-white"
-                            : "text-gray-600 hover:text-gray-900"
-                            } transition-colors`}
+                    <Link
+                        href="/blog"
+                        className="flex items-center gap-2 mb-8 text-gray-400 hover:text-white transition-colors"
                     >
                         <ArrowLeft size={20} />
                         Back to blog
-                    </button>
+                    </Link>
                 </AnimatedSection>
 
                 <AnimatedSection animation="fadeIn" delay={0.2}>
@@ -83,10 +89,7 @@ export default function BlogDetailPage() {
                 </AnimatedSection>
 
                 <AnimatedSection animation="slideUp" delay={0.3}>
-                    <div
-                        className={`flex flex-wrap items-center gap-6 mb-8 pb-8 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
-                            }`}
-                    >
+                    <div className="flex flex-wrap items-center gap-6 mb-8 pb-8 border-b border-gray-700">
                         <div className="flex items-center gap-2">
                             <User size={20} />
                             <span className="font-medium">{blog.author}</span>
@@ -115,10 +118,7 @@ export default function BlogDetailPage() {
                         {blog.tags.map((tag, index) => (
                             <span
                                 key={index}
-                                className={`px-3 py-1 rounded-full text-sm font-medium ${isDarkMode
-                                    ? "bg-blue-900 text-blue-200"
-                                    : "bg-blue-100 text-blue-800"
-                                    }`}
+                                className="px-3 py-1 rounded-full text-sm font-medium bg-blue-900 text-blue-200"
                             >
                                 <Tag size={14} className="inline mr-1" />
                                 {tag}
@@ -128,10 +128,7 @@ export default function BlogDetailPage() {
                 )}
 
                 <AnimatedSection animation="fadeIn" delay={0.6}>
-                    <div
-                        className={`prose ${isDarkMode ? "prose-invert" : ""
-                            } prose-lg max-w-none`}
-                    >
+                    <div className="prose prose-invert prose-lg max-w-none">
                         <div
                             dangerouslySetInnerHTML={{ __html: blog.content }}
                             className="whitespace-pre-wrap"

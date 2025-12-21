@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase-server";
 import { supabasePublic } from "@/lib/supabase-public";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
@@ -108,6 +109,10 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Revalidate pages after creating project
+    revalidatePath("/");
+    revalidatePath("/projects");
 
     return NextResponse.json(data[0], { status: 201 });
   } catch (error) {

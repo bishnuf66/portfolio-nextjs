@@ -70,6 +70,7 @@ const FeaturedProjects = () => {
                     <ProjectCard
                         key={project.id}
                         id={project.id}
+                        slug={project.slug}
                         image={getSafeImageUrl(project.cover_image_url)}
                         name={project.name}
                         techStack={project.tech_stack.join(", ")}
