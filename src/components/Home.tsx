@@ -6,20 +6,7 @@ import useStore from "@/store/store";
 import Image from "next/image";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
-import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { MovingBorder } from "@/components/ui/MovingBorder";
-import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
-import { GlowingStarsBackgroundCard } from "@/components/ui/GlowingStars";
-import {
-  Code2,
-  Rocket,
-  Sparkles,
-  Zap,
-  Globe,
-  Database,
-  Layers,
-  Terminal,
-} from "lucide-react";
 
 const Home = () => {
   const { isDarkMode } = useStore();
@@ -27,11 +14,19 @@ const Home = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
