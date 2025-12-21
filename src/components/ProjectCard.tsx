@@ -83,11 +83,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         {/* Tech Stack */}
         <CardItem translateZ="50" className="w-full mt-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="min-h-16 h-16 flex flex-wrap gap-2 overflow-hidden relative">
             {techStack.split(",").map((tech: string, index: number) => (
               <span
                 key={index}
-                className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
+                className={`px-3 py-1 rounded-full text-xs font-medium h-fit ${isDarkMode
                   ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
                   : "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
                   }`}
@@ -95,6 +95,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 {tech.trim()}
               </span>
             ))}
+            {/* Fade out effect for overflow */}
+            <div className={`absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-l ${isDarkMode ? "from-gray-800" : "from-gray-50"} to-transparent pointer-events-none`}></div>
           </div>
         </CardItem>
 

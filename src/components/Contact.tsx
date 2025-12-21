@@ -213,51 +213,7 @@ const Contact = () => {
             </BackgroundGradient>
           </div>
 
-          {/* Social Links & CV Download */}
-          <div className="space-y-6">
-            <div>
-              <h4
-                className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
-              >
-                Download My CV
-              </h4>
-              <DownloadCVButton />
-            </div>
 
-            <div>
-              <h4
-                className={`text-xl font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
-              >
-                Connect on Social
-              </h4>
-              <div className="flex gap-4">
-                <a
-                  href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
-                    ? "bg-gray-800 hover:bg-blue-600"
-                    : "bg-gray-200 hover:bg-blue-500"
-                    } hover:scale-110`}
-                >
-                  <Linkedin className="w-6 h-6" />
-                </a>
-                <a
-                  href={process.env.NEXT_PUBLIC_MY_GITHUB_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition-all duration-300 ${isDarkMode
-                    ? "bg-gray-800 hover:bg-purple-600"
-                    : "bg-gray-200 hover:bg-purple-500"
-                    } hover:scale-110`}
-                >
-                  <Github className="w-6 h-6" />
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
 
 
