@@ -7,6 +7,7 @@ import Image from "next/image";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { MovingBorder } from "@/components/ui/MovingBorder";
+import { colorScheme } from "@/utils/colorUtils";
 
 const Home = () => {
   const { isDarkMode } = useStore();
@@ -63,7 +64,7 @@ const Home = () => {
       {/* Hero Section with 3D Spline */}
       <div id="home" className="relative w-full min-h-screen overflow-hidden">
         {/* Background with Spotlight */}
-        <div className={`absolute inset-0 ${isDarkMode ? "bg-black/96" : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"}`}>
+        <div className={`absolute inset-0 ${colorScheme.background.primary}`}>
           <Spotlight
             className="-top-40 left-0 md:left-60 md:-top-20"
             fill={isDarkMode ? "white" : "rgba(139, 92, 246, 0.3)"}
@@ -227,7 +228,7 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className={`py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+      <div className={`py-20 ${colorScheme.background.primary}`}>
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
           <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let's Build Something Amazing

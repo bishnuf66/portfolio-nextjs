@@ -8,6 +8,7 @@ import { Mail, Send, User, MessageSquare } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { MovingBorder } from "@/components/ui/MovingBorder";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import { colorScheme } from "@/utils/colorUtils";
 
 const Contact = () => {
   const { isDarkMode } = useStore();
@@ -85,8 +86,7 @@ const Contact = () => {
   return (
     <div
       id="contact"
-      className={`relative min-h-screen py-20 px-4 sm:px-6 lg:px-8 ${isDarkMode ? "bg-black" : "bg-gray-50"
-        }`}
+      className={`relative min-h-screen py-20 px-4 sm:px-6 lg:px-8 ${colorScheme.background.secondary}`}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -124,8 +124,7 @@ const Contact = () => {
           <div>
             <BackgroundGradient className="rounded-[22px] p-1">
               <div
-                className={`p-8 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"
-                  }`}
+                className={`p-8 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"}`}
               >
                 <h3
                   className={`text-2xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"

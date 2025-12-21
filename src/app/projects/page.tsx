@@ -58,8 +58,8 @@ export default function ProjectsPage() {
 
         // Sort projects
         filtered.sort((a, b) => {
-            let aValue: any;
-            let bValue: any;
+            let aValue: string | number | Date;
+            let bValue: string | number | Date;
 
             switch (sortField) {
                 case "name":

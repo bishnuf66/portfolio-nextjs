@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import useStore from "@/store/store";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import { colorScheme, getCardClasses } from "@/utils/colorUtils";
 
 const TechStackGrid = () => {
     const { isDarkMode } = useStore();
@@ -92,9 +93,7 @@ const TechStackGrid = () => {
                 {techCategories.map((category, categoryIndex) => (
                     <div
                         key={categoryIndex}
-                        className={`${isDarkMode ? "bg-gray-800/50" : "bg-white"
-                            } rounded-2xl p-8 border ${isDarkMode ? "border-gray-700" : "border-gray-200"
-                            } hover:shadow-2xl transition-all duration-300`}
+                        className={`${getCardClasses("rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300")}`}
                     >
                         <div className="mb-6">
                             <h3 className={`text-2xl font-bold mb-2 bg-gradient-to-r ${category.gradient} bg-clip-text text-transparent`}>
@@ -108,8 +107,7 @@ const TechStackGrid = () => {
                                 return (
                                     <div
                                         key={techIndex}
-                                        className={`p-4 rounded-xl ${isDarkMode ? "bg-gray-700/50" : "bg-gray-50"
-                                            } hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                                        className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
                                     >
                                         <div className="flex items-center gap-3 mb-2">
                                             <div
@@ -142,9 +140,9 @@ const TechStackGrid = () => {
             <AnimatedSection
                 animation="slideUp"
                 delay={0.6}
-                className={`mt-12 p-8 rounded-2xl ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} border ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+                className={`mt-12 p-8 rounded-2xl ${getCardClasses("border")}`}
             >
-                <h3 className={`text-xl font-bold mb-4 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+                <h3 className={`text-xl font-bold mb-4 text-center ${colorScheme.text.primary}`}>
                     Additional Expertise
                 </h3>
                 <div className="flex flex-wrap justify-center gap-3">

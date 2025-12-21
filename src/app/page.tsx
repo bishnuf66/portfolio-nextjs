@@ -10,12 +10,9 @@ import UnifiedShowcase from "@/components/UnifiedShowcase";
 import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
-import useStore from "@/store/store";
 import { colorScheme } from "@/utils/colorUtils";
 
 export default function HomePage() {
-  const { isDarkMode } = useStore();
-
   return (
     <div className="min-h-screen w-full relative">
       {/* Main Content */}

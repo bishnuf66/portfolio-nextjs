@@ -23,6 +23,7 @@ import ThreeCanvas from "./ThreeCanvas";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { GlowingStarsBackgroundCard } from "@/components/ui/GlowingStars";
 import dynamic from "next/dynamic";
+import { colorScheme } from "@/utils/colorUtils";
 
 // Dynamically import the solar system to avoid SSR issues
 const TechSolarSystem = dynamic(() => import("@/components/TechSolarSystem"), {
@@ -50,25 +51,19 @@ export default function UnifiedShowcase() {
   return (
     <div
       ref={containerRef}
-      className={`relative ${
-        isDarkMode ? "bg-black text-white" : "bg-white text-black"
-      } overflow-x-hidden max-w-[100vw]`}
+      className={`relative ${colorScheme.page
+        } overflow-x-hidden max-w-[100vw]`}
     >
       {/* Hero Section with Solar System */}
       <section
-        className={`relative min-h-screen flex items-center justify-center overflow-hidden py-20 ${
-          isDarkMode
-            ? "bg-black"
-            : "bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
-        }`}
+        className={`relative min-h-screen flex items-center justify-center overflow-hidden py-20 ${colorScheme.background.primary}`}
       >
         <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0">
           <div
-            className={`absolute inset-0 blur-3xl ${
-              isDarkMode
-                ? "bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"
-                : "bg-gradient-to-br from-blue-200/30 via-purple-200/30 to-pink-200/30"
-            }`}
+            className={`absolute inset-0 blur-3xl ${isDarkMode
+              ? "bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"
+              : "bg-gradient-to-br from-blue-200/30 via-purple-200/30 to-pink-200/30"
+              }`}
           ></div>
         </motion.div>
 
@@ -82,9 +77,8 @@ export default function UnifiedShowcase() {
               </ParallaxText>
               <SplitTextReveal
                 text="Building digital experiences that blend creativity with functionality. Every pixel matters. Every interaction counts."
-                className={`text-xl md:text-2xl leading-relaxed ${
-                  isDarkMode ? "opacity-80" : "text-gray-700"
-                }`}
+                className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "opacity-80" : "text-gray-700"
+                  }`}
               />
             </div>
           </ScrollReveal>
@@ -98,7 +92,7 @@ export default function UnifiedShowcase() {
       </section>
 
       {/* Skills & Expertise with Bento Grid */}
-      <section className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      <section className={`py-20 ${colorScheme.background.secondary}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <ScrollFade>
             <div className="text-center mb-16">
@@ -170,7 +164,7 @@ export default function UnifiedShowcase() {
       </section>
 
       {/* Tech Stack Showcase with Solar System */}
-      <section className={`py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
+      <section className={`py-20 ${colorScheme.background.primary}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <ScrollFade>
             <div className="text-center mb-16">
@@ -188,9 +182,8 @@ export default function UnifiedShowcase() {
                 />
               </div>
               <p
-                className={`text-xl ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Explore my technology universe - Interactive 3D solar system
               </p>
@@ -321,11 +314,7 @@ export default function UnifiedShowcase() {
             ].map((tech, index) => (
               <ScrollReveal key={tech.name} direction="up" delay={index * 0.05}>
                 <div
-                  className={`p-6 rounded-2xl ${
-                    isDarkMode ? "bg-gray-900/50" : "bg-gray-100/50"
-                  } backdrop-blur-xl border ${
-                    isDarkMode ? "border-gray-800" : "border-gray-200"
-                  } hover:scale-110 transition-transform duration-300 text-center`}
+                  className={`p-6 rounded-2xl ${colorScheme.background.secondary}/50 backdrop-blur-xl border ${colorScheme.border.primary} hover:scale-110 transition-transform duration-300 text-center`}
                 >
                   <div className="text-4xl mb-2">{tech.icon}</div>
                   <h3
@@ -348,7 +337,7 @@ export default function UnifiedShowcase() {
       </section>
 
       {/* Performance & Scale Section */}
-      <section className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      <section className={`py-20 ${colorScheme.background.secondary}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
             <ScrollReveal direction="left">
@@ -369,11 +358,7 @@ export default function UnifiedShowcase() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-30 rounded-full"></div>
                 <div
-                  className={`relative p-12 rounded-3xl ${
-                    isDarkMode ? "bg-gray-900/50" : "bg-gray-100/50"
-                  } backdrop-blur-xl border ${
-                    isDarkMode ? "border-gray-800" : "border-gray-200"
-                  }`}
+                  className={`relative p-12 rounded-3xl ${colorScheme.background.secondary}/50 backdrop-blur-xl border ${colorScheme.border.primary}`}
                 >
                   <Rocket size={80} className="text-purple-500 mb-6" />
                   <h3 className="text-3xl font-bold mb-4">Performance</h3>
@@ -391,11 +376,7 @@ export default function UnifiedShowcase() {
               <div className="relative order-2 md:order-1">
                 <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-teal-500 blur-3xl opacity-30 rounded-full"></div>
                 <div
-                  className={`relative p-12 rounded-3xl ${
-                    isDarkMode ? "bg-gray-900/50" : "bg-gray-100/50"
-                  } backdrop-blur-xl border ${
-                    isDarkMode ? "border-gray-800" : "border-gray-200"
-                  }`}
+                  className={`relative p-12 rounded-3xl ${colorScheme.background.secondary}/50 backdrop-blur-xl border ${colorScheme.border.primary}`}
                 >
                   <Database size={80} className="text-green-500 mb-6" />
                   <h3 className="text-3xl font-bold mb-4">Architecture</h3>
