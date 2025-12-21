@@ -45,8 +45,9 @@ export async function generateStaticParams() {
     }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-    const blog = await getBlog(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const blog = await getBlog(slug);
 
     if (!blog) {
         return {
@@ -63,9 +64,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function BlogDetailPage({
     params,
 }: {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }) {
-    const blog = await getBlog(params.slug);
+    const { slug } = await params;
+    const blog = await getBlog(slug);
 
     if (!blog) {
         notFound();
