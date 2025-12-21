@@ -75,9 +75,48 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         };
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com";
+    const projectUrl = `${baseUrl}/projects/${slug}`;
+    const description = project.description.replace(/<[^>]*>/g, "").substring(0, 160);
+
     return {
-        title: project.name,
-        description: project.description,
+        title: `${project.name} | Portfolio Project`,
+        description: description,
+        keywords: [...project.tech_stack, project.category, "portfolio", "project"].join(", "),
+        authors: [{ name: "Your Name" }],
+        openGraph: {
+            title: project.name,
+            description: description,
+            url: projectUrl,
+            type: "website",
+            images: project.cover_image_url ? [
+                {
+                    url: project.cover_image_url,
+                    width: 1200,
+                    height: 630,
+                    alt: project.name,
+                    type: "image/jpeg",
+                }
+            ] : [],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: project.name,
+            description: description,
+            images: project.cover_image_url ? [project.cover_image_url] : [],
+        },
+        canonical: projectUrl,
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                "max-snippet": -1,
+                "max-image-preview": "large",
+                "max-video-preview": -1,
+            },
+        },
     };
 }
 

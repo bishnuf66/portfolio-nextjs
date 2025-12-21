@@ -55,9 +55,50 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         };
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com";
+    const blogUrl = `${baseUrl}/blog/${slug}`;
+
     return {
         title: blog.title,
         description: blog.excerpt,
+        keywords: blog.tags?.join(", ") || "blog, article",
+        authors: [{ name: blog.author }],
+        openGraph: {
+            title: blog.title,
+            description: blog.excerpt,
+            url: blogUrl,
+            type: "article",
+            publishedTime: blog.created_at,
+            authors: [blog.author],
+            tags: blog.tags || [],
+            images: blog.cover_image_url ? [
+                {
+                    url: blog.cover_image_url,
+                    width: 1200,
+                    height: 630,
+                    alt: blog.title,
+                    type: "image/jpeg",
+                }
+            ] : [],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: blog.title,
+            description: blog.excerpt,
+            images: blog.cover_image_url ? [blog.cover_image_url] : [],
+        },
+        canonical: blogUrl,
+        robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+                index: true,
+                follow: true,
+                "max-snippet": -1,
+                "max-image-preview": "large",
+                "max-video-preview": -1,
+            },
+        },
     };
 }
 

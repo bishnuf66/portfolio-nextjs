@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
 import FeaturedProjects from "@/components/FeaturedProjects";
@@ -10,6 +11,42 @@ import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 
 export const revalidate = 3600; // Revalidate every hour
+
+export const metadata: Metadata = {
+  title: "Full Stack Developer | Portfolio",
+  description: "Experienced full-stack developer specializing in modern web technologies. Explore my projects, blog, and expertise in React, Next.js, TypeScript, and more.",
+  keywords: "full-stack developer, web development, React, Next.js, JavaScript, TypeScript, portfolio",
+  openGraph: {
+    title: "Full Stack Developer | Portfolio",
+    description: "Experienced full-stack developer specializing in modern web technologies. Explore my projects, blog, and expertise in React, Next.js, TypeScript, and more.",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com",
+    type: "website",
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com"}/coding2.png`,
+        width: 1200,
+        height: 630,
+        alt: "Portfolio",
+      }
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Full Stack Developer | Portfolio",
+    description: "Experienced full-stack developer specializing in modern web technologies.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+};
 
 export default function HomePage() {
   return (

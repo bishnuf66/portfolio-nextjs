@@ -1,10 +1,47 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { getSupabase } from "@/lib/supabase";
 import { Calendar, User, BookOpen } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 import { Blog } from "@/types/blog";
 
 export const revalidate = 3600; // Revalidate every hour
+
+export const metadata: Metadata = {
+    title: "Blog | Articles on Web Development",
+    description: "Read my latest articles, tutorials, and insights on web development, Next.js, React, and modern web technologies.",
+    keywords: "blog, web development, Next.js, React, JavaScript, TypeScript, tutorials",
+    openGraph: {
+        title: "Blog | Articles on Web Development",
+        description: "Read my latest articles, tutorials, and insights on web development, Next.js, React, and modern web technologies.",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com"}/blog`,
+        type: "website",
+        images: [
+            {
+                url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com"}/coding2.png`,
+                width: 1200,
+                height: 630,
+                alt: "Blog",
+            }
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Blog | Articles on Web Development",
+        description: "Read my latest articles, tutorials, and insights on web development, Next.js, React, and modern web technologies.",
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-snippet": -1,
+            "max-image-preview": "large",
+            "max-video-preview": -1,
+        },
+    },
+};
 
 async function getBlogs(): Promise<Blog[]> {
     const supabase = getSupabase();
