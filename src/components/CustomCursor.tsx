@@ -3,11 +3,29 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import useStore from "@/store/store";
 
+interface TrailPoint {
+    x: number;
+    y: number;
+    id: number;
+    timestamp: number;
+}
+
+interface RippleEffect {
+    x: number;
+    y: number;
+    id: number;
+    timestamp: number;
+}
+
 const CustomCursor = () => {
     const { isDarkMode } = useStore();
     const cursorRef = useRef<HTMLDivElement>(null);
     const cursorDotRef = useRef<HTMLDivElement>(null);
     const animationFrameRef = useRef<number | null>(null);
+    const trailContainerRef = useRef<HTMLDivElement>(null);
+    const rippleContainerRef = useRef<HTMLDivElement>(null);
+    const glowRef = useRef<HTMLDivElement>(null);
+
     const [isEnabled, setIsEnabled] = useState(() => {
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem("customCursorEnabled");
@@ -20,6 +38,17 @@ const CustomCursor = () => {
     const mousePositionRef = useRef({ x: 0, y: 0 });
     const targetPositionRef = useRef({ x: 0, y: 0 });
     const cursorVariantRef = useRef("default");
+    const isClickingRef = useRef(false);
+
+    // Use state for rendering-dependent values
+    const [isHovering, setIsHovering] = useState(false);
+    const [cursorVariant, setCursorVariant] = useState("default");
+
+    // Trail and effects
+    const trailPointsRef = useRef<TrailPoint[]>([]);
+    const rippleEffectsRef = useRef<RippleEffect[]>([]);
+    const trailIdRef = useRef(0);
+    const rippleIdRef = useRef(0);
 
     // Listen for cursor toggle events
     useEffect(() => {
@@ -33,18 +62,202 @@ const CustomCursor = () => {
         };
     }, []);
 
+    const getCursorStyles = useCallback((variant: string) => {
+        // Theme-aware base colors
+        const themeColors = {
+            primary: isDarkMode ? "rgba(255, 255, 255, 0.9)" : "rgba(0, 0, 0, 0.9)",
+            primaryBorder: isDarkMode ? "rgba(255, 255, 255, 0.4)" : "rgba(0, 0, 0, 0.4)",
+            primaryShadow: isDarkMode ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)",
+        };
+
+        const baseStyles = {
+            width: "40px",
+            height: "40px",
+            backgroundColor: themeColors.primary,
+            borderColor: themeColors.primaryBorder,
+            borderWidth: "2px",
+            borderRadius: "50%",
+            boxShadow: `0 0 10px ${themeColors.primaryShadow}`,
+        };
+
+        switch (variant) {
+            case "button":
+                return {
+                    ...baseStyles,
+                    width: "60px",
+                    height: "60px",
+                    backgroundColor: isDarkMode ? "rgba(96, 165, 250, 0.9)" : "rgba(59, 130, 246, 0.9)",
+                    borderColor: isDarkMode ? "rgba(96, 165, 250, 0.6)" : "rgba(59, 130, 246, 0.6)",
+                    boxShadow: isDarkMode
+                        ? "0 0 25px rgba(96, 165, 250, 0.5), 0 0 50px rgba(96, 165, 250, 0.2)"
+                        : "0 0 25px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.2)",
+                };
+            case "text":
+                return {
+                    ...baseStyles,
+                    width: "4px",
+                    height: "32px",
+                    backgroundColor: isDarkMode ? "rgba(74, 222, 128, 0.9)" : "rgba(34, 197, 94, 0.9)",
+                    borderColor: isDarkMode ? "rgba(74, 222, 128, 0.6)" : "rgba(34, 197, 94, 0.6)",
+                    borderRadius: "2px",
+                    boxShadow: isDarkMode
+                        ? "0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(74, 222, 128, 0.2)"
+                        : "0 0 20px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.2)",
+                };
+            case "number":
+                return {
+                    ...baseStyles,
+                    width: "36px",
+                    height: "36px",
+                    backgroundColor: isDarkMode ? "rgba(196, 181, 253, 0.9)" : "rgba(168, 85, 247, 0.9)",
+                    borderColor: isDarkMode ? "rgba(196, 181, 253, 0.6)" : "rgba(168, 85, 247, 0.6)",
+                    boxShadow: isDarkMode
+                        ? "0 0 20px rgba(196, 181, 253, 0.5), 0 0 40px rgba(196, 181, 253, 0.2)"
+                        : "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.2)",
+                };
+            case "select":
+                return {
+                    ...baseStyles,
+                    width: "48px",
+                    height: "48px",
+                    backgroundColor: isDarkMode ? "rgba(251, 191, 36, 0.9)" : "rgba(245, 158, 11, 0.9)",
+                    borderColor: isDarkMode ? "rgba(251, 191, 36, 0.6)" : "rgba(245, 158, 11, 0.6)",
+                    boxShadow: isDarkMode
+                        ? "0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.2)"
+                        : "0 0 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.2)",
+                };
+            default:
+                return baseStyles;
+        }
+    }, [isDarkMode]);
+
+    const updateTrail = useCallback(() => {
+        const now = Date.now();
+        const newTrail: TrailPoint = {
+            x: mousePositionRef.current.x,
+            y: mousePositionRef.current.y,
+            id: trailIdRef.current++,
+            timestamp: now,
+        };
+
+        trailPointsRef.current.push(newTrail);
+
+        // Remove old trail points (keep last 15 points or points younger than 500ms)
+        trailPointsRef.current = trailPointsRef.current.filter(
+            (point, index) => index >= trailPointsRef.current.length - 15 && now - point.timestamp < 500
+        );
+
+        // Update trail DOM elements
+        if (trailContainerRef.current) {
+            const container = trailContainerRef.current;
+
+            // Clear existing trail elements
+            container.innerHTML = '';
+
+            // Create new trail elements
+            trailPointsRef.current.forEach((point) => {
+                const trailElement = document.createElement('div');
+                const age = now - point.timestamp;
+                const opacity = Math.max(0, 1 - age / 500) * (isDarkMode ? 0.7 : 0.5);
+                const scale = Math.max(0.2, 1 - age / 500);
+                const trailColor = getCursorStyles(cursorVariantRef.current).backgroundColor;
+
+                trailElement.style.cssText = `
+                    position: absolute;
+                    left: ${point.x - 3}px;
+                    top: ${point.y - 3}px;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: ${trailColor};
+                    opacity: ${opacity};
+                    transform: scale(${scale});
+                    pointer-events: none;
+                    box-shadow: 0 0 4px ${trailColor}40;
+                    transition: opacity 0.1s ease-out;
+                `;
+
+                container.appendChild(trailElement);
+            });
+        }
+    }, [getCursorStyles, isDarkMode]);
+
+    const createRipple = useCallback((x: number, y: number) => {
+        const ripple: RippleEffect = {
+            x,
+            y,
+            id: rippleIdRef.current++,
+            timestamp: Date.now(),
+        };
+
+        rippleEffectsRef.current.push(ripple);
+
+        if (rippleContainerRef.current) {
+            const rippleElement = document.createElement('div');
+            const styles = getCursorStyles(cursorVariantRef.current);
+            const rippleColor = styles.backgroundColor;
+
+            rippleElement.style.cssText = `
+                position: absolute;
+                left: ${x - 30}px;
+                top: ${y - 30}px;
+                width: 60px;
+                height: 60px;
+                border: 2px solid ${rippleColor};
+                border-radius: 50%;
+                pointer-events: none;
+                animation: ripple-expand 0.6s ease-out forwards;
+                box-shadow: 0 0 10px ${rippleColor}30;
+            `;
+
+            rippleContainerRef.current.appendChild(rippleElement);
+
+            // Create a second, larger ripple for more impact
+            const rippleElement2 = document.createElement('div');
+            rippleElement2.style.cssText = `
+                position: absolute;
+                left: ${x - 40}px;
+                top: ${y - 40}px;
+                width: 80px;
+                height: 80px;
+                border: 1px solid ${rippleColor};
+                border-radius: 50%;
+                pointer-events: none;
+                animation: ripple-expand 0.8s ease-out forwards;
+                animation-delay: 0.1s;
+                opacity: 0.6;
+            `;
+
+            rippleContainerRef.current.appendChild(rippleElement2);
+
+            // Remove ripples after animation
+            setTimeout(() => {
+                if (rippleElement.parentNode) {
+                    rippleElement.parentNode.removeChild(rippleElement);
+                }
+                if (rippleElement2.parentNode) {
+                    rippleElement2.parentNode.removeChild(rippleElement2);
+                }
+            }, 800);
+        }
+    }, [getCursorStyles]);
+
     const handleMouseMove = useCallback((e: MouseEvent) => {
         mousePositionRef.current.x = e.clientX;
         mousePositionRef.current.y = e.clientY;
     }, []);
 
-    const handleMouseDown = useCallback(() => {
+    const handleMouseDown = useCallback((e: MouseEvent) => {
+        isClickingRef.current = true;
+        createRipple(e.clientX, e.clientY);
+
         if (cursorRef.current) {
             cursorRef.current.style.transform += ' scale(0.8)';
         }
-    }, []);
+    }, [createRipple]);
 
     const handleMouseUp = useCallback(() => {
+        isClickingRef.current = false;
         if (cursorRef.current) {
             cursorRef.current.style.transform = cursorRef.current.style.transform.replace(' scale(0.8)', '');
         }
@@ -53,43 +266,46 @@ const CustomCursor = () => {
     const handleMouseOver = useCallback((e: MouseEvent) => {
         const target = e.target as HTMLElement;
         let newVariant = "default";
+        let hovering = false;
 
-        // Simplified element checking
-        if (target.closest("button, a, [role='button']") || target.classList.contains("cursor-pointer")) {
-            newVariant = "pointer";
-        } else if (target.closest("input, textarea, [contenteditable='true']")) {
+        // Enhanced element detection
+        if (target.closest("button, [role='button']") || target.classList.contains("cursor-pointer")) {
+            newVariant = "button";
+            hovering = true;
+        } else if (target.closest("input[type='text'], input[type='email'], input[type='password'], textarea, [contenteditable='true']")) {
             newVariant = "text";
+            hovering = true;
+        } else if (target.closest("input[type='number'], input[type='range']")) {
+            newVariant = "number";
+            hovering = true;
+        } else if (target.closest("select, input[type='checkbox'], input[type='radio']")) {
+            newVariant = "select";
+            hovering = true;
+        } else if (target.closest("a")) {
+            newVariant = "button";
+            hovering = true;
         }
 
-        if (newVariant !== cursorVariantRef.current) {
+        if (newVariant !== cursorVariantRef.current || hovering !== isHovering) {
             cursorVariantRef.current = newVariant;
+            setCursorVariant(newVariant);
+            setIsHovering(hovering);
 
             if (cursorRef.current) {
+                const styles = getCursorStyles(newVariant);
                 const cursor = cursorRef.current;
 
-                switch (newVariant) {
-                    case "pointer":
-                        cursor.style.width = "50px";
-                        cursor.style.height = "50px";
-                        cursor.style.backgroundColor = "rgba(59, 130, 246, 0.8)";
-                        cursor.style.borderColor = "rgba(59, 130, 246, 0.5)";
-                        break;
-                    case "text":
-                        cursor.style.width = "30px";
-                        cursor.style.height = "30px";
-                        cursor.style.backgroundColor = "rgba(34, 197, 94, 0.8)";
-                        cursor.style.borderColor = "rgba(34, 197, 94, 0.5)";
-                        break;
-                    default:
-                        cursor.style.width = "40px";
-                        cursor.style.height = "40px";
-                        cursor.style.backgroundColor = isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)";
-                        cursor.style.borderColor = isDarkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)";
-                        break;
-                }
+                Object.assign(cursor.style, {
+                    width: styles.width,
+                    height: styles.height,
+                    backgroundColor: styles.backgroundColor,
+                    borderColor: styles.borderColor,
+                    borderRadius: styles.borderRadius,
+                    boxShadow: styles.boxShadow,
+                });
             }
         }
-    }, [isDarkMode]);
+    }, [getCursorStyles, isHovering]);
 
     useEffect(() => {
         // Check if mobile or cursor is disabled
@@ -110,10 +326,22 @@ const CustomCursor = () => {
             targetPositionRef.current.y += (mousePositionRef.current.y - targetPositionRef.current.y) * 0.15;
 
             // Update main cursor position
-            cursorRef.current.style.transform = `translate3d(${targetPositionRef.current.x - 20}px, ${targetPositionRef.current.y - 20}px, 0)`;
+            const styles = getCursorStyles(cursorVariantRef.current);
+            const offsetX = parseInt(styles.width) / 2;
+            const offsetY = parseInt(styles.height) / 2;
+
+            cursorRef.current.style.transform = `translate3d(${targetPositionRef.current.x - offsetX}px, ${targetPositionRef.current.y - offsetY}px, 0)`;
 
             // Update dot position (faster follow)
             cursorDotRef.current.style.transform = `translate3d(${mousePositionRef.current.x - 4}px, ${mousePositionRef.current.y - 4}px, 0)`;
+
+            // Update glow position if hovering
+            if (glowRef.current && isHovering) {
+                glowRef.current.style.transform = `translate3d(${targetPositionRef.current.x - 50}px, ${targetPositionRef.current.y - 50}px, 0)`;
+            }
+
+            // Update trail
+            updateTrail();
 
             animationFrameRef.current = requestAnimationFrame(animate);
         };
@@ -146,25 +374,44 @@ const CustomCursor = () => {
             document.body.style.cursor = "auto";
             document.documentElement.style.cursor = "auto";
         };
-    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleMouseOver, isEnabled]);
+    }, [handleMouseMove, handleMouseDown, handleMouseUp, handleMouseOver, isEnabled, getCursorStyles, updateTrail, isHovering]);
 
     // Don't render on mobile or when disabled
     const isMobile = typeof window !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile || !isEnabled) return null;
 
+    const currentStyles = getCursorStyles(cursorVariant);
+
     return (
         <>
+            {/* Trail Container */}
+            <div
+                ref={trailContainerRef}
+                className="fixed top-0 left-0 pointer-events-none z-9997"
+                style={{ willChange: "contents" }}
+            />
+
+            {/* Ripple Container */}
+            <div
+                ref={rippleContainerRef}
+                className="fixed top-0 left-0 pointer-events-none z-9996"
+                style={{ willChange: "contents" }}
+            />
+
             {/* Main Cursor */}
             <div
                 ref={cursorRef}
-                className="fixed top-0 left-0 pointer-events-none z-9999 rounded-full border-2 mix-blend-difference"
+                className="fixed top-0 left-0 pointer-events-none z-9999 border-2"
                 style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.8)" : "rgba(0, 0, 0, 0.8)",
-                    borderColor: isDarkMode ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)",
-                    transition: "width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease",
+                    width: currentStyles.width,
+                    height: currentStyles.height,
+                    backgroundColor: currentStyles.backgroundColor,
+                    borderColor: currentStyles.borderColor,
+                    borderRadius: currentStyles.borderRadius,
+                    boxShadow: currentStyles.boxShadow,
+                    transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, border-radius 0.3s ease, box-shadow 0.3s ease",
                     willChange: "transform",
+                    mixBlendMode: isDarkMode ? "screen" : "multiply",
                 }}
             />
 
@@ -173,10 +420,33 @@ const CustomCursor = () => {
                 ref={cursorDotRef}
                 className="fixed top-0 left-0 pointer-events-none z-9998 w-2 h-2 rounded-full"
                 style={{
-                    backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.9)" : "rgba(0, 0, 0, 0.9)",
+                    backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.95)" : "rgba(0, 0, 0, 0.95)",
                     willChange: "transform",
+                    transition: "opacity 0.2s ease, background-color 0.3s ease",
+                    opacity: isHovering ? 0.4 : 0.8,
+                    boxShadow: isDarkMode
+                        ? "0 0 8px rgba(255, 255, 255, 0.3)"
+                        : "0 0 8px rgba(0, 0, 0, 0.3)",
                 }}
             />
+
+            {/* Hover Glow Effect */}
+            {isHovering && (
+                <div
+                    ref={glowRef}
+                    className="fixed top-0 left-0 pointer-events-none z-9995 rounded-full animate-pulse"
+                    style={{
+                        width: "100px",
+                        height: "100px",
+                        background: isDarkMode
+                            ? `radial-gradient(circle, ${currentStyles.backgroundColor}15 0%, ${currentStyles.backgroundColor}08 40%, transparent 70%)`
+                            : `radial-gradient(circle, ${currentStyles.backgroundColor}20 0%, ${currentStyles.backgroundColor}10 40%, transparent 70%)`,
+                        animationDuration: "2s",
+                        willChange: "transform",
+                        filter: isDarkMode ? "blur(1px)" : "blur(0.5px)",
+                    }}
+                />
+            )}
 
             <style jsx global>{`
                 * {
@@ -186,6 +456,35 @@ const CustomCursor = () => {
                 @media (max-width: 768px) {
                     * {
                         cursor: auto !important;
+                    }
+                }
+
+                @keyframes ripple-expand {
+                    0% {
+                        transform: scale(0);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: scale(2);
+                        opacity: 0;
+                    }
+                }
+
+                /* Enhanced theme transitions */
+                .custom-cursor-element {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                }
+
+                /* Better visibility in both themes */
+                @media (prefers-color-scheme: dark) {
+                    .custom-cursor-trail {
+                        filter: brightness(1.2);
+                    }
+                }
+
+                @media (prefers-color-scheme: light) {
+                    .custom-cursor-trail {
+                        filter: brightness(0.9);
                     }
                 }
             `}</style>

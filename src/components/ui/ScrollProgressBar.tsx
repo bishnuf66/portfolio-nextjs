@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import useStore from "@/store/store";
 
 interface ScrollProgressBarProps {
@@ -16,17 +16,55 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
 }) => {
     const { isDarkMode } = useStore();
     const [scrollProgress, setScrollProgress] = useState(0);
+    const rafRef = useRef<number | null>(null);
+    const lastScrollY = useRef(0);
+
+    const handleScroll = useCallback(() => {
+        // Cancel previous animation frame
+        if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+        }
+
+        rafRef.current = requestAnimationFrame(() => {
+            const currentScrollY = window.scrollY;
+
+            // Only update if scroll position actually changed
+            if (Math.abs(currentScrollY - lastScrollY.current) < 1) return;
+
+            lastScrollY.current = currentScrollY;
+
+            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+            // Prevent division by zero
+            if (totalHeight <= 0) {
+                setScrollProgress(0);
+                return;
+            }
+
+            const progress = (currentScrollY / totalHeight) * 100;
+            const clampedProgress = Math.min(100, Math.max(0, progress));
+
+            // Only update state if progress actually changed significantly
+            setScrollProgress(prev => {
+                const diff = Math.abs(prev - clampedProgress);
+                return diff > 0.1 ? clampedProgress : prev;
+            });
+        });
+    }, []);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const progress = (window.scrollY / totalHeight) * 100;
-            setScrollProgress(Math.min(100, Math.max(0, progress)));
-        };
+        // Initial calculation
+        handleScroll();
 
         window.addEventListener("scroll", handleScroll, { passive: true });
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            if (rafRef.current) {
+                cancelAnimationFrame(rafRef.current);
+            }
+        };
+    }, [handleScroll]);
 
     return (
         <div className={`fixed top-0 left-0 w-full z-50 ${className}`}>
@@ -51,8 +89,8 @@ const ScrollProgressBar: React.FC<ScrollProgressBarProps> = ({
             {/* Optional Percentage Display */}
             {showPercentage && (
                 <div className={`absolute top-full right-4 mt-2 px-2 py-1 rounded-md text-xs font-medium ${isDarkMode
-                        ? "bg-gray-800/80 text-gray-200"
-                        : "bg-white/80 text-gray-700"
+                    ? "bg-gray-800/80 text-gray-200"
+                    : "bg-white/80 text-gray-700"
                     } backdrop-blur-sm`}>
                     {Math.round(scrollProgress)}%
                 </div>

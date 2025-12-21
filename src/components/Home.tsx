@@ -24,20 +24,38 @@ const Home = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
-    let ticking = false;
+    let rafRef: number | null = null;
+    let lastScrollY = 0;
 
     const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          setScrollY(window.scrollY);
-          ticking = false;
-        });
-        ticking = true;
+      // Cancel previous animation frame
+      if (rafRef) {
+        cancelAnimationFrame(rafRef);
       }
+
+      rafRef = requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // Only update if scroll position actually changed significantly
+        if (Math.abs(currentScrollY - lastScrollY) > 1) {
+          lastScrollY = currentScrollY;
+          setScrollY(currentScrollY);
+        }
+      });
     };
 
+    // Set initial scroll position
+    setScrollY(window.scrollY);
+    lastScrollY = window.scrollY;
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafRef) {
+        cancelAnimationFrame(rafRef);
+      }
+    };
   }, []);
 
   return (
