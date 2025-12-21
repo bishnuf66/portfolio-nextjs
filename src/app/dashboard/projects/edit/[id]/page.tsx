@@ -7,6 +7,8 @@ import { useProjects, useUpdateProject } from "@/hooks/useProjects";
 import withAuth from "@/components/withAuth";
 import ProjectFormPage from "@/components/dashboard/projects/ProjectFormPage";
 import { Project } from "@/lib/supabase";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 const EditProjectPage = () => {
   const router = useRouter();
@@ -24,17 +26,39 @@ const EditProjectPage = () => {
     }
   }, [projects, params.id]);
 
-  const handleSubmit = async (projectData: any) => {
+  const handleSubmit = async (projectData: Partial<Project>) => {
     setUploading(true);
     try {
       await updateProject.mutateAsync({
         id: params.id as string,
         projectData,
       });
+      toast.success("Project updated successfully!");
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to update project:", error);
-      alert("Failed to update project");
+
+      // Handle different error types
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 400) {
+          const errorData = error.response.data;
+          if (errorData.details && Array.isArray(errorData.details)) {
+            toast.error(`Validation failed: ${errorData.details.join(", ")}`);
+          } else {
+            toast.error(
+              errorData.error || "Validation failed. Please check your input."
+            );
+          }
+        } else if (error.response?.status === 401) {
+          toast.error("You are not authorized to update this project.");
+        } else if (error.response?.status === 429) {
+          toast.error("Too many requests. Please try again later.");
+        } else {
+          toast.error("Failed to update project. Please try again.");
+        }
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setUploading(false);
     }

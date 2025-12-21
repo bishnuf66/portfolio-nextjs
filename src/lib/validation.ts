@@ -27,7 +27,9 @@ export function validateProjectData(data: any): {
     // Validate description
     if (!data.description || typeof data.description !== "string") {
         errors.push("Description is required and must be a string");
-    } else if (data.description.length < 10 || data.description.length > 1000) {
+    } else if (
+        data.description.length < 10 || data.description.length > 10000
+    ) {
         errors.push("Description must be between 10 and 1000 characters");
     }
 

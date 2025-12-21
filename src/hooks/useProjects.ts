@@ -25,6 +25,10 @@ export function useCreateProject() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
         },
+        onError: (error: unknown) => {
+            console.error("Project creation failed:", error);
+            // Let the component handle the toast notification
+        },
     });
 }
 
@@ -41,6 +45,10 @@ export function useUpdateProject() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+        },
+        onError: (error: unknown) => {
+            console.error("Project update failed:", error);
+            // Let the component handle the toast notification
         },
     });
 }

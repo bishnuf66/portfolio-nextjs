@@ -2,84 +2,138 @@
 
 import { useEffect, useState, useRef } from "react";
 
-const ModernCursor = () => {
+interface TrailPoint {
+  x: number;
+  y: number;
+  id: number;
+}
+
+const SimpleCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 });
   const [isClicking, setIsClicking] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [cursorType, setCursorType] = useState("default");
-  const [clickRipples, setClickRipples] = useState<
-    Array<{ id: number; x: number; y: number }>
-  >([]);
-  const [trail, setTrail] = useState<
-    Array<{ x: number; y: number; id: number }>
-  >([]);
+  const [isVisible, setIsVisible] = useState(false);
+  const [trail, setTrail] = useState<TrailPoint[]>([]);
+  const [clickRipples, setClickRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [mounted, setMounted] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(false);
+  const [cursorEnabled, setCursorEnabled] = useState(true);
 
-  const rippleIdRef = useRef(0);
+  const animationRef = useRef<number | undefined>(undefined);
   const trailIdRef = useRef(0);
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const rippleIdRef = useRef(0);
 
-  // Check if device supports hover
-  const [supportsHover, setSupportsHover] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-  });
-
+  // Initialize on mount
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    setMounted(true);
 
-    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    // Check device capabilities
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const hasHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    setSupportsHover(!isMobile && hasHover);
 
-    const handleChange = (e: MediaQueryListEvent) => {
-      setSupportsHover(e.matches);
+    // Check initial cursor state from localStorage
+    const stored = localStorage.getItem("customCursorEnabled");
+    const initialEnabled = stored !== null ? JSON.parse(stored) : true;
+    setCursorEnabled(initialEnabled);
+  }, []);
+
+  // Setup event listeners
+  useEffect(() => {
+    if (!mounted) return;
+
+    // Listen for cursor toggle events
+    const handleCursorToggle = (e: CustomEvent) => {
+      setCursorEnabled(e.detail.enabled);
+      if (!e.detail.enabled) {
+        setIsVisible(false);
+      }
     };
 
+    // Listen for media query changes
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSupportsHover(!isMobile && e.matches);
+      if (!e.matches) {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('cursorToggle', handleCursorToggle as EventListener);
     mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+
+    return () => {
+      window.removeEventListener('cursorToggle', handleCursorToggle as EventListener);
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, [mounted]);
 
   // Smooth cursor following animation
   useEffect(() => {
-    if (!supportsHover) return;
+    if (!mounted || !supportsHover || !cursorEnabled) return;
 
     const animate = () => {
-      setPosition((prev) => ({
-        x: prev.x + (targetPosition.x - prev.x) * 0.15,
-        y: prev.y + (targetPosition.y - prev.y) * 0.15,
-      }));
-      animationFrameRef.current = requestAnimationFrame(animate);
+      setPosition((prev) => {
+        const dx = targetPosition.x - prev.x;
+        const dy = targetPosition.y - prev.y;
+
+        // Only animate if there's a meaningful difference
+        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+          return prev;
+        }
+
+        // Smooth interpolation with easing
+        const newX = prev.x + dx * 0.15;
+        const newY = prev.y + dy * 0.15;
+
+        return { x: newX, y: newY };
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    animationFrameRef.current = requestAnimationFrame(animate);
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [targetPosition, supportsHover]);
+  }, [targetPosition, mounted, supportsHover, cursorEnabled]);
 
   // Trail effect
   useEffect(() => {
-    if (!supportsHover) return;
+    if (!mounted || !supportsHover || !cursorEnabled) return;
 
     const intervalId = setInterval(() => {
-      const newTrail = {
-        x: position.x,
-        y: position.y,
-        id: trailIdRef.current++,
-      };
-      setTrail((prev) => [...prev.slice(-8), newTrail]);
-    }, 30);
+      setTrail((prev) => {
+        const newTrail = {
+          x: position.x,
+          y: position.y,
+          id: trailIdRef.current++,
+        };
+        return [...prev.slice(-12), newTrail];
+      });
+    }, 16); // 60fps
 
     return () => clearInterval(intervalId);
-  }, [position, supportsHover]);
+  }, [position, mounted, supportsHover, cursorEnabled]);
 
+  // Mouse event handlers
   useEffect(() => {
-    if (!supportsHover) return;
+    if (!mounted || !supportsHover || !cursorEnabled) return;
+
+    let isActive = true;
 
     const updatePosition = (e: MouseEvent) => {
+      if (!isActive) return;
+
       setTargetPosition({ x: e.clientX, y: e.clientY });
+      setIsVisible(true);
 
       const target = e.target as HTMLElement;
       if (
@@ -106,162 +160,136 @@ const ModernCursor = () => {
     };
 
     const handleMouseDown = (e: MouseEvent) => {
+      if (!isActive) return;
       setIsClicking(true);
 
+      // Create click ripple
       const rippleId = rippleIdRef.current++;
       const newRipple = { id: rippleId, x: e.clientX, y: e.clientY };
       setClickRipples((prev) => [...prev, newRipple]);
 
       setTimeout(() => {
-        setClickRipples((prev) =>
-          prev.filter((ripple) => ripple.id !== rippleId)
-        );
+        setClickRipples((prev) => prev.filter((ripple) => ripple.id !== rippleId));
       }, 800);
     };
 
     const handleMouseUp = () => {
+      if (!isActive) return;
       setIsClicking(false);
     };
 
-    const applyCustomCursor = () => {
-      document.body.style.cursor = "none";
-      document.documentElement.style.cursor = "none";
-
-      const style = document.createElement("style");
-      style.id = "custom-cursor-style";
-      style.textContent = `
-        * { cursor: none !important; }
-        @media (hover: none) and (pointer: coarse) {
-          * { cursor: auto !important; }
-        }
-      `;
-      document.head.appendChild(style);
-
-      document.addEventListener("mousemove", updatePosition);
-      document.addEventListener("mousedown", handleMouseDown);
-      document.addEventListener("mouseup", handleMouseUp);
+    const handleMouseLeave = () => {
+      setIsVisible(false);
     };
 
-    const removeCustomCursor = () => {
-      document.body.style.cursor = "auto";
-      document.documentElement.style.cursor = "auto";
+    const handleMouseEnter = () => {
+      setIsVisible(true);
+    };
 
+    // Apply custom cursor styles
+    const style = document.createElement("style");
+    style.id = "custom-cursor-style";
+    style.textContent = `
+      * { 
+        cursor: none !important; 
+      }
+      @media (hover: none) and (pointer: coarse) {
+        * { 
+          cursor: auto !important; 
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add event listeners
+    document.addEventListener("mousemove", updatePosition, { passive: true });
+    document.addEventListener("mousedown", handleMouseDown, { passive: true });
+    document.addEventListener("mouseup", handleMouseUp, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave, { passive: true });
+    document.addEventListener("mouseenter", handleMouseEnter, { passive: true });
+
+    return () => {
+      isActive = false;
+
+      // Clean up styles
       const existingStyle = document.getElementById("custom-cursor-style");
       if (existingStyle) {
         document.head.removeChild(existingStyle);
       }
 
+      // Remove event listeners
       document.removeEventListener("mousemove", updatePosition);
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      document.removeEventListener("mouseenter", handleMouseEnter);
     };
+  }, [mounted, supportsHover, cursorEnabled]);
 
-    // Check if custom cursor is enabled
-    const checkCursorState = () => {
-      const customCursorEnabled =
-        localStorage.getItem("customCursorEnabled") !== "false";
-
-      if (customCursorEnabled) {
-        applyCustomCursor();
-        return removeCustomCursor;
-      } else {
-        removeCustomCursor();
-        return () => {};
-      }
-    };
-
-    // Listen for storage changes and custom events
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "customCursorEnabled") {
-        // Clean up current state
-        removeCustomCursor();
-        // Apply new state
-        checkCursorState();
-      }
-    };
-
-    const handleCursorToggle = (e: CustomEvent) => {
-      // Clean up current state
-      removeCustomCursor();
-      // Apply new state based on event detail
-      if (e.detail.enabled) {
-        applyCustomCursor();
-      }
-    };
-
-    // Initial setup
-    const cleanup = checkCursorState();
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener(
-      "cursorToggle",
-      handleCursorToggle as EventListener
-    );
-
-    return () => {
-      cleanup();
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener(
-        "cursorToggle",
-        handleCursorToggle as EventListener
-      );
-    };
-  }, [supportsHover]);
-
-  if (!supportsHover) return null;
+  if (!mounted || !supportsHover || !isVisible || !cursorEnabled) return null;
 
   const getCursorSize = () => {
     switch (cursorType) {
       case "pointer":
-        return isClicking ? 50 : 40;
+        return isClicking ? 45 : 38;
       case "text":
         return 24;
       default:
-        return isClicking ? 28 : 32;
+        return isClicking ? 32 : 28;
+    }
+  };
+
+  const getCursorColor = () => {
+    switch (cursorType) {
+      case "pointer":
+        return "#60a5fa"; // Blue
+      case "text":
+        return "#34d399"; // Green
+      default:
+        return "#8b5cf6"; // Purple
     }
   };
 
   return (
-    <div
-      className="fixed inset-0 pointer-events-none z-9999"
-      data-cursor="custom"
-    >
+    <div className="fixed inset-0 pointer-events-none z-9999 overflow-hidden">
       {/* Animated Trail */}
       {trail.map((point, index) => {
-        const opacity = (index / trail.length) * 0.6;
-        const scale = (index / trail.length) * 0.8;
+        const opacity = (index / trail.length) * 0.8;
+        const scale = (index / trail.length) * 0.9;
         return (
           <div
             key={point.id}
-            className="absolute rounded-full transition-opacity duration-300"
+            className="absolute rounded-full transition-opacity duration-200"
             style={{
-              left: point.x - 6,
-              top: point.y - 6,
-              width: 12,
-              height: 12,
-              background: isHovering
-                ? `radial-gradient(circle, rgba(96, 165, 250, ${opacity}) 0%, transparent 70%)`
-                : `radial-gradient(circle, rgba(139, 92, 246, ${opacity}) 0%, transparent 70%)`,
+              left: point.x - 3,
+              top: point.y - 3,
+              width: 6,
+              height: 6,
+              background: `radial-gradient(circle, ${getCursorColor()}${Math.floor(opacity * 100).toString().padStart(2, '0')} 0%, transparent 70%)`,
               transform: `scale(${scale})`,
+              opacity: opacity,
             }}
           />
         );
       })}
 
-      {/* Click Ripples with modern wave effect */}
+      {/* Click Ripples */}
       {clickRipples.map((ripple) => (
-        <div key={ripple.id}>
+        <div key={ripple.id} className="absolute">
+          {/* Outer ripple */}
           <div
             className="absolute rounded-full animate-ping"
             style={{
-              left: ripple.x - 30,
-              top: ripple.y - 30,
-              width: 60,
-              height: 60,
+              left: ripple.x - 35,
+              top: ripple.y - 35,
+              width: 70,
+              height: 70,
               border: "2px solid",
-              borderColor: isHovering ? "#60a5fa" : "#8b5cf6",
+              borderColor: getCursorColor(),
               animationDuration: "0.8s",
             }}
           />
+          {/* Inner ripple */}
           <div
             className="absolute rounded-full animate-ping"
             style={{
@@ -270,7 +298,7 @@ const ModernCursor = () => {
               width: 40,
               height: 40,
               border: "2px solid",
-              borderColor: isHovering ? "#60a5fa" : "#8b5cf6",
+              borderColor: getCursorColor(),
               animationDuration: "0.6s",
               animationDelay: "0.1s",
             }}
@@ -278,70 +306,58 @@ const ModernCursor = () => {
         </div>
       ))}
 
-      {/* Main Cursor with glassmorphism */}
+      {/* Main Cursor with glassmorphism effect */}
       <div
-        className="absolute transition-transform duration-100 ease-out"
+        className="absolute transition-all duration-200 ease-out"
         style={{
           left: position.x - getCursorSize() / 2,
           top: position.y - getCursorSize() / 2,
-          transform: `scale(${isClicking ? 0.85 : 1}) rotate(${
-            isHovering ? 45 : 0
-          }deg)`,
+          transform: `scale(${isClicking ? 0.85 : 1}) rotate(${isHovering ? 45 : 0}deg)`,
         }}
       >
-        {/* Outer glow ring */}
+        {/* Outer glow */}
         <div
           className="absolute inset-0 rounded-full animate-pulse"
           style={{
             width: getCursorSize(),
             height: getCursorSize(),
-            background: isHovering
-              ? "radial-gradient(circle, rgba(96, 165, 250, 0.3) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%)",
+            background: `radial-gradient(circle, ${getCursorColor()}30 0%, transparent 70%)`,
             filter: "blur(8px)",
             animationDuration: "2s",
           }}
         />
 
-        {/* Main cursor body with gradient */}
+        {/* Main cursor body */}
         <div
           className="rounded-full backdrop-blur-md border-2 flex items-center justify-center relative overflow-hidden"
           style={{
             width: getCursorSize(),
             height: getCursorSize(),
-            borderColor: isHovering ? "#60a5fa" : "#8b5cf6",
-            background: isHovering
-              ? "linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%)"
-              : "linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.1) 100%)",
+            borderColor: getCursorColor(),
+            background: `linear-gradient(135deg, ${getCursorColor()}20 0%, ${getCursorColor()}10 100%)`,
             boxShadow: isHovering
-              ? "0 0 30px rgba(96, 165, 250, 0.4), inset 0 0 20px rgba(96, 165, 250, 0.1)"
-              : "0 0 20px rgba(139, 92, 246, 0.3), inset 0 0 15px rgba(139, 92, 246, 0.1)",
+              ? `0 0 30px ${getCursorColor()}60, inset 0 0 20px ${getCursorColor()}20`
+              : `0 0 20px ${getCursorColor()}40, inset 0 0 15px ${getCursorColor()}15`,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
           {/* Animated gradient overlay */}
           <div
-            className="absolute inset-0 rounded-full opacity-50"
+            className="absolute inset-0 rounded-full opacity-60"
             style={{
-              background: isHovering
-                ? "linear-gradient(45deg, transparent 30%, rgba(96, 165, 250, 0.3) 50%, transparent 70%)"
-                : "linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.3) 50%, transparent 70%)",
-              animation: "shimmer 2s infinite",
+              background: `linear-gradient(45deg, transparent 30%, ${getCursorColor()}40 50%, transparent 70%)`,
+              animation: "shimmer 2s infinite linear",
             }}
           />
 
-          {/* Inner core dot */}
+          {/* Inner core */}
           <div
             className="rounded-full relative z-10"
             style={{
               width: cursorType === "text" ? 3 : 8,
               height: cursorType === "text" ? 20 : 8,
-              background: isHovering
-                ? "linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)"
-                : "linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%)",
-              boxShadow: isHovering
-                ? "0 0 10px rgba(96, 165, 250, 0.8)"
-                : "0 0 10px rgba(139, 92, 246, 0.8)",
+              background: `linear-gradient(180deg, ${getCursorColor()} 0%, ${getCursorColor()}cc 100%)`,
+              boxShadow: `0 0 10px ${getCursorColor()}80`,
             }}
           />
         </div>
@@ -352,25 +368,42 @@ const ModernCursor = () => {
         <div
           className="absolute rounded-full animate-pulse"
           style={{
-            left: position.x - 40,
-            top: position.y - 40,
-            width: 80,
-            height: 80,
-            border: "1px solid rgba(96, 165, 250, 0.3)",
-            background:
-              "radial-gradient(circle, rgba(96, 165, 250, 0.1) 0%, transparent 70%)",
+            left: position.x - 50,
+            top: position.y - 50,
+            width: 100,
+            height: 100,
+            border: `1px solid ${getCursorColor()}40`,
+            background: `radial-gradient(circle, ${getCursorColor()}10 0%, transparent 70%)`,
             animationDuration: "1.5s",
           }}
         />
       )}
 
+      {/* Cursor type indicator */}
+      {cursorType !== "default" && (
+        <div
+          className="absolute text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm transition-all duration-300"
+          style={{
+            left: position.x + 30,
+            top: position.y - 15,
+            backgroundColor: `${getCursorColor()}20`,
+            color: getCursorColor(),
+            border: `1px solid ${getCursorColor()}60`,
+            transform: `scale(${isClicking ? 0.9 : 1})`,
+          }}
+        >
+          {cursorType.toUpperCase()}
+        </div>
+      )}
+
+      {/* CSS Animations */}
       <style jsx>{`
         @keyframes shimmer {
           0% {
-            transform: translateX(-100%) translateY(-100%);
+            transform: translateX(-100%) translateY(-100%) rotate(-45deg);
           }
           100% {
-            transform: translateX(100%) translateY(100%);
+            transform: translateX(100%) translateY(100%) rotate(-45deg);
           }
         }
       `}</style>
@@ -378,4 +411,4 @@ const ModernCursor = () => {
   );
 };
 
-export default ModernCursor;
+export default SimpleCursor;

@@ -82,6 +82,8 @@ export async function PUT(
     // Validate input data
     const validation = validateProjectData(body);
     if (!validation.valid) {
+      console.log("Validation failed for project update:", validation.errors);
+      console.log("Received data:", body);
       return NextResponse.json(
         { error: "Validation failed", details: validation.errors },
         { status: 400 },

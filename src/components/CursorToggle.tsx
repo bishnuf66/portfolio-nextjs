@@ -6,17 +6,21 @@ import useStore from "@/store/store";
 
 const CursorToggle = () => {
   const { isDarkMode } = useStore();
-  const [customCursorEnabled, setCustomCursorEnabled] = useState(() => {
-    // Use lazy initialization to avoid hydration mismatch
-    // Only access localStorage on client side
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("customCursorEnabled");
-      return stored !== null ? JSON.parse(stored) : true;
-    }
-    return true;
-  });
+  const [customCursorEnabled, setCustomCursorEnabled] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Set client flag and initialize from localStorage
+    setIsClient(true);
+    const stored = localStorage.getItem("customCursorEnabled");
+    if (stored !== null) {
+      setCustomCursorEnabled(JSON.parse(stored));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     // This effect now only handles side effects, not state initialization
     // Store user preference
     localStorage.setItem(
@@ -47,7 +51,7 @@ const CursorToggle = () => {
         detail: { enabled: customCursorEnabled },
       })
     );
-  }, [customCursorEnabled]);
+  }, [customCursorEnabled, isClient]);
 
   const toggleCursor = () => {
     setCustomCursorEnabled(!customCursorEnabled);
@@ -56,11 +60,10 @@ const CursorToggle = () => {
   return (
     <button
       onClick={toggleCursor}
-      className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${
-        isDarkMode
-          ? "bg-gray-700 hover:bg-gray-600"
-          : "bg-gray-200 hover:bg-gray-300"
-      }`}
+      className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${isDarkMode
+        ? "bg-gray-700 hover:bg-gray-600"
+        : "bg-gray-200 hover:bg-gray-300"
+        }`}
       title={
         customCursorEnabled ? "Disable Custom Cursor" : "Enable Custom Cursor"
       }
