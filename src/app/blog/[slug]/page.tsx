@@ -9,6 +9,7 @@ import { Blog } from "@/types/blog";
 import { notFound } from "next/navigation";
 import useStore from "@/store/store";
 import { useEffect, useState } from "react";
+import { getPageClasses, colorScheme } from "@/utils/colorUtils";
 
 interface BlogDetailPageProps {
     params: Promise<{ slug: string }>;
@@ -58,11 +59,11 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
     if (loading) {
         return (
-            <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+            <div className={getPageClasses()}>
                 <div className="max-w-4xl mx-auto px-4 md:px-8 py-16">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                        <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Loading article...</p>
+                        <p className={colorScheme.text.secondary}>Loading article...</p>
                     </div>
                 </div>
             </div>
@@ -74,7 +75,7 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
     }
 
     return (
-        <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
+        <div className={getPageClasses()}>
             <article className="max-w-4xl mx-auto px-4 md:px-8 py-16">
                 <AnimatedSection animation="slideRight">
                     <nav aria-label="Breadcrumb">

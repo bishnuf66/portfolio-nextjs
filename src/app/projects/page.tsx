@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { getPageClasses, getCardClasses, getInputClasses, colorScheme } from "@/utils/colorUtils";
 import useStore from "@/store/store";
 import { Briefcase, Code, Layers, Star, Search, SortAsc, SortDesc, Filter, X, WorkflowIcon } from "lucide-react";
 import ProjectCard from "@/components/ProjectCard";
@@ -140,9 +141,7 @@ export default function ProjectsPage() {
     ];
 
     return (
-        <div
-            className={`min-h-screen pt-20 ${isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}
-        >
+        <div className={getPageClasses()}>
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}
                 <AnimatedSection animation="fadeIn" className="text-center mb-12">
@@ -161,7 +160,7 @@ export default function ProjectsPage() {
                 </AnimatedSection>
 
                 {/* Search and Filter Controls */}
-                <AnimatedSection animation="slideUp" delay={0.2} className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-8`}>
+                <AnimatedSection animation="slideUp" delay={0.2} className={`${getCardClasses("rounded-lg p-6 shadow-lg mb-8")}`}>
                     <div className="flex flex-col lg:flex-row gap-4">
                         {/* Search */}
                         <div className="flex-1">
@@ -172,10 +171,7 @@ export default function ProjectsPage() {
                                     placeholder="Search projects by name, description, or tech stack..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-3 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                        : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                                        } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                    className={`${getInputClasses("w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500")}`}
                                 />
                             </div>
                         </div>
@@ -185,10 +181,7 @@ export default function ProjectsPage() {
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                className={`w-full px-3 py-3 border rounded-lg ${isDarkMode
-                                    ? "bg-gray-700 border-gray-600 text-white"
-                                    : "bg-white border-gray-300 text-gray-900"
-                                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                className={`${getInputClasses("w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500")}`}
                             >
                                 <option value={6}>6 per page</option>
                                 <option value={9}>9 per page</option>
@@ -201,7 +194,7 @@ export default function ProjectsPage() {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className="flex items-center gap-2 px-4 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                className={`flex items-center gap-2 px-4 py-3 ${colorScheme.text.secondary} hover:${colorScheme.text.primary} ${colorScheme.border.primary} rounded-lg hover:${colorScheme.background.tertiary} transition-colors`}
                             >
                                 <X size={16} />
                                 Clear
@@ -211,7 +204,7 @@ export default function ProjectsPage() {
 
                     {/* Sort Controls */}
                     <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <span className={`text-sm font-medium ${colorScheme.text.secondary} flex items-center gap-2`}>
                             <Filter size={16} />
                             Sort by:
                         </span>
@@ -225,7 +218,7 @@ export default function ProjectsPage() {
                                 onClick={() => handleSort(field)}
                                 className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${sortField === field
                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    : `${colorScheme.text.secondary} hover:${colorScheme.background.tertiary}`
                                     }`}
                             >
                                 {label}
@@ -237,7 +230,7 @@ export default function ProjectsPage() {
                     </div>
 
                     {/* Results Count */}
-                    <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className={`mt-4 text-sm ${colorScheme.text.secondary}`}>
                         Showing {filteredProjects.length} of {projects.length} projects
                         {hasActiveFilters && " (filtered)"}
                     </div>
@@ -255,9 +248,7 @@ export default function ProjectsPage() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${isActive
                                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg`
-                                    : isDarkMode
-                                        ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                                    : `${colorScheme.background.secondary} ${colorScheme.text.secondary} hover:${colorScheme.background.tertiary} ${colorScheme.border.primary} border`
                                     }`}
                             >
                                 <Icon size={20} />
@@ -265,9 +256,7 @@ export default function ProjectsPage() {
                                 <span
                                     className={`px-2 py-0.5 rounded-full text-xs font-bold ${isActive
                                         ? "bg-white/20"
-                                        : isDarkMode
-                                            ? "bg-gray-700"
-                                            : "bg-gray-200"
+                                        : colorScheme.background.tertiary
                                         }`}
                                 >
                                     {tab.count}
@@ -292,8 +281,7 @@ export default function ProjectsPage() {
                     ].map((stat, index) => (
                         <div
                             key={index}
-                            className={`text-center p-4 rounded-xl ${isDarkMode ? "bg-gray-800/50" : "bg-white"
-                                } border ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+                            className={`text-center p-4 rounded-xl ${getCardClasses()} border`}
                         >
                             <div className="flex items-center justify-center gap-2 mb-1">
                                 {stat.icon && <stat.icon size={18} className="text-yellow-500" />}
@@ -304,8 +292,7 @@ export default function ProjectsPage() {
                                 </div>
                             </div>
                             <div
-                                className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                                    }`}
+                                className={`text-xs ${colorScheme.text.secondary}`}
                             >
                                 {stat.label}
                             </div>
@@ -323,14 +310,12 @@ export default function ProjectsPage() {
                 ) : filteredProjects.length === 0 ? (
                     <AnimatedSection animation="fadeIn" className="text-center py-20">
                         <div
-                            className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"
-                                }`}
+                            className={`text-6xl mb-4 ${colorScheme.text.muted}`}
                         >
                             {hasActiveFilters ? "🔍" : "📂"}
                         </div>
                         <p
-                            className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                                }`}
+                            className={`text-xl ${colorScheme.text.secondary}`}
                         >
                             {hasActiveFilters
                                 ? "No projects match your search criteria."

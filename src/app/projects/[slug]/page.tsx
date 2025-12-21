@@ -18,6 +18,7 @@ import Image from "next/image";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getPageClasses, getCardClasses, colorScheme } from "@/utils/colorUtils";
 import useStore from "@/store/store";
 import { useEffect, useState } from "react";
 
@@ -69,11 +70,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
     if (loading) {
         return (
-            <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
+            <div className={getPageClasses()}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                        <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Loading project...</p>
+                        <p className={colorScheme.text.secondary}>Loading project...</p>
                     </div>
                 </div>
             </div>
@@ -289,14 +290,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
             />
 
-            <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
+            <div className={getPageClasses()}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {/* Back Button */}
                     <AnimatedSection animation="slideRight">
                         <nav aria-label="Breadcrumb">
                             <Link
                                 href="/projects"
-                                className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
+                                className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${colorScheme.text.secondary} hover:${colorScheme.text.primary} hover:${colorScheme.background.tertiary}`}
                             >
                                 <ArrowLeft className="w-5 h-5" />
                                 Back to Projects

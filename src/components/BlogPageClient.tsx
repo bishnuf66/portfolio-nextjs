@@ -8,6 +8,7 @@ import { Blog } from "@/types/blog";
 import useStore from "@/store/store";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
+import { getPageClasses, getCardClasses, getInputClasses, colorScheme } from "@/utils/colorUtils";
 
 type SortField = "title" | "created_at" | "author";
 type SortOrder = "asc" | "desc";
@@ -110,7 +111,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
     const hasActiveFilters = searchTerm || selectedTag || sortField !== "created_at" || sortOrder !== "desc";
 
     return (
-        <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className={getPageClasses()}>
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}
                 <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -126,7 +127,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                 </AnimatedSection>
 
                 {/* Search and Filter Controls */}
-                <AnimatedSection animation="slideUp" delay={0.2} className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-8`}>
+                <AnimatedSection animation="slideUp" delay={0.2} className={`${getCardClasses("rounded-lg p-6 shadow-lg mb-8")}`}>
                     <div className="flex flex-col lg:flex-row gap-4">
                         {/* Search */}
                         <div className="flex-1">
@@ -137,10 +138,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                                     placeholder="Search articles by title, content, author, or tags..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-3 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                                        : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-500"
-                                        } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                    className={`${getInputClasses("w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500")}`}
                                 />
                             </div>
                         </div>
@@ -150,10 +148,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                             <select
                                 value={selectedTag}
                                 onChange={(e) => setSelectedTag(e.target.value)}
-                                className={`w-full px-3 py-3 border rounded-lg ${isDarkMode
-                                    ? "bg-gray-700 border-gray-600 text-white"
-                                    : "bg-gray-50 border-gray-300 text-gray-900"
-                                    } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                className={`${getInputClasses("w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500")}`}
                             >
                                 <option value="">All Tags</option>
                                 {allTags.map((tag) => (
@@ -169,10 +164,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                             <select
                                 value={itemsPerPage}
                                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                className={`w-full px-3 py-3 border rounded-lg ${isDarkMode
-                                    ? "bg-gray-700 border-gray-600 text-white"
-                                    : "bg-gray-50 border-gray-300 text-gray-900"
-                                    } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                className={`${getInputClasses("w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500")}`}
                             >
                                 <option value={6}>6 per page</option>
                                 <option value={9}>9 per page</option>
@@ -185,10 +177,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearFilters}
-                                className={`flex items-center gap-2 px-4 py-3 transition-colors border rounded-lg ${isDarkMode
-                                    ? "text-gray-400 hover:text-gray-200 border-gray-600 hover:bg-gray-700"
-                                    : "text-gray-600 hover:text-gray-800 border-gray-300 hover:bg-gray-100"
-                                    }`}
+                                className={`flex items-center gap-2 px-4 py-3 transition-colors border rounded-lg ${colorScheme.text.secondary} hover:${colorScheme.text.primary} ${colorScheme.border.primary} hover:${colorScheme.background.tertiary}`}
                             >
                                 <X size={16} />
                                 Clear
@@ -214,9 +203,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                                     ? isDarkMode
                                         ? "bg-purple-900 text-purple-300"
                                         : "bg-purple-100 text-purple-700"
-                                    : isDarkMode
-                                        ? "text-gray-400 hover:bg-gray-700"
-                                        : "text-gray-600 hover:bg-gray-100"
+                                    : `${colorScheme.text.secondary} hover:${colorScheme.background.tertiary}`
                                     }`}
                             >
                                 {label}
@@ -257,7 +244,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                                 <Link
                                     key={blog.id}
                                     href={`/blog/${blog.slug}`}
-                                    className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group border`}
+                                    className={`${getCardClasses("rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group border")}`}
                                 >
                                     {blog.cover_image_url && (
                                         <div className="relative h-56 overflow-hidden">
@@ -306,7 +293,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                                                     </span>
                                                 ))}
                                                 {blog.tags.length > 3 && (
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${colorScheme.background.tertiary} ${colorScheme.text.secondary}`}>
                                                         +{blog.tags.length - 3} more
                                                     </span>
                                                 )}
