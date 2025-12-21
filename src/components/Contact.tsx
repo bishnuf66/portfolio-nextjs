@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { send } from "emailjs-com";
 import useStore from "@/store/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -50,29 +49,34 @@ const Contact = () => {
       return;
     }
 
-    const emailParams = {
-      name: formData.name,
-      email: formData.email,
-      message: formData.message,
-    };
-
     try {
-      const response = await send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID as string,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID as string,
-        emailParams,
-        process.env.NEXT_PUBLIC_EMAILJS_USER_ID as string
-      );
-      console.log("Email sent successfully:", response);
-      toast.success("Your message has been sent!");
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        }),
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Message sent successfully! I'll get back to you soon.");
+        setFormData({
+          name: "",
+          email: "",
+          message: "",
+        });
+      } else {
+        toast.error(data.error || "Failed to send message. Please try again.");
+      }
     } catch (error) {
-      console.error("Error sending email:", error);
-      toast.error("Sorry, there was an error sending your message.");
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
