@@ -5,6 +5,7 @@ import useStore from "@/store/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Trophy, RotateCcw, Play, Pause } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
+import { colorScheme } from "@/utils/colorUtils";
 
 interface GameObject {
   id: number;
@@ -457,7 +458,7 @@ export default function SpaceShooterGame() {
     <AnimatedSection animation="fadeIn">
       <section
         id="game"
-        className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+        className={`py-20 ${colorScheme.background.secondary}`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="text-center mb-12">

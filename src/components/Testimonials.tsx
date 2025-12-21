@@ -6,6 +6,7 @@ import { useTestimonials } from "@/hooks/useTestimonials";
 import { TestimonialCardSkeleton } from "./LoadingSkeleton";
 import { Star, Quote } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import { colorScheme } from "@/utils/colorUtils";
 
 export default function Testimonials() {
     const { isDarkMode } = useStore();
@@ -15,7 +16,7 @@ export default function Testimonials() {
         return (
             <section
                 id="testimonials"
-                className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+                className={`py-20 ${colorScheme.background.secondary}`}
             >
                 <div className="max-w-7xl mx-auto px-4 md:px-8">
                     <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -46,7 +47,7 @@ export default function Testimonials() {
     return (
         <section
             id="testimonials"
-            className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
+            className={`py-20 ${colorScheme.background.secondary}`}
         >
             <div className="max-w-7xl mx-auto px-4 md:px-8">
                 <AnimatedSection animation="fadeIn" className="text-center mb-16">

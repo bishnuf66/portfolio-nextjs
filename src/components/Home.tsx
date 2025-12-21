@@ -64,7 +64,7 @@ const Home = () => {
       {/* Hero Section with 3D Spline */}
       <div id="home" className="relative w-full min-h-screen overflow-hidden">
         {/* Background with Spotlight */}
-        <div className={`absolute inset-0 ${colorScheme.background.primary}`}>
+        <div className={`absolute inset-0 ${colorScheme.background.secondary}`}>
           <Spotlight
             className="-top-40 left-0 md:left-60 md:-top-20"
             fill={isDarkMode ? "white" : "rgba(139, 92, 246, 0.3)"}

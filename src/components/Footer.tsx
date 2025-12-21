@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { scrollToTop } from "@/utils/scrollUtils";
 import DownloadCVButton from "./DownloadCVButton";
+import { colorScheme } from "@/utils/colorUtils";
 
 const Footer = () => {
   const { isDarkMode } = useStore();
@@ -39,8 +40,7 @@ const Footer = () => {
 
   return (
     <footer
-      className={`relative ${isDarkMode ? "bg-black border-t border-gray-800" : "bg-white border-t border-gray-200"
-        }`}
+      className={`relative ${colorScheme.background.primary} border-t ${colorScheme.border.primary}`}
     >
       {/* Particles Background */}
       <Design id="tsparticles-footer" />

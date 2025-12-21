@@ -60,10 +60,7 @@ export default function UnifiedShowcase() {
       >
         <motion.div style={{ y: backgroundY }} className="absolute inset-0 z-0">
           <div
-            className={`absolute inset-0 blur-3xl ${isDarkMode
-              ? "bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"
-              : "bg-gradient-to-br from-blue-200/30 via-purple-200/30 to-pink-200/30"
-              }`}
+            className={`absolute inset-0 blur-3xl ${colorScheme.background.secondary}`}
           ></div>
         </motion.div>
 
