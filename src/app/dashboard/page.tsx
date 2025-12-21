@@ -24,6 +24,7 @@ import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
 import ProjectList from "@/components/dashboard/projects/ProjectList";
 import CVManager from "@/components/dashboard/CVManager";
+import { colorScheme } from "@/utils/colorUtils";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -74,8 +75,7 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-        } p-8`}
+      className={`min-h-screen ${colorScheme.page} p-8`}
     >
       <div className="max-w-7xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">

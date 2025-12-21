@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import useStore from "@/store/store";
 import { signIn } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
-import { colorScheme } from "@/utils/colorScheme";
+import { colorScheme } from "@/utils/colorUtils";
 
 const Login = () => {
   const { isDarkMode } = useStore();
@@ -49,12 +49,10 @@ const Login = () => {
         }`}
     >
       <div
-        className={`w-full max-w-md p-8 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
-          }`}
+        className={`w-full max-w-md p-8 rounded-lg shadow-lg ${colorScheme.background.primary}`}
       >
         <h1
-          className={`text-2xl font-bold text-center mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-            }`}
+          className={`text-2xl font-bold text-center mb-6 ${colorScheme.text.primary}`}
         >
           Admin Login
         </h1>
@@ -72,10 +70,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={`w-full px-3 py-2 rounded-md border ${isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-3 py-2 rounded-md border ${colorScheme.input} focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
           </div>
 
@@ -91,10 +86,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className={`w-full px-3 py-2 rounded-md border ${isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full px-3 py-2 rounded-md border ${colorScheme.input} focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
           </div>
 
