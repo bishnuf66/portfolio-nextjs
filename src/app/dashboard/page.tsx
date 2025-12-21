@@ -11,6 +11,7 @@ import {
   FolderKanban,
   BookOpen,
   MessageSquare,
+  FileText,
 } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
@@ -22,6 +23,7 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
 import ProjectList from "@/components/dashboard/projects/ProjectList";
+import CVManager from "@/components/dashboard/CVManager";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -34,7 +36,7 @@ const Dashboard = () => {
   const deleteProject = useDeleteProject();
 
   const [activeTab, setActiveTab] = useState<
-    "projects" | "analytics" | "blogs" | "testimonials"
+    "projects" | "analytics" | "blogs" | "testimonials" | "cv"
   >((searchParams?.get("tab") as any) || "projects");
 
 
@@ -148,6 +150,18 @@ const Dashboard = () => {
               Testimonials
             </div>
           </button>
+          <button
+            onClick={() => setActiveTab("cv")}
+            className={`px-4 py-2 font-medium ${activeTab === "cv"
+              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              }`}
+          >
+            <div className="flex items-center gap-2">
+              <FileText size={18} />
+              CV Management
+            </div>
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -157,6 +171,8 @@ const Dashboard = () => {
           <BlogManager />
         ) : activeTab === "testimonials" ? (
           <TestimonialManager />
+        ) : activeTab === "cv" ? (
+          <CVManager />
         ) : (
           <ProjectList
             projects={projects}

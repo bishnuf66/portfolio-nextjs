@@ -7,6 +7,7 @@ import Design from "./Design";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { scrollToTop } from "@/utils/scrollUtils";
+import DownloadCVButton from "./DownloadCVButton";
 
 const Footer = () => {
   const { isDarkMode } = useStore();
@@ -209,41 +210,49 @@ const Footer = () => {
             >
               Connect
             </h4>
-            <div className="flex gap-4">
-              <a
-                href={process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/bishnuf66"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
-                  ? "bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900"
-                  }`}
-                title="GitHub Profile"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/bishnubk"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
-                  ? "bg-gray-800 hover:bg-blue-600 text-gray-300 hover:text-white"
-                  : "bg-gray-100 hover:bg-blue-500 text-gray-600 hover:text-white"
-                  }`}
-                title="LinkedIn Profile"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a
-                href={`mailto:${process.env.NEXT_PUBLIC_MY_EMAIL || "contact@bishnubk.com.np"}`}
-                className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
-                  ? "bg-gray-800 hover:bg-purple-600 text-gray-300 hover:text-white"
-                  : "bg-gray-100 hover:bg-purple-500 text-gray-600 hover:text-white"
-                  }`}
-                title="Send Email"
-              >
-                <Mail className="w-5 h-5" />
-              </a>
+            <div className="space-y-4">
+              {/* CV Download Button */}
+              <div>
+                <DownloadCVButton />
+              </div>
+
+              {/* Social Links */}
+              <div className="flex gap-4">
+                <a
+                  href={process.env.NEXT_PUBLIC_GITHUB_URL || "https://github.com/bishnuf66"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
+                    ? "bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white"
+                    : "bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900"
+                    }`}
+                  title="GitHub Profile"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+                <a
+                  href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/bishnubk"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
+                    ? "bg-gray-800 hover:bg-blue-600 text-gray-300 hover:text-white"
+                    : "bg-gray-100 hover:bg-blue-500 text-gray-600 hover:text-white"
+                    }`}
+                  title="LinkedIn Profile"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+                <a
+                  href={`mailto:${process.env.NEXT_PUBLIC_MY_EMAIL || "contact@bishnubk.com.np"}`}
+                  className={`p-2 rounded-lg transition-all hover:scale-110 ${isDarkMode
+                    ? "bg-gray-800 hover:bg-purple-600 text-gray-300 hover:text-white"
+                    : "bg-gray-100 hover:bg-purple-500 text-gray-600 hover:text-white"
+                    }`}
+                  title="Send Email"
+                >
+                  <Mail className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

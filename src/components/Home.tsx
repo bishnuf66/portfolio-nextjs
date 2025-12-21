@@ -10,6 +10,7 @@ import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { MovingBorder } from "@/components/ui/MovingBorder";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
 import { GlowingStarsBackgroundCard } from "@/components/ui/GlowingStars";
+import DownloadCVButton from "./DownloadCVButton";
 import {
   Code2,
   Rocket,
@@ -88,6 +89,7 @@ const Home = () => {
                   >
                     View My Work
                   </a>
+                  <DownloadCVButton />
                   <a
                     href="/#contact"
                     className={`px-8 py-3 border-2 rounded-full font-semibold transition-all duration-300 ${isDarkMode
@@ -142,14 +144,14 @@ const Home = () => {
       <div className="relative w-full h-screen overflow-hidden">
         {/* Top gradient overlay - blends with hero section above */}
         <div className={`absolute top-0 left-0 right-0 h-32 z-20 pointer-events-none ${isDarkMode
-            ? "bg-gradient-to-b from-black via-black/80 to-transparent"
-            : "bg-gradient-to-b from-gray-50 via-gray-50/80 to-transparent"
+          ? "bg-gradient-to-b from-black via-black/80 to-transparent"
+          : "bg-gradient-to-b from-gray-50 via-gray-50/80 to-transparent"
           }`}></div>
 
         {/* Bottom gradient overlay - blends with section below */}
         <div className={`absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none ${isDarkMode
-            ? "bg-gradient-to-t from-black via-black/80 to-transparent"
-            : "bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent"
+          ? "bg-gradient-to-t from-black via-black/80 to-transparent"
+          : "bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent"
           }`}></div>
 
         <div
@@ -173,8 +175,8 @@ const Home = () => {
             />
             {/* Image overlay for better text contrast */}
             <div className={`absolute inset-0 ${isDarkMode
-                ? "bg-gradient-to-b from-black/60 via-black/40 to-black/60"
-                : "bg-gradient-to-b from-white/40 via-white/20 to-white/40"
+              ? "bg-gradient-to-b from-black/60 via-black/40 to-black/60"
+              : "bg-gradient-to-b from-white/40 via-white/20 to-white/40"
               }`}></div>
           </div>
         </div>
