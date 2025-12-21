@@ -72,43 +72,89 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!project) {
         return {
             title: "Project Not Found",
+            description: "The requested project could not be found.",
+            robots: {
+                index: false,
+                follow: false,
+            },
         };
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://yoursite.com";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np";
     const projectUrl = `${baseUrl}/projects/${slug}`;
-    const description = project.description.replace(/<[^>]*>/g, "").substring(0, 160);
+
+    // Clean HTML and truncate description
+    const cleanDescription = project.description.replace(/<[^>]*>/g, "");
+    const description = cleanDescription.length > 160
+        ? cleanDescription.substring(0, 157) + "..."
+        : cleanDescription;
 
     return {
         title: `${project.name} | Portfolio Project`,
-        description: description,
-        keywords: [...project.tech_stack, project.category, "portfolio", "project"].join(", "),
-        authors: [{ name: "Your Name" }],
+        description,
+        keywords: [
+            ...project.tech_stack,
+            project.category,
+            "portfolio",
+            "project",
+            "web development",
+            "software development",
+            project.name.toLowerCase().replace(/\s+/g, " ")
+        ],
+        authors: [{ name: "Bishnu BK", url: baseUrl }],
+        creator: "Bishnu BK",
+        publisher: "Bishnu BK",
+        category: "Technology",
         openGraph: {
             title: project.name,
-            description: description,
+            description,
             url: projectUrl,
             type: "website",
+            locale: "en_US",
+            siteName: "Bishnu BK Portfolio",
             images: project.cover_image_url ? [
                 {
                     url: project.cover_image_url,
                     width: 1200,
                     height: 630,
-                    alt: project.name,
+                    alt: `${project.name} - Project Screenshot`,
                     type: "image/jpeg",
                 }
-            ] : [],
+            ] : [
+                {
+                    url: `${baseUrl}/coding2.png`,
+                    width: 1200,
+                    height: 630,
+                    alt: project.name,
+                    type: "image/png",
+                }
+            ],
         },
         twitter: {
             card: "summary_large_image",
             title: project.name,
-            description: description,
-            images: project.cover_image_url ? [project.cover_image_url] : [],
+            description,
+            creator: "@bishnubk",
+            site: "@bishnubk",
+            images: project.cover_image_url ? [
+                {
+                    url: project.cover_image_url,
+                    alt: `${project.name} - Project Screenshot`,
+                }
+            ] : [
+                {
+                    url: `${baseUrl}/coding2.png`,
+                    alt: project.name,
+                }
+            ],
         },
-        canonical: projectUrl,
+        alternates: {
+            canonical: projectUrl,
+        },
         robots: {
             index: true,
             follow: true,
+            nocache: true,
             googleBot: {
                 index: true,
                 follow: true,
@@ -116,6 +162,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
                 "max-image-preview": "large",
                 "max-video-preview": -1,
             },
+        },
+        other: {
+            "project:category": project.category,
+            "project:tech_stack": project.tech_stack.join(", "),
+            "project:url": project.url || "",
         },
     };
 }
@@ -131,6 +182,70 @@ export default async function ProjectDetailPage({
     if (!project) {
         notFound();
     }
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np";
+    const projectUrl = `${baseUrl}/projects/${slug}`;
+
+    // Structured data for the project
+    const projectSchema = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: project.name,
+        description: project.description.replace(/<[^>]*>/g, ""),
+        url: projectUrl,
+        image: project.cover_image_url || `${baseUrl}/coding2.png`,
+        author: {
+            "@type": "Person",
+            name: "Bishnu BK",
+            url: baseUrl,
+        },
+        creator: {
+            "@type": "Person",
+            name: "Bishnu BK",
+            url: baseUrl,
+        },
+        dateCreated: project.created_at,
+        dateModified: project.updated_at || project.created_at,
+        genre: project.category,
+        keywords: project.tech_stack.join(", "),
+        mainEntity: {
+            "@type": "SoftwareApplication",
+            name: project.name,
+            applicationCategory: "WebApplication",
+            operatingSystem: "Web Browser",
+            url: project.url,
+        },
+        isPartOf: {
+            "@type": "WebSite",
+            name: "Bishnu BK Portfolio",
+            url: baseUrl,
+        },
+    };
+
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: baseUrl,
+            },
+            {
+                "@type": "ListItem",
+                position: 2,
+                name: "Projects",
+                item: `${baseUrl}/projects`,
+            },
+            {
+                "@type": "ListItem",
+                position: 3,
+                name: project.name,
+                item: projectUrl,
+            },
+        ],
+    };
 
     // Get gallery images with titles, fallback to legacy format
     const getGalleryImages = () => {
@@ -263,103 +378,119 @@ export default async function ProjectDetailPage({
     ];
 
     return (
-        <div className="min-h-screen bg-black pt-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Back Button */}
-                <AnimatedSection animation="slideRight">
-                    <Link
-                        href="/projects"
-                        className="flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all text-gray-300 hover:text-white hover:bg-gray-800"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                        Back to Projects
-                    </Link>
-                </AnimatedSection>
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(projectSchema) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
 
-                {/* Hero Section */}
-                <div className="mb-12">
-                    <AnimatedSection animation="fadeIn" delay={0.2}>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                            <div>
-                                <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                                    {project.name}
-                                </h1>
-                                <div
-                                    className="text-xl prose prose-xl max-w-none prose-invert text-gray-300"
-                                    dangerouslySetInnerHTML={{ __html: project.description }}
-                                />
+            <div className="min-h-screen bg-black pt-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    {/* Back Button */}
+                    <AnimatedSection animation="slideRight">
+                        <nav aria-label="Breadcrumb">
+                            <Link
+                                href="/projects"
+                                className="flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all text-gray-300 hover:text-white hover:bg-gray-800"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                                Back to Projects
+                            </Link>
+                        </nav>
+                    </AnimatedSection>
+
+                    {/* Hero Section */}
+                    <div className="mb-12">
+                        <AnimatedSection animation="fadeIn" delay={0.2}>
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                                <div>
+                                    <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                                        {project.name}
+                                    </h1>
+                                    <div
+                                        className="text-xl prose prose-xl max-w-none prose-invert text-gray-300"
+                                        dangerouslySetInnerHTML={{ __html: project.description }}
+                                    />
+                                </div>
+
+                                <div className="flex gap-4">
+                                    {project.url && (
+                                        <MovingBorder
+                                            as="a"
+                                            href={project.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            duration={3000}
+                                            className="px-6 py-3 rounded-full flex items-center gap-2"
+                                            aria-label={`Visit ${project.name} project`}
+                                        >
+                                            <ExternalLink className="w-5 h-5" />
+                                            Visit Project
+                                        </MovingBorder>
+                                    )}
+                                </div>
                             </div>
+                        </AnimatedSection>
 
-                            <div className="flex gap-4">
-                                <MovingBorder
-                                    as="a"
-                                    href={project.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    duration={3000}
-                                    className="px-6 py-3 rounded-full flex items-center gap-2"
+                        {/* Tech Stack Badges */}
+                        <StaggeredContainer className="flex flex-wrap gap-2 mb-8" staggerDelay={0.1}>
+                            {project.tech_stack.map((tech, index) => (
+                                <span
+                                    key={index}
+                                    className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
                                 >
-                                    <ExternalLink className="w-5 h-5" />
-                                    Visit Project
-                                </MovingBorder>
+                                    {tech}
+                                </span>
+                            ))}
+                        </StaggeredContainer>
+                    </div>
+
+                    {/* Image Carousel */}
+                    <AnimatedSection animation="scaleIn" delay={0.4} className="mb-12">
+                        <ImageCarousel images={allImages} alt={project.name} />
+                    </AnimatedSection>
+
+                    {/* Tabs Section */}
+                    <AnimatedSection animation="slideUp" delay={0.5} className="mb-12">
+                        <Tabs
+                            tabs={tabs}
+                            containerClassName="mb-8"
+                            activeTabClassName="bg-gradient-to-r from-blue-500 to-purple-600"
+                        />
+                    </AnimatedSection>
+
+                    {/* Call to Action */}
+                    <AnimatedSection animation="fadeIn" delay={0.6}>
+                        <div className="mt-16 p-8 rounded-2xl text-center bg-gray-900">
+                            <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
+                            <h3 className="text-2xl font-bold mb-4 text-white">
+                                Interested in Similar Projects?
+                            </h3>
+                            <p className="mb-6 text-gray-300">
+                                Check out more of my work or get in touch to discuss your project
+                            </p>
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                <Link
+                                    href="/#projects"
+                                    className="px-6 py-3 rounded-full font-semibold transition-all bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                    View All Projects
+                                </Link>
+                                <Link
+                                    href="/#contact"
+                                    className="px-6 py-3 rounded-full font-semibold border-2 transition-all border-gray-700 text-white hover:bg-gray-800"
+                                >
+                                    Contact Me
+                                </Link>
                             </div>
                         </div>
                     </AnimatedSection>
-
-                    {/* Tech Stack Badges */}
-                    <StaggeredContainer className="flex flex-wrap gap-2 mb-8" staggerDelay={0.1}>
-                        {project.tech_stack.map((tech, index) => (
-                            <span
-                                key={index}
-                                className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
-                            >
-                                {tech}
-                            </span>
-                        ))}
-                    </StaggeredContainer>
                 </div>
-
-                {/* Image Carousel */}
-                <AnimatedSection animation="scaleIn" delay={0.4} className="mb-12">
-                    <ImageCarousel images={allImages} alt={project.name} />
-                </AnimatedSection>
-
-                {/* Tabs Section */}
-                <AnimatedSection animation="slideUp" delay={0.5} className="mb-12">
-                    <Tabs
-                        tabs={tabs}
-                        containerClassName="mb-8"
-                        activeTabClassName="bg-gradient-to-r from-blue-500 to-purple-600"
-                    />
-                </AnimatedSection>
-
-                {/* Call to Action */}
-                <AnimatedSection animation="fadeIn" delay={0.6}>
-                    <div className="mt-16 p-8 rounded-2xl text-center bg-gray-900">
-                        <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
-                        <h3 className="text-2xl font-bold mb-4 text-white">
-                            Interested in Similar Projects?
-                        </h3>
-                        <p className="mb-6 text-gray-300">
-                            Check out more of my work or get in touch to discuss your project
-                        </p>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <Link
-                                href="/#projects"
-                                className="px-6 py-3 rounded-full font-semibold transition-all bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                                View All Projects
-                            </Link>
-                            <Link
-                                href="/#contact"
-                                className="px-6 py-3 rounded-full font-semibold border-2 transition-all border-gray-700 text-white hover:bg-gray-800"
-                            >
-                                Contact Me
-                            </Link>
-                        </div>
-                    </div>
-                </AnimatedSection>
             </div>
-        </div>
+        </>
     );
 }

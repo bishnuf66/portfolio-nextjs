@@ -1,14 +1,45 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        "https://www.bishnubk.com.np";
+
     return {
         rules: [
             {
                 userAgent: "*",
                 allow: "/",
-                disallow: ["/api/", "/dashboard/", "/login/"],
+                disallow: [
+                    "/api/",
+                    "/admin/",
+                    "/_next/",
+                    "/private/",
+                    "*.json",
+                    "/search",
+                ],
+            },
+            {
+                userAgent: "GPTBot",
+                disallow: "/",
+            },
+            {
+                userAgent: "ChatGPT-User",
+                disallow: "/",
+            },
+            {
+                userAgent: "CCBot",
+                disallow: "/",
+            },
+            {
+                userAgent: "anthropic-ai",
+                disallow: "/",
+            },
+            {
+                userAgent: "Claude-Web",
+                disallow: "/",
             },
         ],
-        sitemap: "https://www.bishnubk.com.np/sitemap.xml",
+        sitemap: `${baseUrl}/sitemap.xml`,
+        host: baseUrl,
     };
 }

@@ -9,8 +9,6 @@ import { AuthProvider } from "@/components/AuthProvider";
 import QueryProvider from "@/components/QueryProvider";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
-import SmoothScrollProvider from "@/components/SmoothScrollProvider";
-import SimpleCursor from "@/components/SimpleCursor";
 import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 
@@ -51,14 +49,37 @@ export const metadata: Metadata = {
     "Three.js",
     "Web Development",
     "Nepal Developer",
+    "UI/UX Design",
+    "API Development",
+    "Database Design",
+    "Responsive Design",
+    "Performance Optimization",
   ],
   authors: [{ name: "Bishnu BK", url: "https://www.bishnubk.com.np" }],
   creator: "Bishnu BK",
   publisher: "Bishnu BK",
+  applicationName: "Bishnu BK Portfolio",
+  referrer: "origin-when-cross-origin",
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#111827" },
+  ],
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Bishnu BK Portfolio",
   },
   openGraph: {
     type: "website",
@@ -73,7 +94,15 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
+        alt: "Bishnu BK - Full Stack Developer Portfolio",
+        type: "image/jpeg",
+      },
+      {
+        url: "/og-image-square.jpg",
+        width: 400,
+        height: 400,
         alt: "Bishnu BK - Full Stack Developer",
+        type: "image/jpeg",
       },
     ],
   },
@@ -83,27 +112,62 @@ export const metadata: Metadata = {
     description:
       "Professional portfolio of Bishnu BK - Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies.",
     creator: "@bishnubk",
-    images: ["/og-image.jpg"],
+    site: "@bishnubk",
+    images: [
+      {
+        url: "/og-image.jpg",
+        alt: "Bishnu BK - Full Stack Developer Portfolio",
+      },
+    ],
   },
   robots: {
     index: true,
     follow: true,
+    nocache: true,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#3b82f6",
+      },
+    ],
+  },
   verification: {
     google:
       "google-site-verification=4fLQ3r82bIt2QQeYAGicv9sAG2rTL7zCRzXWBxVS_Og",
+    yandex: "verification_token_here",
+    yahoo: "verification_token_here",
   },
   alternates: {
     canonical: "https://www.bishnubk.com.np",
+    languages: {
+      "en-US": "https://www.bishnubk.com.np",
+      "x-default": "https://www.bishnubk.com.np",
+    },
   },
   category: "technology",
+  classification: "Portfolio Website",
+  other: {
+    "msapplication-TileColor": "#3b82f6",
+    "msapplication-config": "/browserconfig.xml",
+  },
 };
 
 export default function RootLayout({
@@ -119,10 +183,33 @@ export default function RootLayout({
     jobTitle: "Full Stack Developer",
     description:
       "Full Stack Developer specializing in React, Next.js, Node.js, and modern web technologies",
+    image: "https://www.bishnubk.com.np/og-image.jpg",
+    email: "contact@bishnubk.com.np",
+    knowsAbout: [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Node.js",
+      "MongoDB",
+      "PostgreSQL",
+      "Web Development",
+      "Full Stack Development",
+      "UI/UX Design"
+    ],
     sameAs: [
       "https://github.com/bishnuf66",
       "https://linkedin.com/in/bishnubk",
+      "https://twitter.com/bishnubk"
     ],
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "Nepal"
+    },
+    worksFor: {
+      "@type": "Organization",
+      name: "Freelance Developer"
+    }
   };
 
   const websiteSchema = {
@@ -136,11 +223,73 @@ export default function RootLayout({
       "@type": "Person",
       name: "Bishnu BK",
     },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://www.bishnubk.com.np/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    mainEntity: {
+      "@type": "Person",
+      name: "Bishnu BK"
+    }
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: "Bishnu BK - Web Development Services",
+    url: "https://www.bishnubk.com.np",
+    logo: "https://www.bishnubk.com.np/logo.png",
+    description: "Professional web development services specializing in modern technologies",
+    founder: {
+      "@type": "Person",
+      name: "Bishnu BK"
+    },
+    serviceType: "Web Development",
+    areaServed: "Worldwide",
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Web Development Services",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Full Stack Development"
+          }
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Frontend Development"
+          }
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Backend Development"
+          }
+        }
+      ]
+    }
   };
 
   return (
-    <html lang="en">
+    <html lang="en" dir="ltr">
       <head>
+        {/* Preconnect to external domains for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="//www.google-analytics.com" />
+
+        {/* Structured Data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
@@ -149,10 +298,39 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+
+        {/* Additional meta tags for better SEO */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Bishnu BK Portfolio" />
+
+        {/* Security headers */}
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+        <meta httpEquiv="X-Frame-Options" content="DENY" />
+        <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
+
+        {/* Performance hints */}
+        <link rel="preload" href="/fonts/geist-sans.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/geist-mono.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        suppressHydrationWarning={true}
       >
+        {/* Skip navigation for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-md focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
+
         {/* <SmoothScrollProvider> */}
         <QueryProvider>
           <AuthProvider>
@@ -160,7 +338,9 @@ export default function RootLayout({
               <AnalyticsProvider>
                 <ScrollProgressBar />
                 <Header />
-                {children}
+                <main id="main-content" role="main">
+                  {children}
+                </main>
                 <Footer />
                 <ConsentManager />
                 <CustomCursor />

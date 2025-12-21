@@ -1,59 +1,57 @@
 import { MetadataRoute } from "next";
+import { getSupabase } from "@/lib/supabase";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = "https://www.bishnubk.com.np";
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+        "https://www.bishnubk.com.np";
 
-    // Static routes
-    const routes = [
-        "",
-        "/projects",
-        "/blog",
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: route === "" ? 1 : 0.8,
-    }));
+    // Static pages
+    const staticPages = [
+        {
+            url: baseUrl,
+            lastModified: new Date(),
+            changeFrequency: "weekly" as const,
+            priority: 1,
+        },
+        {
+            url: `${baseUrl}/projects`,
+            lastModified: new Date(),
+            changeFrequency: "weekly" as const,
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: new Date(),
+            changeFrequency: "daily" as const,
+            priority: 0.8,
+        },
+    ];
 
-    // Fetch dynamic blog posts
-    let blogPosts: any[] = [];
-    try {
-        const response = await fetch(`${baseUrl}/api/blog`, {
-            next: { revalidate: 3600 },
-        });
-        if (response.ok) {
-            blogPosts = await response.json();
-        }
-    } catch (error) {
-        console.error("Error fetching blog posts for sitemap:", error);
-    }
+    // Dynamic blog pages
+    const supabase = getSupabase();
+    const { data: blogs } = await supabase
+        .from("blogs")
+        .select("slug, created_at, updated_at")
+        .eq("published", true);
 
-    const blogRoutes = blogPosts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.updated_at || post.created_at),
+    const blogPages = blogs?.map((blog) => ({
+        url: `${baseUrl}/blog/${blog.slug}`,
+        lastModified: new Date(blog.updated_at || blog.created_at),
         changeFrequency: "monthly" as const,
         priority: 0.6,
-    }));
+    })) || [];
 
-    // Fetch dynamic projects
-    let projects: any[] = [];
-    try {
-        const response = await fetch(`${baseUrl}/api/projects`, {
-            next: { revalidate: 3600 },
-        });
-        if (response.ok) {
-            projects = await response.json();
-        }
-    } catch (error) {
-        console.error("Error fetching projects for sitemap:", error);
-    }
+    // Dynamic project pages
+    const { data: projects } = await supabase
+        .from("projects")
+        .select("slug, created_at, updated_at");
 
-    const projectRoutes = projects.map((project) => ({
+    const projectPages = projects?.map((project) => ({
         url: `${baseUrl}/projects/${project.slug}`,
         lastModified: new Date(project.updated_at || project.created_at),
         changeFrequency: "monthly" as const,
         priority: 0.7,
-    }));
+    })) || [];
 
-    return [...routes, ...blogRoutes, ...projectRoutes];
+    return [...staticPages, ...blogPages, ...projectPages];
 }
