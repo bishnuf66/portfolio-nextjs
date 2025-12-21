@@ -108,6 +108,11 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
         }
     }
 
+    // Don't track analytics for dashboard pages
+    if (pagePath.startsWith("/dashboard")) {
+        return;
+    }
+
     try {
         const sessionId = getSessionId();
         const visitorId = getVisitorId();
@@ -199,6 +204,14 @@ export const trackSectionInteraction = async (
         }
     }
 
+    // Don't track interactions on dashboard pages
+    if (
+        typeof window !== "undefined" &&
+        window.location.pathname.startsWith("/dashboard")
+    ) {
+        return;
+    }
+
     // Throttle: prevent duplicate tracking within 5 seconds
     const cacheKey = `${sectionName}-${interactionType}-${
         JSON.stringify(metadata)
@@ -233,6 +246,11 @@ export const trackSectionInteraction = async (
 
 // Track time on page
 export const trackTimeOnPage = (pagePath: string) => {
+    // Don't track time on dashboard pages
+    if (pagePath.startsWith("/dashboard")) {
+        return () => {}; // Return empty cleanup function
+    }
+
     const startTime = Date.now();
 
     const updateDuration = async () => {

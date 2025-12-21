@@ -22,6 +22,11 @@ export default function AnalyticsProvider({
             return; // Don't track if cookies not accepted
         }
 
+        // Don't track analytics for dashboard pages
+        if (pathname.startsWith("/dashboard")) {
+            return;
+        }
+
         // Track page view
         trackPageView(pathname);
 
