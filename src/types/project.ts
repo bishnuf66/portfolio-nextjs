@@ -1,3 +1,8 @@
+export interface GalleryImageWithTitle {
+    url: string;
+    title: string;
+}
+
 export type Project = {
     id?: string;
     name: string;
@@ -9,6 +14,7 @@ export type Project = {
     is_featured: boolean;
     cover_image_url: string;
     gallery_images: string[];
+    gallery_images_with_titles?: GalleryImageWithTitle[]; // New enhanced gallery
     created_at?: string;
     updated_at?: string;
 };

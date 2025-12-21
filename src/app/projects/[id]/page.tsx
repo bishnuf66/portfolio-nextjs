@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useStore from "@/store/store";
-import { Project } from "@/lib/supabase";
+import { Project } from "@/types/project";
 import { ImageCarousel } from "@/components/ui/ImageCarousel";
 import { Tabs } from "@/components/ui/AnimatedTabs";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
@@ -35,10 +35,10 @@ export default function ProjectDetailPage() {
     }, [params.id]);
 
     useEffect(() => {
-        if (project) {
+        if (project && project.id) {
             // Track project view
             import("@/lib/analytics").then(({ trackProjectView }) => {
-                trackProjectView(project.id);
+                trackProjectView(project.id!);
             });
         }
     }, [project]);
@@ -83,9 +83,19 @@ export default function ProjectDetailPage() {
         return null;
     }
 
+    // Get gallery images with titles, fallback to legacy format
+    const getGalleryImages = () => {
+        if (project.gallery_images_with_titles && project.gallery_images_with_titles.length > 0) {
+            return project.gallery_images_with_titles;
+        }
+        // Fallback to legacy format
+        return (project.gallery_images || []).map(url => ({ url, title: "" }));
+    };
+
+    const galleryImagesWithTitles = getGalleryImages();
     const allImages = [
         project.cover_image_url || "/project-images/placeholder.png",
-        ...(project.gallery_images || []),
+        ...galleryImagesWithTitles.map(img => img.url),
     ];
 
     const tabs = [
@@ -127,7 +137,7 @@ export default function ProjectDetailPage() {
                                     className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
                                         }`}
                                 >
-                                    Created: {new Date(project.created_at).toLocaleDateString()}
+                                    Created: {project.created_at ? new Date(project.created_at).toLocaleDateString() : "Unknown"}
                                 </p>
                             </div>
                         </BackgroundGradient>
@@ -201,26 +211,35 @@ export default function ProjectDetailPage() {
                     >
                         Project Gallery
                     </h3>
-                    {project.gallery_images && project.gallery_images.length > 0 ? (
+                    {galleryImagesWithTitles.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {project.gallery_images.map((image, index) => (
+                            {galleryImagesWithTitles.map((imageWithTitle, index) => (
                                 <div
                                     key={index}
-                                    className="relative h-64 rounded-2xl overflow-hidden group cursor-pointer"
+                                    className="relative rounded-2xl overflow-hidden group cursor-pointer"
                                     onClick={() => {
                                         setCurrentImageIndex(index);
                                         setIsModalOpen(true);
                                     }}
                                 >
-                                    <Image
-                                        src={image}
-                                        alt={`${project.name} - Gallery ${index + 1}`}
-                                        fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
-                                        <Maximize2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="relative h-64">
+                                        <Image
+                                            src={imageWithTitle.url}
+                                            alt={imageWithTitle.title || `${project.name} - Gallery ${index + 1}`}
+                                            fill
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">
+                                            <Maximize2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        </div>
                                     </div>
+                                    {imageWithTitle.title && (
+                                        <div className={`p-3 ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
+                                            <p className={`text-sm font-medium ${isDarkMode ? "text-gray-200" : "text-gray-800"}`}>
+                                                {imageWithTitle.title}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -242,7 +261,7 @@ export default function ProjectDetailPage() {
             <ImageModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                images={project.gallery_images || []}
+                images={galleryImagesWithTitles.map(img => img.url)}
                 currentIndex={currentImageIndex}
                 onNavigate={setCurrentImageIndex}
                 alt={project.name}

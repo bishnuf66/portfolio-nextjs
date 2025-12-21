@@ -63,7 +63,7 @@ export function validateProjectData(data: any): {
         errors.push("Cover image URL must be a string");
     }
 
-    // Validate gallery_images (optional)
+    // Validate gallery_images (optional, for backward compatibility)
     if (data.gallery_images) {
         if (!Array.isArray(data.gallery_images)) {
             errors.push("Gallery images must be an array");
@@ -75,6 +75,29 @@ export function validateProjectData(data: any): {
             );
             if (invalidImages.length > 0) {
                 errors.push("Each gallery image must be a string URL");
+            }
+        }
+    }
+
+    // Validate gallery_images_with_titles (optional, new enhanced format)
+    if (data.gallery_images_with_titles) {
+        if (!Array.isArray(data.gallery_images_with_titles)) {
+            errors.push("Gallery images with titles must be an array");
+        } else if (data.gallery_images_with_titles.length > 10) {
+            errors.push("Maximum 10 gallery images with titles allowed");
+        } else {
+            const invalidImages = data.gallery_images_with_titles.filter(
+                (img: any) =>
+                    !img ||
+                    typeof img !== "object" ||
+                    typeof img.url !== "string" ||
+                    typeof img.title !== "string" ||
+                    img.title.length > 200,
+            );
+            if (invalidImages.length > 0) {
+                errors.push(
+                    "Each gallery image must have a valid URL and title (max 200 characters)",
+                );
             }
         }
     }

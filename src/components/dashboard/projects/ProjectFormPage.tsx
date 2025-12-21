@@ -14,11 +14,23 @@ type ProjectData = {
     category: "professional" | "personal";
     is_featured: boolean;
     cover_image_url: string;
-    gallery_images: string[];
+    gallery_images: string[]; // Keep for backward compatibility
+    gallery_images_with_titles?: GalleryImageWithTitle[]; // New enhanced gallery
 };
 
+interface GalleryImageWithTitle {
+    url: string;
+    title: string;
+}
+
+interface PendingGalleryImage {
+    file: File;
+    title: string;
+    preview: string;
+}
+
 interface ProjectFormPageProps {
-    initialData?: ProjectData;
+    initialData?: ProjectData & { id?: string }; // Add id for existing projects
     onSubmit: (data: ProjectData) => Promise<void>;
     onCancel: () => void;
     uploading: boolean;
@@ -42,11 +54,12 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
         is_featured: initialData?.is_featured || false,
         cover_image_url: initialData?.cover_image_url || "",
         gallery_images: initialData?.gallery_images || [],
+        gallery_images_with_titles: initialData?.gallery_images_with_titles || [],
     });
 
     const [pendingUploads, setPendingUploads] = useState<{
         cover: File | null;
-        gallery: File[];
+        gallery: PendingGalleryImage[];
     }>({ cover: null, gallery: [] });
 
     const [uploadStates, setUploadStates] = useState<{
@@ -142,45 +155,18 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
 
     const handleGalleryImageUpload = async (files: FileList) => {
         const fileArray = Array.from(files);
-        setUploadStates((prev) => ({ ...prev, galleryUploading: true }));
 
-        for (const file of fileArray) {
-            const fileId = `${file.name}-${Date.now()}`;
-            const controller = new AbortController();
-            galleryUploadControllers.current.set(fileId, controller);
+        // Add files to pending uploads immediately for user to add titles
+        const newPendingImages: PendingGalleryImage[] = fileArray.map((file) => ({
+            file,
+            title: "",
+            preview: URL.createObjectURL(file),
+        }));
 
-            // Add preview immediately
-            const previewUrl = URL.createObjectURL(file);
-            setFormData((prev) => ({
-                ...prev,
-                gallery_images: [...prev.gallery_images, previewUrl],
-            }));
-
-            try {
-                const uploadedUrl = await handleImageUpload(file, controller.signal);
-
-                // Replace preview with actual URL
-                setFormData((prev) => ({
-                    ...prev,
-                    gallery_images: prev.gallery_images.map((url) =>
-                        url === previewUrl ? uploadedUrl : url
-                    ),
-                }));
-            } catch (error: unknown) {
-                if (error instanceof Error && error.name !== 'AbortError') {
-                    console.error("Gallery image upload failed:", error);
-                    // Remove failed image from gallery
-                    setFormData((prev) => ({
-                        ...prev,
-                        gallery_images: prev.gallery_images.filter((url) => url !== previewUrl),
-                    }));
-                }
-            } finally {
-                galleryUploadControllers.current.delete(fileId);
-            }
-        }
-
-        setUploadStates((prev) => ({ ...prev, galleryUploading: false }));
+        setPendingUploads((prev) => ({
+            ...prev,
+            gallery: [...prev.gallery, ...newPendingImages],
+        }));
     };
 
     const cancelAllGalleryUploads = () => {
@@ -197,20 +183,123 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
         }));
     };
 
-    const removeCoverImage = () => {
+    const removeCoverImage = async () => {
         // Cancel upload if in progress
         if (uploadStates.coverUploading) {
             cancelCoverUpload();
         } else {
+            const currentCoverUrl = formData.cover_image_url;
+
+            // If editing an existing project and has a cover image, delete from storage
+            if (currentCoverUrl && initialData?.id && !currentCoverUrl.startsWith("blob:")) {
+                try {
+                    const token = localStorage.getItem("supabase_token");
+                    const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(currentCoverUrl)}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        console.error("Failed to delete cover image from storage");
+                    }
+                } catch (error) {
+                    console.error("Error deleting cover image:", error);
+                }
+            }
+
+            // Remove from local state regardless of API call result
             setFormData((prev) => ({ ...prev, cover_image_url: "" }));
             setPendingUploads((prev) => ({ ...prev, cover: null }));
         }
     };
 
-    const removeGalleryImage = (index: number) => {
+    const removeGalleryImage = async (index: number) => {
+        const imageUrl = formData.gallery_images[index];
+        if (imageUrl && initialData?.id) {
+            // Call API to remove from database and storage
+            try {
+                const token = localStorage.getItem("supabase_token");
+                const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(imageUrl)}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    console.error("Failed to delete image from storage");
+                }
+            } catch (error) {
+                console.error("Error deleting image:", error);
+            }
+        }
+
+        // Remove from local state regardless of API call result
         setFormData((prev) => ({
             ...prev,
             gallery_images: prev.gallery_images.filter((_, i) => i !== index),
+        }));
+    };
+
+    // New helper functions for gallery images with titles
+    const updatePendingGalleryTitle = (index: number, title: string) => {
+        setPendingUploads((prev) => ({
+            ...prev,
+            gallery: prev.gallery.map((img, i) =>
+                i === index ? { ...img, title } : img
+            ),
+        }));
+    };
+
+    const removePendingGalleryImage = (index: number) => {
+        setPendingUploads((prev) => {
+            const imageToRemove = prev.gallery[index];
+            if (imageToRemove?.preview) {
+                URL.revokeObjectURL(imageToRemove.preview); // Clean up memory
+            }
+            return {
+                ...prev,
+                gallery: prev.gallery.filter((_, i) => i !== index),
+            };
+        });
+    };
+
+    const removeGalleryImageWithTitle = async (index: number) => {
+        const imageWithTitle = formData.gallery_images_with_titles?.[index];
+        if (imageWithTitle && initialData?.id) {
+            // Call API to remove from database and storage
+            try {
+                const token = localStorage.getItem("supabase_token");
+                const response = await fetch(`/api/projects/${initialData.id}/images?url=${encodeURIComponent(imageWithTitle.url)}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    console.error("Failed to delete image from storage");
+                }
+            } catch (error) {
+                console.error("Error deleting image:", error);
+            }
+        }
+
+        // Remove from local state regardless of API call result
+        setFormData((prev) => ({
+            ...prev,
+            gallery_images_with_titles: prev.gallery_images_with_titles?.filter((_, i) => i !== index) || [],
+        }));
+    };
+
+    const updateGalleryImageTitle = (index: number, title: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            gallery_images_with_titles: prev.gallery_images_with_titles?.map((img, i) =>
+                i === index ? { ...img, title } : img
+            ) || [],
         }));
     };
 
@@ -219,23 +308,36 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
 
         try {
             let finalCoverUrl = formData.cover_image_url;
-            const finalGalleryUrls = [...formData.gallery_images.filter((url) => !url.startsWith("blob:"))];
+            const finalGalleryImagesWithTitles: GalleryImageWithTitle[] = [
+                ...(formData.gallery_images_with_titles || [])
+            ];
 
             // Upload pending cover image
             if (pendingUploads.cover) {
                 finalCoverUrl = await handleImageUpload(pendingUploads.cover);
             }
 
-            // Upload pending gallery images
-            for (const file of pendingUploads.gallery) {
-                const url = await handleImageUpload(file);
-                if (url) finalGalleryUrls.push(url);
+            // Upload pending gallery images with titles
+            for (const pendingImage of pendingUploads.gallery) {
+                if (pendingImage.file) {
+                    const url = await handleImageUpload(pendingImage.file);
+                    if (url) {
+                        finalGalleryImagesWithTitles.push({
+                            url,
+                            title: pendingImage.title || "",
+                        });
+                    }
+                }
             }
+
+            // Create backward-compatible gallery_images array
+            const finalGalleryUrls = finalGalleryImagesWithTitles.map(img => img.url);
 
             const projectData = {
                 ...formData,
                 cover_image_url: finalCoverUrl.startsWith("blob:") ? "" : finalCoverUrl,
-                gallery_images: finalGalleryUrls,
+                gallery_images: finalGalleryUrls, // Backward compatibility
+                gallery_images_with_titles: finalGalleryImagesWithTitles, // New enhanced format
             };
 
             await onSubmit(projectData);
@@ -511,9 +613,103 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                     </div>
                                 )}
 
-                                {formData.gallery_images.length > 0 && (
+                                {/* Pending Gallery Images with Title Inputs */}
+                                {pendingUploads.gallery.length > 0 && (
                                     <div>
-                                        <p className="text-sm font-medium mb-2">Gallery Preview:</p>
+                                        <p className="text-sm font-medium mb-2">Pending Gallery Images:</p>
+                                        <div className="space-y-3">
+                                            {pendingUploads.gallery.map((pendingImage, index) => (
+                                                <div key={index} className="flex items-start gap-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-700">
+                                                    <div className="relative">
+                                                        <Image
+                                                            src={pendingImage.preview}
+                                                            alt={`Pending ${index + 1}`}
+                                                            width={80}
+                                                            height={80}
+                                                            className="w-20 h-20 object-cover rounded border"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removePendingGalleryImage(index)}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                            aria-label={`Remove pending image ${index + 1}`}
+                                                        >
+                                                            <X size={12} />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="block text-sm font-medium mb-1">
+                                                            Image Title (Optional)
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={pendingImage.title}
+                                                            onChange={(e) => updatePendingGalleryTitle(index, e.target.value)}
+                                                            placeholder="Enter a title for this image..."
+                                                            className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                                                                ? "bg-gray-600 border-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                                                                : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                                } focus:outline-none focus:ring-1`}
+                                                        />
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                            File: {pendingImage.file.name}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Existing Gallery Images with Titles */}
+                                {formData.gallery_images_with_titles && formData.gallery_images_with_titles.length > 0 && (
+                                    <div>
+                                        <p className="text-sm font-medium mb-2">Current Gallery Images:</p>
+                                        <div className="space-y-3">
+                                            {formData.gallery_images_with_titles.map((imageWithTitle, index) => (
+                                                <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                                                    <div className="relative">
+                                                        <Image
+                                                            src={imageWithTitle.url}
+                                                            alt={imageWithTitle.title || `Gallery ${index + 1}`}
+                                                            width={80}
+                                                            height={80}
+                                                            className="w-20 h-20 object-cover rounded border"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeGalleryImageWithTitle(index)}
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                                            aria-label={`Remove gallery image ${index + 1}`}
+                                                        >
+                                                            <X size={12} />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="block text-sm font-medium mb-1">
+                                                            Image Title (Optional)
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={imageWithTitle.title}
+                                                            onChange={(e) => updateGalleryImageTitle(index, e.target.value)}
+                                                            placeholder="Enter a title for this image..."
+                                                            className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
+                                                                ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                                                                : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                                } focus:outline-none focus:ring-1`}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Legacy Gallery Images (for backward compatibility) */}
+                                {formData.gallery_images.length > 0 && (!formData.gallery_images_with_titles || formData.gallery_images_with_titles.length === 0) && (
+                                    <div>
+                                        <p className="text-sm font-medium mb-2">Gallery Preview (Legacy):</p>
                                         <div className="flex flex-wrap gap-3">
                                             {formData.gallery_images.map((url, index) => (
                                                 <div key={index} className="relative group">

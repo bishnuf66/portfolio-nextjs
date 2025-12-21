@@ -4,6 +4,7 @@ import { supabasePublic } from "@/lib/supabase-public";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateProjectData } from "@/lib/validation";
+import { cleanupProjectImages } from "@/lib/storage-cleanup";
 import { Database } from "@/lib/database.types";
 
 type ProjectUpdateData = Database["public"]["Tables"]["projects"]["Update"];
@@ -170,18 +171,49 @@ export async function DELETE(
     // Create an authenticated client with the user's token for RLS
     const authenticatedSupabase = createAuthenticatedClient(token);
 
-    const { error } = await authenticatedSupabase
+    // First, get the project data to clean up associated images
+    const { data: project, error: fetchError } = await authenticatedSupabase
+      .from("projects")
+      .select("cover_image_url, gallery_images, gallery_images_with_titles")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching project for cleanup:", fetchError);
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+
+    // Delete the project from database first
+    const { error: deleteError } = await authenticatedSupabase
       .from("projects")
       .delete()
       .eq("id", id);
 
-    if (error) {
-      console.error("Delete error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
     }
 
-    console.log("Project deleted successfully");
-    return NextResponse.json({ message: "Project deleted successfully" });
+    console.log("Project deleted from database successfully");
+
+    // Clean up associated images from storage
+    if (project) {
+      const cleanupResult = await cleanupProjectImages(project);
+      if (!cleanupResult.success) {
+        console.warn(
+          "Some images could not be deleted from storage:",
+          cleanupResult.errors,
+        );
+        // Don't fail the request if storage cleanup fails, just log it
+      } else {
+        console.log("All project images cleaned up from storage successfully");
+      }
+    }
+
+    return NextResponse.json({
+      message: "Project deleted successfully",
+      storageCleanup: project ? "completed" : "skipped",
+    });
   } catch (error) {
     console.error("Delete catch error:", error);
     return NextResponse.json(
