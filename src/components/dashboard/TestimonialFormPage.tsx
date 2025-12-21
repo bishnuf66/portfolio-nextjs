@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ArrowLeft, Star, X } from "lucide-react";
 import Image from "next/image";
+import { colorScheme } from "@/utils/colorUtils";
 
 interface TestimonialFormPageProps {
     initialData?: any;
@@ -64,8 +65,7 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
 
     return (
         <div
-            className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-                }`}
+            className={`min-h-screen ${colorScheme.page}`}
         >
             <div className="max-w-3xl mx-auto p-8 pt-24">
                 <button
@@ -77,8 +77,7 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                 </button>
 
                 <div
-                    className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                        } rounded-lg shadow-xl p-8`}
+                    className={`${colorScheme.background.primary} rounded-lg shadow-xl p-8`}
                 >
                     <h1 className="text-3xl font-bold mb-8">
                         {initialData ? "Edit Testimonial" : "Add New Testimonial"}

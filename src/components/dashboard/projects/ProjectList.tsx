@@ -4,6 +4,7 @@ import { Star, Edit2, Trash2, Search, SortAsc, SortDesc, Filter, X } from "lucid
 import { Project } from "@/lib/supabase";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
+import { colorScheme } from "@/utils/colorUtils";
 
 interface ProjectListProps {
   projects: Project[];

@@ -68,7 +68,7 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+      className={`min-h-screen ${isDarkMode ? " text-white" : " text-gray-900"
         }`}
     >
       <div className="max-w-4xl mx-auto p-8 pt-24">
@@ -107,8 +107,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   }));
                 }}
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
             </div>
@@ -123,8 +123,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   setFormData((prev) => ({ ...prev, slug: e.target.value }))
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
             </div>
@@ -142,8 +142,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   }))
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
             </div>
@@ -182,8 +182,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   }
                 }}
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
               {formData.cover_image_url && (
@@ -211,8 +211,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   }))
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
             </div>
@@ -229,8 +229,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   setFormData((prev) => ({ ...prev, tags: e.target.value }))
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                    ? "bg-gray-700 border-gray-600"
-                    : "bg-white border-gray-300"
+                  ? "bg-gray-700 border-gray-600"
+                  : "bg-white border-gray-300"
                   }`}
               />
             </div>
