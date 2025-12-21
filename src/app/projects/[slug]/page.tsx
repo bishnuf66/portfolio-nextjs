@@ -1,5 +1,6 @@
-import React from "react";
-import { supabasePublic } from "@/lib/supabase-public";
+"use client";
+
+import { getSupabase } from "@/lib/supabase";
 import { Project } from "@/types/project";
 import { ImageCarousel } from "@/components/ui/ImageCarousel";
 import { Tabs } from "@/components/ui/AnimatedTabs";
@@ -17,167 +18,68 @@ import Image from "next/image";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import useStore from "@/store/store";
+import { useEffect, useState } from "react";
 
-export const revalidate = 3600; // Revalidate every hour
-
-async function getProject(slug: string): Promise<Project | null> {
-    try {
-        const { data, error } = await supabasePublic()
-            .from("projects")
-            .select("*")
-            .eq("slug", slug)
-            .maybeSingle();
-
-        if (error) {
-            console.error("Failed to fetch project:", error);
-            return null;
-        }
-
-        return data as Project | null;
-    } catch (error) {
-        console.error("Error fetching project:", error);
-        return null;
-    }
-}
-
-async function getAllProjectSlugs(): Promise<string[]> {
-    try {
-        const { data, error } = await supabasePublic()
-            .from("projects")
-            .select("slug");
-
-        if (error || !data) {
-            console.error("Failed to fetch project slugs:", error);
-            return [];
-        }
-
-        return data.map((item: { slug: string }) => item.slug);
-    } catch (error) {
-        console.error("Error fetching project slugs:", error);
-        return [];
-    }
-}
-
-export async function generateStaticParams() {
-    const slugs = await getAllProjectSlugs();
-    return slugs.map((slug) => ({
-        slug,
-    }));
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const project = await getProject(slug);
-
-    if (!project) {
-        return {
-            title: "Project Not Found",
-            description: "The requested project could not be found.",
-            robots: {
-                index: false,
-                follow: false,
-            },
-        };
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np";
-    const projectUrl = `${baseUrl}/projects/${slug}`;
-
-    // Clean HTML and truncate description
-    const cleanDescription = project.description.replace(/<[^>]*>/g, "");
-    const description = cleanDescription.length > 160
-        ? cleanDescription.substring(0, 157) + "..."
-        : cleanDescription;
-
-    return {
-        title: `${project.name} | Portfolio Project`,
-        description,
-        keywords: [
-            ...project.tech_stack,
-            project.category,
-            "portfolio",
-            "project",
-            "web development",
-            "software development",
-            project.name.toLowerCase().replace(/\s+/g, " ")
-        ],
-        authors: [{ name: "Bishnu BK", url: baseUrl }],
-        creator: "Bishnu BK",
-        publisher: "Bishnu BK",
-        category: "Technology",
-        openGraph: {
-            title: project.name,
-            description,
-            url: projectUrl,
-            type: "website",
-            locale: "en_US",
-            siteName: "Bishnu BK Portfolio",
-            images: project.cover_image_url ? [
-                {
-                    url: project.cover_image_url,
-                    width: 1200,
-                    height: 630,
-                    alt: `${project.name} - Project Screenshot`,
-                    type: "image/jpeg",
-                }
-            ] : [
-                {
-                    url: `${baseUrl}/coding2.png`,
-                    width: 1200,
-                    height: 630,
-                    alt: project.name,
-                    type: "image/png",
-                }
-            ],
-        },
-        twitter: {
-            card: "summary_large_image",
-            title: project.name,
-            description,
-            creator: "@bishnubk",
-            site: "@bishnubk",
-            images: project.cover_image_url ? [
-                {
-                    url: project.cover_image_url,
-                    alt: `${project.name} - Project Screenshot`,
-                }
-            ] : [
-                {
-                    url: `${baseUrl}/coding2.png`,
-                    alt: project.name,
-                }
-            ],
-        },
-        alternates: {
-            canonical: projectUrl,
-        },
-        robots: {
-            index: true,
-            follow: true,
-            nocache: true,
-            googleBot: {
-                index: true,
-                follow: true,
-                "max-snippet": -1,
-                "max-image-preview": "large",
-                "max-video-preview": -1,
-            },
-        },
-        other: {
-            "project:category": project.category,
-            "project:tech_stack": project.tech_stack.join(", "),
-            "project:url": project.url || "",
-        },
-    };
-}
-
-export default async function ProjectDetailPage({
-    params,
-}: {
+interface ProjectDetailPageProps {
     params: Promise<{ slug: string }>;
-}) {
-    const { slug } = await params;
-    const project = await getProject(slug);
+}
+
+export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+    const { isDarkMode } = useStore();
+    const [project, setProject] = useState<Project | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [slug, setSlug] = useState<string>("");
+
+    useEffect(() => {
+        const getParams = async () => {
+            const resolvedParams = await params;
+            setSlug(resolvedParams.slug);
+        };
+        getParams();
+    }, [params]);
+
+    useEffect(() => {
+        if (slug) {
+            fetchProject();
+        }
+    }, [slug]);
+
+    const fetchProject = async () => {
+        try {
+            const supabase = getSupabase();
+            const { data, error } = await supabase
+                .from("projects")
+                .select("*")
+                .eq("slug", slug)
+                .maybeSingle();
+
+            if (error) {
+                console.error("Failed to fetch project:", error);
+                setProject(null);
+            } else {
+                setProject(data as Project | null);
+            }
+        } catch (error) {
+            console.error("Error fetching project:", error);
+            setProject(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                        <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Loading project...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!project) {
         notFound();
@@ -269,39 +171,39 @@ export default async function ProjectDetailPage({
             content: (
                 <div className="space-y-6">
                     <div>
-                        <h3 className="text-2xl font-bold mb-4 text-white">
+                        <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                             About This Project
                         </h3>
                         <div
-                            className="text-lg leading-relaxed prose prose-lg max-w-none prose-invert text-gray-300"
+                            className={`text-lg leading-relaxed prose prose-lg max-w-none ${isDarkMode ? 'prose-invert text-gray-300' : 'prose-gray text-gray-700'}`}
                             dangerouslySetInnerHTML={{ __html: project.description }}
                         />
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <BackgroundGradient className="rounded-[22px] p-1">
-                            <div className="p-6 rounded-[20px] bg-black">
+                            <div className={`p-6 rounded-[20px] ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     <Calendar className="w-5 h-5 text-blue-500" />
-                                    <h4 className="font-semibold text-white">
+                                    <h4 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         Timeline
                                     </h4>
                                 </div>
-                                <p className="text-gray-300">
+                                <p className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>
                                     Created: {project.created_at ? new Date(project.created_at).toLocaleDateString() : "Unknown"}
                                 </p>
                             </div>
                         </BackgroundGradient>
 
                         <BackgroundGradient className="rounded-[22px] p-1">
-                            <div className="p-6 rounded-[20px] bg-black">
+                            <div className={`p-6 rounded-[20px] ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     <Tag className="w-5 h-5 text-purple-500" />
-                                    <h4 className="font-semibold text-white">
+                                    <h4 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         Category
                                     </h4>
                                 </div>
-                                <p className="capitalize text-gray-300">
+                                <p className={`capitalize ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                     {project.category}
                                 </p>
                             </div>
@@ -315,15 +217,15 @@ export default async function ProjectDetailPage({
             value: "tech",
             content: (
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-bold mb-4 text-white">
+                    <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Technologies Used
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {project.tech_stack.map((tech, index) => (
                             <BackgroundGradient key={index} className="rounded-[22px] p-1">
-                                <div className="p-4 rounded-[20px] text-center bg-black">
+                                <div className={`p-4 rounded-[20px] text-center ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
                                     <Code2 className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                                    <p className="font-semibold text-white">
+                                    <p className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                         {tech}
                                     </p>
                                 </div>
@@ -338,7 +240,7 @@ export default async function ProjectDetailPage({
             value: "gallery",
             content: (
                 <div className="space-y-6">
-                    <h3 className="text-2xl font-bold mb-4 text-white">
+                    <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         Project Gallery
                     </h3>
                     {galleryImagesWithTitles.length > 0 ? (
@@ -358,8 +260,8 @@ export default async function ProjectDetailPage({
                                         />
                                     </div>
                                     {imageWithTitle.title && (
-                                        <div className="p-3 bg-gray-800">
-                                            <p className="text-sm font-medium text-gray-200">
+                                        <div className={`p-3 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                            <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                                                 {imageWithTitle.title}
                                             </p>
                                         </div>
@@ -368,7 +270,7 @@ export default async function ProjectDetailPage({
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center py-12 text-gray-400">
+                        <p className={`text-center py-12 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                             No additional images available
                         </p>
                     )}
@@ -388,14 +290,14 @@ export default async function ProjectDetailPage({
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
             />
 
-            <div className="min-h-screen bg-black pt-20">
+            <div className={`min-h-screen pt-20 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {/* Back Button */}
                     <AnimatedSection animation="slideRight">
                         <nav aria-label="Breadcrumb">
                             <Link
                                 href="/projects"
-                                className="flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all text-gray-300 hover:text-white hover:bg-gray-800"
+                                className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
                             >
                                 <ArrowLeft className="w-5 h-5" />
                                 Back to Projects
@@ -412,7 +314,7 @@ export default async function ProjectDetailPage({
                                         {project.name}
                                     </h1>
                                     <div
-                                        className="text-xl prose prose-xl max-w-none prose-invert text-gray-300"
+                                        className={`text-xl prose prose-xl max-w-none ${isDarkMode ? 'prose-invert text-gray-300' : 'prose-gray text-gray-700'}`}
                                         dangerouslySetInnerHTML={{ __html: project.description }}
                                     />
                                 </div>
@@ -441,7 +343,7 @@ export default async function ProjectDetailPage({
                             {project.tech_stack.map((tech, index) => (
                                 <span
                                     key={index}
-                                    className="px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
+                                    className={`px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border ${isDarkMode ? 'border-blue-500/30' : 'border-blue-400/50'}`}
                                 >
                                     {tech}
                                 </span>
@@ -465,12 +367,12 @@ export default async function ProjectDetailPage({
 
                     {/* Call to Action */}
                     <AnimatedSection animation="fadeIn" delay={0.6}>
-                        <div className="mt-16 p-8 rounded-2xl text-center bg-gray-900">
+                        <div className={`mt-16 p-8 rounded-2xl text-center ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
                             <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
-                            <h3 className="text-2xl font-bold mb-4 text-white">
+                            <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Interested in Similar Projects?
                             </h3>
-                            <p className="mb-6 text-gray-300">
+                            <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Check out more of my work or get in touch to discuss your project
                             </p>
                             <div className="flex flex-wrap gap-4 justify-center">
@@ -482,7 +384,7 @@ export default async function ProjectDetailPage({
                                 </Link>
                                 <Link
                                     href="/#contact"
-                                    className="px-6 py-3 rounded-full font-semibold border-2 transition-all border-gray-700 text-white hover:bg-gray-800"
+                                    className={`px-6 py-3 rounded-full font-semibold border-2 transition-all ${isDarkMode ? 'border-gray-700 text-white hover:bg-gray-800' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
                                 >
                                     Contact Me
                                 </Link>

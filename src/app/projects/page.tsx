@@ -43,7 +43,7 @@ export default function ProjectsPage() {
     };
 
     const filteredProjects = useMemo(() => {
-        let filtered = projects.filter((project) => {
+        const filtered = projects.filter((project) => {
             // Tab filter
             const matchesTab = activeTab === "all" || project.category === activeTab;
 
@@ -142,8 +142,7 @@ export default function ProjectsPage() {
 
     return (
         <div
-            className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-                } pt-20`}
+            className={`min-h-screen pt-20 ${isDarkMode ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}
         >
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}

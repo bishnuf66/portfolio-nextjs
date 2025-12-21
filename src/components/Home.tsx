@@ -227,12 +227,12 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className={`py-20 ${isDarkMode ? "bg-black" : "bg-gray-50"}`}>
+      <div className={`py-20 ${isDarkMode ? "bg-black" : "bg-white"}`}>
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-          <h2 className="text-5xl font-bold mb-6 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let's Build Something Amazing
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+          <p className={`text-xl mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
             Have a project in mind? Let's collaborate and create something
             extraordinary together.
           </p>

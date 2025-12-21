@@ -1,3 +1,5 @@
+"use client";
+
 import { Metadata } from "next";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
@@ -9,80 +11,11 @@ import UnifiedShowcase from "@/components/UnifiedShowcase";
 import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
-
-export const revalidate = 3600; // Revalidate every hour
-
-export const metadata: Metadata = {
-  title: "Full Stack Developer | Portfolio",
-  description: "Experienced full-stack developer specializing in modern web technologies. Explore my projects, blog, and expertise in React, Next.js, TypeScript, and more.",
-  keywords: [
-    "full-stack developer",
-    "web development",
-    "React",
-    "Next.js",
-    "JavaScript",
-    "TypeScript",
-    "portfolio",
-    "Node.js",
-    "MongoDB",
-    "PostgreSQL",
-    "UI/UX design",
-    "responsive design",
-    "API development",
-    "performance optimization",
-    "modern web technologies"
-  ],
-  authors: [{ name: "Bishnu BK", url: "https://www.bishnubk.com.np" }],
-  creator: "Bishnu BK",
-  publisher: "Bishnu BK",
-  openGraph: {
-    title: "Full Stack Developer | Portfolio",
-    description: "Experienced full-stack developer specializing in modern web technologies. Explore my projects, blog, and expertise in React, Next.js, TypeScript, and more.",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np",
-    type: "website",
-    locale: "en_US",
-    siteName: "Bishnu BK Portfolio",
-    images: [
-      {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.png`,
-        width: 1200,
-        height: 630,
-        alt: "Bishnu BK - Full Stack Developer Portfolio Homepage",
-        type: "image/png",
-      }
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Full Stack Developer | Portfolio",
-    description: "Experienced full-stack developer specializing in modern web technologies.",
-    creator: "@bishnubk",
-    site: "@bishnubk",
-    images: [
-      {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.png`,
-        alt: "Bishnu BK - Full Stack Developer Portfolio",
-      }
-    ],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-snippet": -1,
-      "max-image-preview": "large",
-      "max-video-preview": -1,
-    },
-  },
-  alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np",
-  },
-};
+import useStore from "@/store/store";
 
 export default function HomePage() {
+  const { isDarkMode } = useStore();
+
   return (
     <div className="min-h-screen w-full relative">
       {/* Main Content */}
@@ -95,7 +28,7 @@ export default function HomePage() {
         {/* Technology Stack Section */}
         <div
           id="tech-stack"
-          className={`py-20 bg-gray-900`}
+          className={`py-20 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}
         >
           <TechStackGrid />
         </div>
@@ -103,7 +36,7 @@ export default function HomePage() {
         {/* Featured Projects Section */}
         <div
           id="projects"
-          className={`py-20 bg-black`}
+          className={`py-20 ${isDarkMode ? 'bg-black' : 'bg-white'}`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -113,7 +46,7 @@ export default function HomePage() {
                   Featured Projects
                 </h2>
               </div>
-              <p className="text-xl text-gray-300">
+              <p className={`text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 Showcasing my best work and technical expertise
               </p>
             </AnimatedSection>
@@ -125,7 +58,7 @@ export default function HomePage() {
         {/* Featured Blog Section */}
         <div
           id="blog"
-          className={`py-20 bg-gray-900`}
+          className={`py-20 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <AnimatedSection animation="fadeIn" className="text-center mb-16">
@@ -135,7 +68,7 @@ export default function HomePage() {
                   Latest Articles
                 </h2>
               </div>
-              <p className="text-xl text-gray-300">
+              <p className={`text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 Thoughts, tutorials, and insights on web development
               </p>
             </AnimatedSection>
