@@ -75,6 +75,7 @@ export default function TestimonialManager() {
                   alt={testimonial.name}
                   width={80}
                   height={80}
+                  unoptimized
                   className="w-20 h-20 object-cover rounded-full"
                 />
               ) : (

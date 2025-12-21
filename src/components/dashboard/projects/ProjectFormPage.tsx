@@ -555,6 +555,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                             alt="Cover Preview"
                                             width={128}
                                             height={128}
+                                            unoptimized
                                             className={`w-32 h-32 object-cover rounded border ${uploadStates.coverUploading ? "opacity-75" : ""
                                                 }`}
                                         />
@@ -626,6 +627,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                                             alt={`Pending ${index + 1}`}
                                                             width={80}
                                                             height={80}
+                                                            unoptimized
                                                             className="w-20 h-20 object-cover rounded border"
                                                         />
                                                         <button
@@ -674,6 +676,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                                             alt={imageWithTitle.title || `Gallery ${index + 1}`}
                                                             width={80}
                                                             height={80}
+                                                            unoptimized
                                                             className="w-20 h-20 object-cover rounded border"
                                                         />
                                                         <button
@@ -718,6 +721,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                                         alt={`Gallery ${index + 1}`}
                                                         width={80}
                                                         height={80}
+                                                        unoptimized
                                                         className={`w-20 h-20 object-cover rounded border ${url.startsWith("blob:") && uploadStates.galleryUploading
                                                             ? "opacity-75"
                                                             : ""

@@ -38,6 +38,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                     src={images[currentIndex]}
                     alt={`${alt} - Image ${currentIndex + 1}`}
                     fill
+                    unoptimized
                     className="object-contain"
                     priority={currentIndex === 0}
                 />
@@ -88,6 +89,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                                 src={image}
                                 alt={`Thumbnail ${index + 1}`}
                                 fill
+                                unoptimized
                                 className="object-cover"
                             />
                         </button>

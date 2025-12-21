@@ -68,9 +68,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
-      }`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
+        }`}
     >
       <div className="max-w-4xl mx-auto p-8 pt-24">
         <button
@@ -82,9 +81,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
         </button>
 
         <div
-          className={`${
-            isDarkMode ? "bg-gray-800" : "bg-white"
-          } rounded-lg shadow-xl p-8`}
+          className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+            } rounded-lg shadow-xl p-8`}
         >
           <h1 className="text-3xl font-bold mb-8">
             {initialData ? "Edit Blog Post" : "Add New Blog Post"}
@@ -108,11 +106,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                         : prev.slug,
                   }));
                 }}
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
             </div>
 
@@ -125,11 +122,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, slug: e.target.value }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
             </div>
 
@@ -145,11 +141,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     excerpt: e.target.value,
                   }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
             </div>
 
@@ -186,11 +181,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     }));
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
               {formData.cover_image_url && (
                 <Image
@@ -198,6 +192,7 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                   alt="Cover Preview"
                   width={800}
                   height={192}
+                  unoptimized
                   className="mt-2 w-full h-48 object-cover rounded"
                 />
               )}
@@ -215,11 +210,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     author: e.target.value,
                   }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
             </div>
 
@@ -234,11 +228,10 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, tags: e.target.value }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${
-                  isDarkMode
+                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
                     ? "bg-gray-700 border-gray-600"
                     : "bg-white border-gray-300"
-                }`}
+                  }`}
               />
             </div>
 
@@ -276,8 +269,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 {uploading
                   ? "Saving..."
                   : initialData
-                  ? "Update Blog"
-                  : "Add Blog"}
+                    ? "Update Blog"
+                    : "Add Blog"}
               </button>
             </div>
           </form>

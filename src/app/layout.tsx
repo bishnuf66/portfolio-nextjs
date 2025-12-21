@@ -153,42 +153,42 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
       >
-        <SmoothScrollProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <AnalyticsProvider>
-                  <ScrollProgressBar />
-                  <Header />
-                  {children}
-                  <Footer />
-                  <ConsentManager />
-                  <CustomCursor />
-                  <ToastContainer
-                    position="top-right"
-                    autoClose={3000}
-                    hideProgressBar
-                    newestOnTop
-                    closeButton={false}
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    toastStyle={{
-                      backgroundColor: "#333",
-                      color: "#fff",
-                      borderRadius: "8px",
-                      fontSize: "16px",
-                      padding: "12px 20px",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                      maxWidth: "400px",
-                    }}
-                  />
-                </AnalyticsProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </QueryProvider>
-        </SmoothScrollProvider>
+        {/* <SmoothScrollProvider> */}
+        <QueryProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <AnalyticsProvider>
+                <ScrollProgressBar />
+                <Header />
+                {children}
+                <Footer />
+                <ConsentManager />
+                <CustomCursor />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar
+                  newestOnTop
+                  closeButton={false}
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  toastStyle={{
+                    backgroundColor: "#333",
+                    color: "#fff",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    padding: "12px 20px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    maxWidth: "400px",
+                  }}
+                />
+              </AnalyticsProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </QueryProvider>
+        {/* </SmoothScrollProvider> */}
       </body>
     </html>
   );

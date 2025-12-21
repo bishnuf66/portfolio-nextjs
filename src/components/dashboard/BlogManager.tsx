@@ -75,6 +75,7 @@ export default function BlogManager() {
                   alt={blog.title}
                   width={128}
                   height={128}
+                  unoptimized
                   className="w-32 h-32 object-cover rounded-lg"
                 />
               )}

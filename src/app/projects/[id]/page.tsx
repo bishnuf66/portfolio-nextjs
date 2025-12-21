@@ -227,6 +227,7 @@ export default function ProjectDetailPage() {
                                             src={imageWithTitle.url}
                                             alt={imageWithTitle.title || `${project.name} - Gallery ${index + 1}`}
                                             fill
+                                            unoptimized
                                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center">

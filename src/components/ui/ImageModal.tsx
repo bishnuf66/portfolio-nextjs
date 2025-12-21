@@ -125,6 +125,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                             src={images[currentIndex]}
                             alt={`${alt} - ${currentIndex + 1}`}
                             fill
+                            unoptimized
                             className="object-contain"
                             quality={100}
                             priority
@@ -142,14 +143,15 @@ export const ImageModal: React.FC<ImageModalProps> = ({
                                         onNavigate(index);
                                     }}
                                     className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-all ${index === currentIndex
-                                            ? "ring-2 ring-white scale-110"
-                                            : "opacity-50 hover:opacity-100"
+                                        ? "ring-2 ring-white scale-110"
+                                        : "opacity-50 hover:opacity-100"
                                         }`}
                                 >
                                     <Image
                                         src={image}
                                         alt={`Thumbnail ${index + 1}`}
                                         fill
+                                        unoptimized
                                         className="object-cover"
                                     />
                                 </button>

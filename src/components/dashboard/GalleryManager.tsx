@@ -311,6 +311,7 @@ const GalleryManager: React.FC = () => {
                                             alt="Preview"
                                             width={80}
                                             height={80}
+                                            unoptimized
                                             className="w-20 h-20 object-cover rounded"
                                         />
                                         <div className="flex-1 space-y-3">
@@ -322,8 +323,8 @@ const GalleryManager: React.FC = () => {
                                                     onChange={(e) => updatePendingUpload(index, "title", e.target.value)}
                                                     placeholder="Enter image title..."
                                                     className={`w-full px-3 py-2 border rounded ${isDarkMode
-                                                            ? "bg-gray-600 border-gray-500 text-white"
-                                                            : "bg-white border-gray-300 text-gray-900"
+                                                        ? "bg-gray-600 border-gray-500 text-white"
+                                                        : "bg-white border-gray-300 text-gray-900"
                                                         }`}
                                                 />
                                             </div>
@@ -335,8 +336,8 @@ const GalleryManager: React.FC = () => {
                                                     placeholder="Enter image description..."
                                                     rows={2}
                                                     className={`w-full px-3 py-2 border rounded resize-none ${isDarkMode
-                                                            ? "bg-gray-600 border-gray-500 text-white"
-                                                            : "bg-white border-gray-300 text-gray-900"
+                                                        ? "bg-gray-600 border-gray-500 text-white"
+                                                        : "bg-white border-gray-300 text-gray-900"
                                                         }`}
                                                 />
                                             </div>
@@ -346,8 +347,8 @@ const GalleryManager: React.FC = () => {
                                                     value={upload.category}
                                                     onChange={(e) => updatePendingUpload(index, "category", e.target.value)}
                                                     className={`px-3 py-2 border rounded ${isDarkMode
-                                                            ? "bg-gray-600 border-gray-500 text-white"
-                                                            : "bg-white border-gray-300 text-gray-900"
+                                                        ? "bg-gray-600 border-gray-500 text-white"
+                                                        : "bg-white border-gray-300 text-gray-900"
                                                         }`}
                                                 >
                                                     {categories.map((cat) => (
@@ -398,8 +399,8 @@ const GalleryManager: React.FC = () => {
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
                         className={`px-3 py-2 border rounded ${isDarkMode
-                                ? "bg-gray-700 border-gray-600 text-white"
-                                : "bg-white border-gray-300 text-gray-900"
+                            ? "bg-gray-700 border-gray-600 text-white"
+                            : "bg-white border-gray-300 text-gray-900"
                             }`}
                     >
                         <option value="all">All Categories</option>
@@ -432,6 +433,7 @@ const GalleryManager: React.FC = () => {
                                         alt={image.title || image.original_filename}
                                         width={300}
                                         height={200}
+                                        unoptimized
                                         className="w-full h-48 object-cover"
                                     />
                                     {image.is_featured && (
@@ -497,8 +499,8 @@ const GalleryManager: React.FC = () => {
                                     value={editingImage.title || ""}
                                     onChange={(e) => setEditingImage({ ...editingImage, title: e.target.value })}
                                     className={`w-full px-3 py-2 border rounded ${isDarkMode
-                                            ? "bg-gray-700 border-gray-600 text-white"
-                                            : "bg-white border-gray-300 text-gray-900"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-gray-900"
                                         }`}
                                 />
                             </div>
@@ -510,8 +512,8 @@ const GalleryManager: React.FC = () => {
                                     onChange={(e) => setEditingImage({ ...editingImage, description: e.target.value })}
                                     rows={3}
                                     className={`w-full px-3 py-2 border rounded resize-none ${isDarkMode
-                                            ? "bg-gray-700 border-gray-600 text-white"
-                                            : "bg-white border-gray-300 text-gray-900"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-gray-900"
                                         }`}
                                 />
                             </div>
@@ -522,8 +524,8 @@ const GalleryManager: React.FC = () => {
                                     value={editingImage.category}
                                     onChange={(e) => setEditingImage({ ...editingImage, category: e.target.value })}
                                     className={`w-full px-3 py-2 border rounded ${isDarkMode
-                                            ? "bg-gray-700 border-gray-600 text-white"
-                                            : "bg-white border-gray-300 text-gray-900"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-gray-900"
                                         }`}
                                 >
                                     {categories.map((cat) => (

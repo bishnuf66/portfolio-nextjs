@@ -229,6 +229,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   alt={project.name}
                   width={96}
                   height={96}
+                  unoptimized
                   className="w-24 h-24 object-cover rounded-lg"
                 />
                 {project.is_featured && (

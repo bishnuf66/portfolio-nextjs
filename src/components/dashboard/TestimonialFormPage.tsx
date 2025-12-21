@@ -103,8 +103,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     }));
                                 }}
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600"
-                                        : "bg-white border-gray-300"
+                                    ? "bg-gray-700 border-gray-600"
+                                    : "bg-white border-gray-300"
                                     }`}
                             />
                         </div>
@@ -113,8 +113,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                             <label className="block text-sm font-medium mb-2">Slug</label>
                             <div
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600 text-gray-300"
-                                        : "bg-gray-100 border-gray-300 text-gray-700"
+                                    ? "bg-gray-700 border-gray-600 text-gray-300"
+                                    : "bg-gray-100 border-gray-300 text-gray-700"
                                     }`}
                             >
                                 {formData.slug}
@@ -134,8 +134,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     setFormData((prev) => ({ ...prev, role: e.target.value }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600"
-                                        : "bg-white border-gray-300"
+                                    ? "bg-gray-700 border-gray-600"
+                                    : "bg-white border-gray-300"
                                     }`}
                             />
                         </div>
@@ -154,8 +154,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600"
-                                        : "bg-white border-gray-300"
+                                    ? "bg-gray-700 border-gray-600"
+                                    : "bg-white border-gray-300"
                                     }`}
                             />
                         </div>
@@ -175,8 +175,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     }))
                                 }
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600"
-                                        : "bg-white border-gray-300"
+                                    ? "bg-gray-700 border-gray-600"
+                                    : "bg-white border-gray-300"
                                     }`}
                             />
                         </div>
@@ -196,8 +196,8 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     }
                                 }}
                                 className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                                        ? "bg-gray-700 border-gray-600"
-                                        : "bg-white border-gray-300"
+                                    ? "bg-gray-700 border-gray-600"
+                                    : "bg-white border-gray-300"
                                     }`}
                             />
                             {formData.avatar_url && (
@@ -206,6 +206,7 @@ const TestimonialFormPage: React.FC<TestimonialFormPageProps> = ({
                                     alt="Avatar Preview"
                                     width={80}
                                     height={80}
+                                    unoptimized
                                     className="mt-2 w-20 h-20 object-cover rounded-full"
                                 />
                             )}

@@ -91,6 +91,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 src={safeImageUrl}
                 alt={name}
                 fill
+                unoptimized
                 className="object-cover group-hover/card:scale-110 transition-transform duration-500"
                 onError={handleImageError}
               />
