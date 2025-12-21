@@ -19,6 +19,7 @@ import {
     Image
 } from "lucide-react";
 import useStore from "@/store/store";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 const TechStackGrid = () => {
     const { isDarkMode } = useStore();
@@ -78,16 +79,16 @@ const TechStackGrid = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="text-center mb-16">
+            <AnimatedSection animation="fadeIn" className="text-center mb-16">
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
                     Technology Stack
                 </h2>
                 <p className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                     Modern tools and technologies I use to build exceptional web experiences
                 </p>
-            </div>
+            </AnimatedSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
                 {techCategories.map((category, categoryIndex) => (
                     <div
                         key={categoryIndex}
@@ -135,10 +136,14 @@ const TechStackGrid = () => {
                         </div>
                     </div>
                 ))}
-            </div>
+            </StaggeredContainer>
 
             {/* Additional Skills */}
-            <div className={`mt-12 p-8 rounded-2xl ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} border ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}>
+            <AnimatedSection
+                animation="slideUp"
+                delay={0.6}
+                className={`mt-12 p-8 rounded-2xl ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} border ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+            >
                 <h3 className={`text-xl font-bold mb-4 text-center ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                     Additional Expertise
                 </h3>
@@ -161,7 +166,7 @@ const TechStackGrid = () => {
                         </span>
                     ))}
                 </div>
-            </div>
+            </AnimatedSection>
         </div>
     );
 };

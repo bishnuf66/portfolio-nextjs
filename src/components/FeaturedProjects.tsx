@@ -8,6 +8,7 @@ import useStore from "@/store/store";
 import { ProjectCardSkeleton } from "./LoadingSkeleton";
 import { Sparkles } from "lucide-react";
 import { getSafeImageUrl } from "@/utils/imageUtils";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 const FeaturedProjects = () => {
     const { isDarkMode } = useStore();
@@ -63,8 +64,8 @@ const FeaturedProjects = () => {
     }
 
     return (
-        <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <AnimatedSection animation="fadeIn" duration={0.8}>
+            <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
                 {projects.map((project) => (
                     <ProjectCard
                         key={project.id}
@@ -76,9 +77,13 @@ const FeaturedProjects = () => {
                         link={project.url}
                     />
                 ))}
-            </div>
+            </StaggeredContainer>
 
-            <div className="text-center mt-12">
+            <AnimatedSection
+                animation="slideUp"
+                delay={0.4}
+                className="text-center mt-12"
+            >
                 <Link
                     href="/projects"
                     className={`inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${isDarkMode
@@ -89,8 +94,8 @@ const FeaturedProjects = () => {
                     <Sparkles size={20} />
                     View All Projects
                 </Link>
-            </div>
-        </div>
+            </AnimatedSection>
+        </AnimatedSection>
     );
 };
 

@@ -10,6 +10,7 @@ import SpaceShooterGame from "@/components/SpaceShooterGame";
 import UnifiedShowcase from "@/components/UnifiedShowcase";
 import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
+import { AnimatedSection } from "@/components/ui/AnimatedSection";
 
 export default function HomePage() {
   const { isDarkMode } = useStore();
@@ -69,7 +70,7 @@ export default function HomePage() {
           className={`py-20 ${isDarkMode ? "bg-black" : "bg-gray-50"}`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="text-center mb-16">
+            <AnimatedSection animation="fadeIn" className="text-center mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Code2 size={40} className="text-blue-500" />
                 <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
@@ -82,7 +83,7 @@ export default function HomePage() {
               >
                 Showcasing my best work and technical expertise
               </p>
-            </div>
+            </AnimatedSection>
 
             <FeaturedProjects />
           </div>
@@ -94,7 +95,7 @@ export default function HomePage() {
           className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-white"}`}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="text-center mb-16">
+            <AnimatedSection animation="fadeIn" className="text-center mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <BookOpen size={40} className="text-purple-500" />
                 <h2 className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
@@ -107,7 +108,7 @@ export default function HomePage() {
               >
                 Thoughts, tutorials, and insights on web development
               </p>
-            </div>
+            </AnimatedSection>
 
             <FeaturedBlogs />
           </div>

@@ -5,9 +5,10 @@ import Link from "next/link";
 import useStore from "@/store/store";
 import { useBlogs } from "@/hooks/useBlogs";
 import { BlogCardSkeleton } from "@/components/LoadingSkeleton";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, BookOpen } from "lucide-react";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 export default function BlogPage() {
     const { isDarkMode } = useStore();
@@ -48,56 +49,61 @@ export default function BlogPage() {
                 } pt-20`}
         >
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-                <div className="text-center mb-16">
-                    <h1 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                        Blog
-                    </h1>
+                <AnimatedSection animation="fadeIn" className="text-center mb-16">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <BookOpen size={40} className="text-purple-500" />
+                        <h1 className="text-5xl font-bold bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                            Blog
+                        </h1>
+                    </div>
                     <p
                         className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
                             }`}
                     >
                         Thoughts, tutorials, and insights on web development
                     </p>
-                </div>
+                </AnimatedSection>
 
                 {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.1}>
                         {[1, 2, 3, 4, 5, 6].map((i) => (
                             <BlogCardSkeleton key={i} />
                         ))}
-                    </div>
+                    </StaggeredContainer>
                 ) : blogs.length === 0 ? (
-                    <div className="text-center py-20">
+                    <AnimatedSection animation="fadeIn" className="text-center py-20">
+                        <BookOpen size={64} className={`mx-auto mb-4 ${isDarkMode ? "text-gray-600" : "text-gray-400"}`} />
                         <p
                             className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"
                                 }`}
                         >
                             No blog posts yet. Check back soon!
                         </p>
-                    </div>
+                    </AnimatedSection>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar">
+                        <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar" staggerDelay={0.15}>
                             {paginatedData.map((blog) => (
                                 <Link
                                     key={blog.id}
                                     href={`/blog/${blog.slug}`}
                                     onClick={() => handleBlogClick(blog)}
                                     className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                                        } rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2`}
+                                        } rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 group`}
                                 >
                                     {blog.cover_image_url && (
                                         <div className="relative h-56 overflow-hidden">
                                             <img
                                                 src={blog.cover_image_url}
                                                 alt={blog.title}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                             />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                         </div>
                                     )}
                                     <div className="p-6">
                                         <h2
-                                            className={`text-2xl font-bold mb-3 ${isDarkMode ? "text-white" : "text-gray-900"
+                                            className={`text-2xl font-bold mb-3 group-hover:text-blue-500 transition-colors ${isDarkMode ? "text-white" : "text-gray-900"
                                                 }`}
                                         >
                                             {blog.title}
@@ -143,16 +149,18 @@ export default function BlogPage() {
                                     </div>
                                 </Link>
                             ))}
-                        </div>
+                        </StaggeredContainer>
 
                         {/* Pagination */}
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={goToPage}
-                            itemsPerPage={6}
-                            totalItems={blogs.length}
-                        />
+                        <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={goToPage}
+                                itemsPerPage={6}
+                                totalItems={blogs.length}
+                            />
+                        </AnimatedSection>
                     </>
                 )}
             </div>

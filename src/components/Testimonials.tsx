@@ -5,6 +5,7 @@ import useStore from "@/store/store";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { TestimonialCardSkeleton } from "./LoadingSkeleton";
 import { Star, Quote } from "lucide-react";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 export default function Testimonials() {
     const { isDarkMode } = useStore();
@@ -17,7 +18,7 @@ export default function Testimonials() {
                 className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
             >
                 <div className="max-w-7xl mx-auto px-4 md:px-8">
-                    <div className="text-center mb-16">
+                    <AnimatedSection animation="fadeIn" className="text-center mb-16">
                         <h2 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
                             Testimonials
                         </h2>
@@ -27,7 +28,7 @@ export default function Testimonials() {
                         >
                             What people say about working with me
                         </p>
-                    </div>
+                    </AnimatedSection>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[1, 2, 3].map((i) => (
                             <TestimonialCardSkeleton key={i} />
@@ -48,7 +49,7 @@ export default function Testimonials() {
             className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}
         >
             <div className="max-w-7xl mx-auto px-4 md:px-8">
-                <div className="text-center mb-16">
+                <AnimatedSection animation="fadeIn" className="text-center mb-16">
                     <h2 className="text-5xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
                         Testimonials
                     </h2>
@@ -58,9 +59,9 @@ export default function Testimonials() {
                     >
                         What people say about working with me
                     </p>
-                </div>
+                </AnimatedSection>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
                     {testimonials.map((testimonial) => (
                         <div
                             key={testimonial.id}
@@ -131,7 +132,7 @@ export default function Testimonials() {
                             </p>
                         </div>
                     ))}
-                </div>
+                </StaggeredContainer>
             </div>
         </section>
     );

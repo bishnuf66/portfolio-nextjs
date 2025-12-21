@@ -5,10 +5,10 @@ import { send } from "emailjs-com";
 import useStore from "@/store/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Mail, Send, User, MessageSquare, Linkedin, Github } from "lucide-react";
+import { Mail, Send, User, MessageSquare } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { MovingBorder } from "@/components/ui/MovingBorder";
-import DownloadCVButton from "./DownloadCVButton";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 const Contact = () => {
   const { isDarkMode } = useStore();
@@ -86,7 +86,7 @@ const Contact = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <AnimatedSection animation="fadeIn" className="text-center mb-16">
           <h2 className="text-5xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let&apos;s Connect
           </h2>
@@ -96,11 +96,10 @@ const Contact = () => {
           >
             Have a project in mind? Let&apos;s make it happen together
           </p>
-        </div>
-
+        </AnimatedSection>
 
         {/* Contact Info */}
-        <div className="space-y-8">
+        <StaggeredContainer className="space-y-8" staggerDelay={0.2}>
           <div>
             <h3
               className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
@@ -134,7 +133,7 @@ const Contact = () => {
                   <div>
                     <label
                       htmlFor="name"
-                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                     >
                       <User className="w-4 h-4" />
@@ -157,7 +156,7 @@ const Contact = () => {
                   <div>
                     <label
                       htmlFor="email"
-                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                     >
                       <Mail className="w-4 h-4" />
@@ -180,7 +179,7 @@ const Contact = () => {
                   <div>
                     <label
                       htmlFor="message"
-                      className={`block text-sm font-medium mb-2 flex items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
                         }`}
                     >
                       <MessageSquare className="w-4 h-4" />
@@ -223,11 +222,7 @@ const Contact = () => {
               </div>
             </BackgroundGradient>
           </div>
-
-
-        </div>
-
-
+        </StaggeredContainer>
       </div>
     </div>
   );

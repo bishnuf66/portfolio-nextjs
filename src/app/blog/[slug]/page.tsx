@@ -6,6 +6,7 @@ import useStore from "@/store/store";
 import { useBlog } from "@/hooks/useBlogs";
 import { BlogDetailSkeleton } from "@/components/LoadingSkeleton";
 import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 export default function BlogDetailPage() {
     const { isDarkMode } = useStore();
@@ -45,7 +46,7 @@ export default function BlogDetailPage() {
                 className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
                     } flex items-center justify-center`}
             >
-                <div className="text-center">
+                <AnimatedSection animation="fadeIn" className="text-center">
                     <h1 className="text-4xl font-bold mb-4">Blog post not found</h1>
                     <button
                         onClick={() => router.push("/blog")}
@@ -53,7 +54,7 @@ export default function BlogDetailPage() {
                     >
                         Back to blog
                     </button>
-                </div>
+                </AnimatedSection>
             </div>
         );
     }
@@ -64,45 +65,53 @@ export default function BlogDetailPage() {
                 } pt-20`}
         >
             <article className="max-w-4xl mx-auto px-4 md:px-8 py-16">
-                <button
-                    onClick={() => router.push("/blog")}
-                    className={`flex items-center gap-2 mb-8 ${isDarkMode
-                        ? "text-gray-400 hover:text-white"
-                        : "text-gray-600 hover:text-gray-900"
-                        } transition-colors`}
-                >
-                    <ArrowLeft size={20} />
-                    Back to blog
-                </button>
+                <AnimatedSection animation="slideRight">
+                    <button
+                        onClick={() => router.push("/blog")}
+                        className={`flex items-center gap-2 mb-8 ${isDarkMode
+                            ? "text-gray-400 hover:text-white"
+                            : "text-gray-600 hover:text-gray-900"
+                            } transition-colors`}
+                    >
+                        <ArrowLeft size={20} />
+                        Back to blog
+                    </button>
+                </AnimatedSection>
 
-                <h1 className="text-5xl font-bold mb-6">{blog.title}</h1>
+                <AnimatedSection animation="fadeIn" delay={0.2}>
+                    <h1 className="text-5xl font-bold mb-6">{blog.title}</h1>
+                </AnimatedSection>
 
-                <div
-                    className={`flex flex-wrap items-center gap-6 mb-8 pb-8 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
-                        }`}
-                >
-                    <div className="flex items-center gap-2">
-                        <User size={20} />
-                        <span className="font-medium">{blog.author}</span>
+                <AnimatedSection animation="slideUp" delay={0.3}>
+                    <div
+                        className={`flex flex-wrap items-center gap-6 mb-8 pb-8 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
+                            }`}
+                    >
+                        <div className="flex items-center gap-2">
+                            <User size={20} />
+                            <span className="font-medium">{blog.author}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Calendar size={20} />
+                            <span>{new Date(blog.created_at).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar size={20} />
-                        <span>{new Date(blog.created_at).toLocaleDateString()}</span>
-                    </div>
-                </div>
+                </AnimatedSection>
 
                 {blog.cover_image_url && (
-                    <div className="mb-8 rounded-xl overflow-hidden">
-                        <img
-                            src={blog.cover_image_url}
-                            alt={blog.title}
-                            className="w-full h-auto"
-                        />
-                    </div>
+                    <AnimatedSection animation="scaleIn" delay={0.4}>
+                        <div className="mb-8 rounded-xl overflow-hidden">
+                            <img
+                                src={blog.cover_image_url}
+                                alt={blog.title}
+                                className="w-full h-auto"
+                            />
+                        </div>
+                    </AnimatedSection>
                 )}
 
                 {blog.tags && blog.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-8">
+                    <StaggeredContainer className="flex flex-wrap gap-2 mb-8" staggerDelay={0.1}>
                         {blog.tags.map((tag, index) => (
                             <span
                                 key={index}
@@ -115,18 +124,20 @@ export default function BlogDetailPage() {
                                 {tag}
                             </span>
                         ))}
-                    </div>
+                    </StaggeredContainer>
                 )}
 
-                <div
-                    className={`prose ${isDarkMode ? "prose-invert" : ""
-                        } prose-lg max-w-none`}
-                >
+                <AnimatedSection animation="fadeIn" delay={0.6}>
                     <div
-                        dangerouslySetInnerHTML={{ __html: blog.content }}
-                        className="whitespace-pre-wrap"
-                    />
-                </div>
+                        className={`prose ${isDarkMode ? "prose-invert" : ""
+                            } prose-lg max-w-none`}
+                    >
+                        <div
+                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                            className="whitespace-pre-wrap"
+                        />
+                    </div>
+                </AnimatedSection>
             </article>
         </div>
     );

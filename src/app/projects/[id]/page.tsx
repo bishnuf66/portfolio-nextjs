@@ -20,6 +20,7 @@ import {
     Maximize2,
 } from "lucide-react";
 import Image from "next/image";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 export default function ProjectDetailPage() {
     const params = useParams();
@@ -273,48 +274,52 @@ export default function ProjectDetailPage() {
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {/* Back Button */}
-                    <button
-                        onClick={() => router.back()}
-                        className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${isDarkMode
-                            ? "text-gray-300 hover:text-white hover:bg-gray-800"
-                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
-                            }`}
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                        Back to Projects
-                    </button>
+                    <AnimatedSection animation="slideRight">
+                        <button
+                            onClick={() => router.back()}
+                            className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${isDarkMode
+                                ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                                }`}
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            Back to Projects
+                        </button>
+                    </AnimatedSection>
 
                     {/* Hero Section */}
                     <div className="mb-12">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                            <div>
-                                <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                                    {project.name}
-                                </h1>
-                                <div
-                                    className={`text-xl prose prose-xl max-w-none ${isDarkMode ? "prose-invert text-gray-300" : "text-gray-600"
-                                        }`}
-                                    dangerouslySetInnerHTML={{ __html: project.description }}
-                                />
-                            </div>
+                        <AnimatedSection animation="fadeIn" delay={0.2}>
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                                <div>
+                                    <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                                        {project.name}
+                                    </h1>
+                                    <div
+                                        className={`text-xl prose prose-xl max-w-none ${isDarkMode ? "prose-invert text-gray-300" : "text-gray-600"
+                                            }`}
+                                        dangerouslySetInnerHTML={{ __html: project.description }}
+                                    />
+                                </div>
 
-                            <div className="flex gap-4">
-                                <MovingBorder
-                                    as="a"
-                                    href={project.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    duration={3000}
-                                    className="px-6 py-3 rounded-full flex items-center gap-2"
-                                >
-                                    <ExternalLink className="w-5 h-5" />
-                                    Visit Project
-                                </MovingBorder>
+                                <div className="flex gap-4">
+                                    <MovingBorder
+                                        as="a"
+                                        href={project.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        duration={3000}
+                                        className="px-6 py-3 rounded-full flex items-center gap-2"
+                                    >
+                                        <ExternalLink className="w-5 h-5" />
+                                        Visit Project
+                                    </MovingBorder>
+                                </div>
                             </div>
-                        </div>
+                        </AnimatedSection>
 
                         {/* Tech Stack Badges */}
-                        <div className="flex flex-wrap gap-2 mb-8">
+                        <StaggeredContainer className="flex flex-wrap gap-2 mb-8" staggerDelay={0.1}>
                             {project.tech_stack.map((tech, index) => (
                                 <span
                                     key={index}
@@ -326,61 +331,63 @@ export default function ProjectDetailPage() {
                                     {tech}
                                 </span>
                             ))}
-                        </div>
+                        </StaggeredContainer>
                     </div>
 
                     {/* Image Carousel */}
-                    <div className="mb-12">
+                    <AnimatedSection animation="scaleIn" delay={0.4} className="mb-12">
                         <ImageCarousel images={allImages} alt={project.name} />
-                    </div>
+                    </AnimatedSection>
 
                     {/* Tabs Section */}
-                    <div className="mb-12">
+                    <AnimatedSection animation="slideUp" delay={0.5} className="mb-12">
                         <Tabs
                             tabs={tabs}
                             containerClassName="mb-8"
                             activeTabClassName="bg-linear-to-r from-blue-500 to-purple-600"
                         />
-                    </div>
+                    </AnimatedSection>
 
                     {/* Call to Action */}
-                    <div
-                        className={`mt-16 p-8 rounded-2xl text-center ${isDarkMode ? "bg-gray-900" : "bg-white"
-                            }`}
-                    >
-                        <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
-                        <h3
-                            className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
+                    <AnimatedSection animation="fadeIn" delay={0.6}>
+                        <div
+                            className={`mt-16 p-8 rounded-2xl text-center ${isDarkMode ? "bg-gray-900" : "bg-white"
                                 }`}
                         >
-                            Interested in Similar Projects?
-                        </h3>
-                        <p
-                            className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                        >
-                            Check out more of my work or get in touch to discuss your project
-                        </p>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <button
-                                onClick={() => router.push("/#projects")}
-                                className={`px-6 py-3 rounded-full font-semibold transition-all ${isDarkMode
-                                    ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                            <Sparkles className="w-12 h-12 mx-auto mb-4 text-purple-500" />
+                            <h3
+                                className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"
                                     }`}
                             >
-                                View All Projects
-                            </button>
-                            <button
-                                onClick={() => router.push("/#contact")}
-                                className={`px-6 py-3 rounded-full font-semibold border-2 transition-all ${isDarkMode
-                                    ? "border-gray-700 text-white hover:bg-gray-800"
-                                    : "border-gray-300 text-gray-900 hover:bg-gray-100"
-                                    }`}
+                                Interested in Similar Projects?
+                            </h3>
+                            <p
+                                className={`mb-6 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
                             >
-                                Contact Me
-                            </button>
+                                Check out more of my work or get in touch to discuss your project
+                            </p>
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                <button
+                                    onClick={() => router.push("/#projects")}
+                                    className={`px-6 py-3 rounded-full font-semibold transition-all ${isDarkMode
+                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                        : "bg-blue-500 hover:bg-blue-600 text-white"
+                                        }`}
+                                >
+                                    View All Projects
+                                </button>
+                                <button
+                                    onClick={() => router.push("/#contact")}
+                                    className={`px-6 py-3 rounded-full font-semibold border-2 transition-all ${isDarkMode
+                                        ? "border-gray-700 text-white hover:bg-gray-800"
+                                        : "border-gray-300 text-gray-900 hover:bg-gray-100"
+                                        }`}
+                                >
+                                    Contact Me
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </AnimatedSection>
                 </div>
             </div>
         </>

@@ -10,6 +10,7 @@ import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
 import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
 import { getSafeImageUrl } from "@/utils/imageUtils";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 type TabType = "all" | "professional" | "personal";
 type SortField = "name" | "created_at" | "is_featured";
@@ -146,7 +147,7 @@ export default function ProjectsPage() {
         >
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}
-                <div className="text-center mb-12">
+                <AnimatedSection animation="fadeIn" className="text-center mb-12">
                     <h1 className="text-5xl md:text-6xl font-bold mb-4">
                         <TextGenerateEffect words="My Projects" />
                     </h1>
@@ -156,10 +157,10 @@ export default function ProjectsPage() {
                     >
                         Explore my work across professional client projects and personal experiments
                     </p>
-                </div>
+                </AnimatedSection>
 
                 {/* Search and Filter Controls */}
-                <div className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-8`}>
+                <AnimatedSection animation="slideUp" delay={0.2} className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-8`}>
                     <div className="flex flex-col lg:flex-row gap-4">
                         {/* Search */}
                         <div className="flex-1">
@@ -239,10 +240,10 @@ export default function ProjectsPage() {
                         Showing {filteredProjects.length} of {projects.length} projects
                         {hasActiveFilters && " (filtered)"}
                     </div>
-                </div>
+                </AnimatedSection>
 
                 {/* Tabs */}
-                <div className="flex flex-wrap justify-center gap-4 mb-12">
+                <StaggeredContainer className="flex flex-wrap justify-center gap-4 mb-12" staggerDelay={0.1}>
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -273,10 +274,10 @@ export default function ProjectsPage() {
                             </button>
                         );
                     })}
-                </div>
+                </StaggeredContainer>
 
                 {/* Stats Bar */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
+                <AnimatedSection animation="slideUp" delay={0.4} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
                     {[
                         { label: "Total Projects", value: projects.length, gradient: "from-blue-500 to-cyan-500" },
                         {
@@ -309,17 +310,17 @@ export default function ProjectsPage() {
                             </div>
                         </div>
                     ))}
-                </div>
+                </AnimatedSection>
 
                 {/* Projects Grid */}
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.1}>
                         {Array.from({ length: itemsPerPage }).map((_, i) => (
                             <ProjectCardSkeleton key={i} />
                         ))}
-                    </div>
+                    </StaggeredContainer>
                 ) : filteredProjects.length === 0 ? (
-                    <div className="text-center py-20">
+                    <AnimatedSection animation="fadeIn" className="text-center py-20">
                         <div
                             className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"
                                 }`}
@@ -343,10 +344,10 @@ export default function ProjectsPage() {
                                 Clear Filters
                             </button>
                         )}
-                    </div>
+                    </AnimatedSection>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar">
+                        <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar" staggerDelay={0.15}>
                             {paginatedData.map((project) => (
                                 <ProjectCard
                                     key={project.id}
@@ -359,19 +360,21 @@ export default function ProjectsPage() {
                                     isFeatured={project.is_featured}
                                 />
                             ))}
-                        </div>
+                        </StaggeredContainer>
 
                         {/* Pagination */}
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={goToPage}
-                            itemsPerPage={itemsPerPage}
-                            totalItems={filteredProjects.length}
-                        />
+                        <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={goToPage}
+                                itemsPerPage={itemsPerPage}
+                                totalItems={filteredProjects.length}
+                            />
+                        </AnimatedSection>
                     </>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

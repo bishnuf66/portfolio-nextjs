@@ -6,6 +6,7 @@ import useStore from "@/store/store";
 import { useBlogs } from "@/hooks/useBlogs";
 import { BlogCardSkeleton } from "@/components/LoadingSkeleton";
 import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
+import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 
 const FeaturedBlogs = () => {
     const { isDarkMode } = useStore();
@@ -25,18 +26,18 @@ const FeaturedBlogs = () => {
 
     if (featuredBlogs.length === 0) {
         return (
-            <div className="text-center py-20">
+            <AnimatedSection animation="fadeIn" className="text-center py-20">
                 <BookOpen size={64} className={`mx-auto mb-4 ${isDarkMode ? "text-gray-600" : "text-gray-400"}`} />
                 <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
                     No blog posts yet. Check back soon!
                 </p>
-            </div>
+            </AnimatedSection>
         );
     }
 
     return (
-        <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <AnimatedSection animation="fadeIn" duration={0.8}>
+            <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
                 {featuredBlogs.map((blog) => (
                     <Link
                         key={blog.id}
@@ -95,8 +96,8 @@ const FeaturedBlogs = () => {
                                         <span
                                             key={index}
                                             className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode
-                                                    ? "bg-blue-900/50 text-blue-200"
-                                                    : "bg-blue-100 text-blue-800"
+                                                ? "bg-blue-900/50 text-blue-200"
+                                                : "bg-blue-100 text-blue-800"
                                                 }`}
                                         >
                                             {tag}
@@ -107,22 +108,26 @@ const FeaturedBlogs = () => {
                         </div>
                     </Link>
                 ))}
-            </div>
+            </StaggeredContainer>
 
-            <div className="text-center mt-12">
+            <AnimatedSection
+                animation="slideUp"
+                delay={0.4}
+                className="text-center mt-12"
+            >
                 <Link
                     href="/blog"
                     className={`inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${isDarkMode
-                            ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-pink-500/50 text-white"
-                            : "bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 text-white"
+                        ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-pink-500/50 text-white"
+                        : "bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 text-white"
                         }`}
                 >
                     <BookOpen size={20} />
                     Read All Articles
                     <ArrowRight size={20} />
                 </Link>
-            </div>
-        </div>
+            </AnimatedSection>
+        </AnimatedSection>
     );
 };
 
