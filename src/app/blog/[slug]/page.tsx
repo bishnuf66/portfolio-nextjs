@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase";
 import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 import Link from "next/link";
+import Image from "next/image";
 import { Blog } from "@/types/blog";
 import { notFound } from "next/navigation";
 import useStore from "@/store/store";
@@ -115,10 +116,13 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
                 {blog.cover_image_url && (
                     <AnimatedSection animation="scaleIn" delay={0.4}>
                         <figure className="mb-8 rounded-xl overflow-hidden">
-                            <img
+                            <Image
                                 src={blog.cover_image_url}
                                 alt={`Cover image for ${blog.title}`}
+                                width={800}
+                                height={400}
                                 className="w-full h-auto"
+                                unoptimized
                             />
                         </figure>
                     </AnimatedSection>

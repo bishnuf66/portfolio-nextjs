@@ -41,32 +41,31 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
     useEffect(() => {
         if (slug) {
+            const fetchProject = async () => {
+                try {
+                    const supabase = getSupabase();
+                    const { data, error } = await supabase
+                        .from("projects")
+                        .select("*")
+                        .eq("slug", slug)
+                        .maybeSingle();
+
+                    if (error) {
+                        console.error("Failed to fetch project:", error);
+                        setProject(null);
+                    } else {
+                        setProject(data as Project | null);
+                    }
+                } catch (error) {
+                    console.error("Error fetching project:", error);
+                    setProject(null);
+                } finally {
+                    setLoading(false);
+                }
+            };
             fetchProject();
         }
     }, [slug]);
-
-    const fetchProject = async () => {
-        try {
-            const supabase = getSupabase();
-            const { data, error } = await supabase
-                .from("projects")
-                .select("*")
-                .eq("slug", slug)
-                .maybeSingle();
-
-            if (error) {
-                console.error("Failed to fetch project:", error);
-                setProject(null);
-            } else {
-                setProject(data as Project | null);
-            }
-        } catch (error) {
-            console.error("Error fetching project:", error);
-            setProject(null);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (loading) {
         return (

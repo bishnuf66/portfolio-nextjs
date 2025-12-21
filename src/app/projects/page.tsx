@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import useStore from "@/store/store";
-import { Briefcase, Code, Layers, Star, Search, SortAsc, SortDesc, Filter, X } from "lucide-react";
-import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
+import { Briefcase, Code, Layers, Star, Search, SortAsc, SortDesc, Filter, X, WorkflowIcon } from "lucide-react";
 import ProjectCard from "@/components/ProjectCard";
 import { Project } from "@/lib/supabase";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
@@ -147,9 +146,12 @@ export default function ProjectsPage() {
             <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
                 {/* Header */}
                 <AnimatedSection animation="fadeIn" className="text-center mb-12">
-                    <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                        <TextGenerateEffect words="My Projects" />
-                    </h1>
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <WorkflowIcon size={40} className="text-purple-500" />
+                        <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                            Projects
+                        </h1>
+                    </div>
                     <p
                         className={`text-xl max-w-3xl mx-auto ${isDarkMode ? "text-gray-300" : "text-gray-600"
                             }`}

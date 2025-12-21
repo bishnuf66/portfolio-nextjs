@@ -1,6 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
 import Home from "../components/Home";
 import Contact from "../components/Contact";
 import FeaturedProjects from "@/components/FeaturedProjects";
