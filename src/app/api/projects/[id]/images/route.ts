@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+    import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createAuthenticatedClient } from "@/lib/supabase-auth-server";
 import { rateLimit } from "@/lib/rate-limit";
@@ -85,7 +85,12 @@ export async function DELETE(
         // Remove image from both gallery formats
         let updatedGalleryImages = project.gallery_images || [];
         let updatedGalleryImagesWithTitles =
-            project.gallery_images_with_titles || [];
+            Array.isArray(project.gallery_images_with_titles)
+                ? project.gallery_images_with_titles as {
+                    url: string;
+                    title: string;
+                }[]
+                : [];
 
         // Remove from legacy gallery_images array
         updatedGalleryImages = updatedGalleryImages.filter((url: string) =>

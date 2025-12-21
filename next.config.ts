@@ -1,28 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  experimental: {
-    optimizePackageImports: ["@splinetool/react-spline", "@splinetool/runtime"],
-  },
-  webpack: (config, { isServer }) => {
-    // Fix for multiple Three.js instances
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "three": require.resolve("three"),
-      };
-    }
-
-    // Optimize bundle size
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-    };
-
-    return config;
-  },
+const nextConfig: NextConfig = { 
   images: {
     // Optimize image loading
     formats: ["image/webp", "image/avif"],

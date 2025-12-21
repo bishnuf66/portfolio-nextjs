@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import useStore from "@/store/store";
 import { useProjects, useUpdateProject } from "@/hooks/useProjects";
 import withAuth from "@/components/withAuth";
-import ProjectFormPage from "@/components/dashboard/projects/ProjectFormPage";
+import ProjectFormPage, { ProjectData } from "@/components/dashboard/projects/ProjectFormPage";
 import { Project } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
@@ -17,12 +17,19 @@ const EditProjectPage = () => {
   const { data: projects = [] } = useProjects();
   const updateProject = useUpdateProject();
   const [uploading, setUploading] = useState(false);
-  const [initialData, setInitialData] = useState<Project | null>(null);
+  const [initialData, setInitialData] = useState<(ProjectData & { id?: string }) | null>(null);
 
   useEffect(() => {
     const project = projects.find((p) => p.id === params.id);
     if (project) {
-      setInitialData(project);
+      // Convert Project type to match ProjectData expectations
+      const projectData = {
+        ...project,
+        is_featured: project.is_featured ?? false, // Convert null/undefined to false
+        cover_image_url: project.cover_image_url ?? "", // Convert null to empty string
+        gallery_images: project.gallery_images ?? [], // Convert null to empty array
+      };
+      setInitialData(projectData);
     }
   }, [projects, params.id]);
 

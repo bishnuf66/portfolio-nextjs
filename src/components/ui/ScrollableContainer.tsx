@@ -19,7 +19,6 @@ const ScrollableContainer: React.FC<ScrollableContainerProps> = ({
     return (
         <CustomScrollbar
             maxHeight={maxHeight}
-            showScrollIndicator={showIndicator}
             className={`enhanced-scrollbar ${className}`}
         >
             {children}

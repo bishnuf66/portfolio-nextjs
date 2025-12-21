@@ -5,7 +5,7 @@ import { ArrowLeft, Star, X, Upload, Loader2 } from "lucide-react";
 import Image from "next/image";
 import RichTextEditor from "../../RichTextEditor";
 
-type ProjectData = {
+export type ProjectData = {
     name: string;
     slug: string;
     url: string;

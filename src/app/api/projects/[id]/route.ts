@@ -198,7 +198,19 @@ export async function DELETE(
 
     // Clean up associated images from storage
     if (project) {
-      const cleanupResult = await cleanupProjectImages(project);
+      // Convert the Json type to the expected array type
+      const projectForCleanup = {
+        cover_image_url: project.cover_image_url ?? undefined,
+        gallery_images: project.gallery_images ?? undefined,
+        gallery_images_with_titles:
+          Array.isArray(project.gallery_images_with_titles)
+            ? project.gallery_images_with_titles as Array<
+              { url: string; title: string }
+            >
+            : undefined,
+      };
+
+      const cleanupResult = await cleanupProjectImages(projectForCleanup);
       if (!cleanupResult.success) {
         console.warn(
           "Some images could not be deleted from storage:",
