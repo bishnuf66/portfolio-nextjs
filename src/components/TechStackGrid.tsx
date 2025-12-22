@@ -214,7 +214,7 @@ const TechStackGrid = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8">
       <AnimatedSection animation="fadeIn" className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+        <h2 className="font-display text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
           Technology Stack
         </h2>
         <p

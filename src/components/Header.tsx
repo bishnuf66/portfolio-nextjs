@@ -80,7 +80,7 @@ const Header = () => {
           <Link href={"/"}>
             <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
               <motion.h1
-                className={`text-2xl font-bold ${
+                className={`font-display text-2xl font-bold ${
                   isDarkMode ? "text-white" : "text-black"
                 }`}
               >

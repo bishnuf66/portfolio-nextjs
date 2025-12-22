@@ -91,7 +91,7 @@ const Home = () => {
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               {/* Left: Text Content */}
               <div className="space-y-6 pt-20 lg:pt-0">
-                <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500">
+                <h1 className="font-display text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500">
                   <Typewriter
                     words={[
                       "Bishnu BK",
@@ -316,7 +316,7 @@ const Home = () => {
         <div className="absolute inset-0 z-10 flex items-center justify-center">
           <div className="text-center px-4 max-w-4xl">
             <h2
-              className={`text-4xl md:text-6xl font-bold mb-6 ${
+              className={`font-display text-4xl md:text-6xl font-bold mb-6 ${
                 isDarkMode ? "text-white" : "text-gray-900"
               }`}
             >
@@ -347,7 +347,7 @@ const Home = () => {
         className={`py-20 ${colorScheme.background.primary}`}
       >
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-          <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="font-display text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let&apos;s Build Something Amazing
           </h2>
           <p

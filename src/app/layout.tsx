@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import Header from "@/components/Header";
@@ -25,6 +25,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const displayFont = Space_Grotesk({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -361,7 +367,7 @@ export default function RootLayout({
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased relative`}
         suppressHydrationWarning={true}
       >
         {/* Skip navigation for accessibility */}

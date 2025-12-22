@@ -452,7 +452,7 @@ export default function AnalyticsDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p
-                className={`text-sm font-medium ${
+                className={`text-sm font-medium font-display ${
                   isDarkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
@@ -489,7 +489,7 @@ export default function AnalyticsDashboard() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2
-            className={`text-3xl font-bold ${
+            className={`font-display text-3xl font-bold ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
