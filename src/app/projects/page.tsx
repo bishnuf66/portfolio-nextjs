@@ -1,104 +1,45 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { getPageClasses, getCardClasses, getInputClasses, colorScheme } from "@/utils/colorUtils";
 import useStore from "@/store/store";
 import { Briefcase, Code, Layers, Star, Search, SortAsc, SortDesc, Filter, X, WorkflowIcon } from "lucide-react";
 import ProjectCard from "@/components/ProjectCard";
-import { Project } from "@/lib/supabase";
 import { ProjectCardSkeleton } from "@/components/LoadingSkeleton";
-import { usePagination } from "@/hooks/usePagination";
 import Pagination from "@/components/ui/Pagination";
 import { getSafeImageUrl } from "@/utils/imageUtils";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
 import SEOContent from "@/components/SEOContent";
+import { useProjectsFiltered, useProjectCounts } from "@/hooks/useProjects";
 
 type TabType = "all" | "professional" | "personal";
-type SortField = "name" | "created_at" | "is_featured";
+type SortField = "name" | "created_at" | "is_featured" | "category";
 type SortOrder = "asc" | "desc";
 
 export default function ProjectsPage() {
     const { isDarkMode } = useStore();
     const [activeTab, setActiveTab] = useState<TabType>("all");
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState<SortField>("created_at");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [itemsPerPage, setItemsPerPage] = useState(6);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        fetchProjects();
-    }, []);
-
-    const fetchProjects = async () => {
-        try {
-            const response = await fetch("/api/projects");
-            const data = await response.json();
-            setProjects(data);
-        } catch (error) {
-            console.error("Failed to fetch projects:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const filteredProjects = useMemo(() => {
-        const filtered = projects.filter((project) => {
-            // Tab filter
-            const matchesTab = activeTab === "all" || project.category === activeTab;
-
-            // Search filter
-            const matchesSearch =
-                project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                project.tech_stack.some(tech => tech.toLowerCase().includes(searchTerm.toLowerCase()));
-
-            return matchesTab && matchesSearch;
-        });
-
-        // Sort projects
-        filtered.sort((a, b) => {
-            let aValue: string | number | Date;
-            let bValue: string | number | Date;
-
-            switch (sortField) {
-                case "name":
-                    aValue = a.name.toLowerCase();
-                    bValue = b.name.toLowerCase();
-                    break;
-                case "created_at":
-                    aValue = new Date(a.created_at || 0);
-                    bValue = new Date(b.created_at || 0);
-                    break;
-                case "is_featured":
-                    aValue = a.is_featured ? 1 : 0;
-                    bValue = b.is_featured ? 1 : 0;
-                    break;
-                default:
-                    return 0;
-            }
-
-            if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-            return 0;
-        });
-
-        return filtered;
-    }, [projects, activeTab, searchTerm, sortField, sortOrder]);
-
-    const {
-        currentPage,
-        totalPages,
-        paginatedData,
-        goToPage,
-    } = usePagination({
-        data: filteredProjects,
-        itemsPerPage,
+    // Use the new hooks for backend filtering and pagination
+    const { data: projectsResponse, isLoading: loading, error } = useProjectsFiltered({
+        category: activeTab,
+        search: searchTerm || undefined,
+        sortBy: sortField,
+        sortOrder: sortOrder,
+        page: currentPage,
+        limit: itemsPerPage,
     });
 
-    const professionalCount = projects.filter((p) => p.category === "professional").length;
-    const personalCount = projects.filter((p) => p.category === "personal").length;
+    const { data: counts, isLoading: countsLoading } = useProjectCounts();
+
+    // Extract data from the paginated response
+    const projects = projectsResponse?.data || [];
+    const pagination = projectsResponse?.pagination;
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -107,36 +48,54 @@ export default function ProjectsPage() {
             setSortField(field);
             setSortOrder("asc");
         }
+        setCurrentPage(1); // Reset to first page when sorting changes
     };
 
     const clearFilters = () => {
         setSearchTerm("");
         setSortField("created_at");
         setSortOrder("desc");
+        setCurrentPage(1);
+    };
+
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        setCurrentPage(1); // Reset to first page when tab changes
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when items per page changes
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        setCurrentPage(1); // Reset to first page when search changes
     };
 
     const hasActiveFilters = searchTerm || sortField !== "created_at" || sortOrder !== "desc";
 
+    // Show loading state for counts in tabs
     const tabs = [
         {
             id: "all" as TabType,
             label: "All Projects",
             icon: Layers,
-            count: filteredProjects.length,
+            count: countsLoading ? "..." : (counts?.all || 0),
             gradient: "from-blue-500 to-cyan-500",
         },
         {
             id: "professional" as TabType,
             label: "Professional",
             icon: Briefcase,
-            count: filteredProjects.filter(p => p.category === "professional").length,
+            count: countsLoading ? "..." : (counts?.professional || 0),
             gradient: "from-purple-500 to-blue-500",
         },
         {
             id: "personal" as TabType,
             label: "Personal",
             icon: Code,
-            count: filteredProjects.filter(p => p.category === "personal").length,
+            count: countsLoading ? "..." : (counts?.personal || 0),
             gradient: "from-pink-500 to-purple-500",
         },
     ];
@@ -174,7 +133,7 @@ export default function ProjectsPage() {
                                     type="text"
                                     placeholder="Search projects by name, description, or tech stack..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className={`${getInputClasses("w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500")}`}
                                 />
                             </div>
@@ -184,7 +143,7 @@ export default function ProjectsPage() {
                         <div className="min-w-[120px]">
                             <select
                                 value={itemsPerPage}
-                                onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                                 className={`${getInputClasses("w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500")}`}
                             >
                                 <option value={6}>6 per page</option>
@@ -235,8 +194,13 @@ export default function ProjectsPage() {
 
                     {/* Results Count */}
                     <div className={`mt-4 text-sm ${colorScheme.text.secondary}`}>
-                        Showing {filteredProjects.length} of {projects.length} projects
+                        Showing {projects.length} of {pagination?.totalItems || 0} projects
                         {hasActiveFilters && " (filtered)"}
+                        {pagination && (
+                            <span className="ml-2">
+                                (Page {pagination.currentPage} of {pagination.totalPages})
+                            </span>
+                        )}
                     </div>
                 </AnimatedSection>
 
@@ -249,7 +213,7 @@ export default function ProjectsPage() {
                         return (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleTabChange(tab.id)}
                                 className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${isActive
                                     ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg`
                                     : `${colorScheme.background.secondary} ${colorScheme.text.secondary} hover:${colorScheme.background.tertiary} ${colorScheme.border.primary} border`
@@ -273,15 +237,15 @@ export default function ProjectsPage() {
                 {/* Stats Bar */}
                 <AnimatedSection animation="slideUp" delay={0.4} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
                     {[
-                        { label: "Total Projects", value: projects.length, gradient: "from-blue-500 to-cyan-500" },
+                        { label: "Total Projects", value: countsLoading ? "..." : (counts?.all || 0), gradient: "from-blue-500 to-cyan-500" },
                         {
                             label: "Featured",
-                            value: projects.filter((p) => p.is_featured).length,
+                            value: countsLoading ? "..." : (counts?.featured || 0),
                             gradient: "from-yellow-500 to-orange-500",
                             icon: Star,
                         },
-                        { label: "Professional", value: professionalCount, gradient: "from-purple-500 to-blue-500" },
-                        { label: "Personal", value: personalCount, gradient: "from-pink-500 to-purple-500" },
+                        { label: "Professional", value: countsLoading ? "..." : (counts?.professional || 0), gradient: "from-purple-500 to-blue-500" },
+                        { label: "Personal", value: countsLoading ? "..." : (counts?.personal || 0), gradient: "from-pink-500 to-purple-500" },
                     ].map((stat, index) => (
                         <div
                             key={index}
@@ -311,7 +275,20 @@ export default function ProjectsPage() {
                             <ProjectCardSkeleton key={i} />
                         ))}
                     </StaggeredContainer>
-                ) : filteredProjects.length === 0 ? (
+                ) : error ? (
+                    <AnimatedSection animation="fadeIn" className="text-center py-20">
+                        <div className={`text-6xl mb-4 ${colorScheme.text.muted}`}>⚠️</div>
+                        <p className={`text-xl ${colorScheme.text.secondary} mb-4`}>
+                            Failed to load projects. Please try again.
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </AnimatedSection>
+                ) : projects.length === 0 ? (
                     <AnimatedSection animation="fadeIn" className="text-center py-20">
                         <div
                             className={`text-6xl mb-4 ${colorScheme.text.muted}`}
@@ -338,7 +315,7 @@ export default function ProjectsPage() {
                 ) : (
                     <>
                         <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar" staggerDelay={0.15}>
-                            {paginatedData.map((project) => (
+                            {projects.map((project) => (
                                 <ProjectCard
                                     key={project.id}
                                     id={project.id}
@@ -354,15 +331,17 @@ export default function ProjectsPage() {
                         </StaggeredContainer>
 
                         {/* Pagination */}
-                        <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={goToPage}
-                                itemsPerPage={itemsPerPage}
-                                totalItems={filteredProjects.length}
-                            />
-                        </AnimatedSection>
+                        {pagination && pagination.totalPages > 1 && (
+                            <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
+                                <Pagination
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    onPageChange={setCurrentPage}
+                                    itemsPerPage={pagination.pageSize}
+                                    totalItems={pagination.totalItems}
+                                />
+                            </AnimatedSection>
+                        )}
                     </>
                 )}
             </div>

@@ -175,7 +175,6 @@ const Dashboard = () => {
           <CVManager />
         ) : (
           <ProjectList
-            projects={projects}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
             isDarkMode={isDarkMode}

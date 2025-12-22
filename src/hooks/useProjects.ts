@@ -2,7 +2,29 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/axios";
 import { Project } from "@/lib/supabase";
 
-// Hook for fetching all projects
+interface PaginatedResponse {
+    data: Project[];
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        pageSize: number;
+        totalItems: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}
+
+interface ProjectsQueryParams {
+    category?: "all" | "professional" | "personal";
+    search?: string;
+    sortBy?: "name" | "created_at" | "is_featured" | "category" | "updated_at";
+    sortOrder?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+    featured?: boolean;
+}
+
+// Hook for fetching all projects (no pagination)
 export function useProjects() {
     return useQuery({
         queryKey: ["projects"],
@@ -12,6 +34,92 @@ export function useProjects() {
         },
         staleTime: 0, // Always consider data stale to force fresh fetches
         gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    });
+}
+
+// Hook for fetching projects with filters and pagination
+export function useProjectsFiltered(params: ProjectsQueryParams) {
+    const {
+        category,
+        search,
+        sortBy,
+        sortOrder,
+        page = 1,
+        limit = 10,
+        featured,
+    } = params;
+
+    return useQuery({
+        queryKey: [
+            "projects",
+            "filtered",
+            category,
+            search,
+            sortBy,
+            sortOrder,
+            page,
+            limit,
+            featured,
+        ],
+        queryFn: async () => {
+            const queryParams = new URLSearchParams();
+
+            if (category && category !== "all") {
+                queryParams.append("category", category);
+            }
+            if (search) {
+                queryParams.append("search", search);
+            }
+            if (sortBy) {
+                queryParams.append("sortBy", sortBy);
+            }
+            if (sortOrder) {
+                queryParams.append("sortOrder", sortOrder);
+            }
+            if (featured !== undefined) {
+                queryParams.append("featured", featured.toString());
+            }
+            queryParams.append("page", page.toString());
+            queryParams.append("limit", limit.toString());
+
+            const response = await api.get(
+                `/projects?${queryParams.toString()}`,
+            );
+            return response.data as PaginatedResponse;
+        },
+        staleTime: 0,
+        gcTime: 1000 * 60 * 5,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+    });
+}
+
+// Hook for getting project counts by category
+export function useProjectCounts() {
+    return useQuery({
+        queryKey: ["projects", "counts"],
+        queryFn: async () => {
+            const [
+                allResponse,
+                professionalResponse,
+                personalResponse,
+                featuredResponse,
+            ] = await Promise.all([
+                api.get("/projects"),
+                api.get("/projects?category=professional"),
+                api.get("/projects?category=personal"),
+                api.get("/projects?featured=true"),
+            ]);
+
+            return {
+                all: (allResponse.data as Project[]).length,
+                professional: (professionalResponse.data as Project[]).length,
+                personal: (personalResponse.data as Project[]).length,
+                featured: (featuredResponse.data as Project[]).length,
+            };
+        },
+        staleTime: 30 * 1000, // Cache for 30 seconds
+        gcTime: 1000 * 60 * 5,
     });
 }
 
@@ -42,6 +150,10 @@ export function useCreateProject() {
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "filtered"],
+            });
+            queryClient.invalidateQueries({ queryKey: ["projects", "counts"] });
         },
         onError: (error: unknown) => {
             console.error("Project creation failed:", error);
@@ -116,10 +228,16 @@ export function useUpdateProject() {
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "filtered"],
+            });
+            queryClient.invalidateQueries({ queryKey: ["projects", "counts"] });
 
             // Force refetch immediately
             queryClient.refetchQueries({ queryKey: ["projects"] });
             queryClient.refetchQueries({ queryKey: ["projects", "featured"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "counts"] });
         },
         onError: (error: unknown) => {
             console.error("Project update failed:", error);
@@ -157,6 +275,10 @@ export function useDeleteProject() {
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
             });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "filtered"],
+            });
+            queryClient.invalidateQueries({ queryKey: ["projects", "counts"] });
 
             // Also remove the specific project from cache immediately for better UX
             queryClient.setQueryData(
