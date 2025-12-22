@@ -1,14 +1,8 @@
 "use client";
 
-import React, { useRef, Suspense, useState, useMemo } from "react";
+import React, { useRef, Suspense, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  OrbitControls,
-  Text,
-  Html,
-  Stars,
-  Sparkles as DreiSparkles,
-} from "@react-three/drei";
+import { OrbitControls, Text, Html, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import {
   EffectComposer,
@@ -23,10 +17,11 @@ import {
   Database,
   Terminal,
   Search,
-  Server,
-  Cloud,
+  Package,
   Settings,
   TrendingUp,
+  Smartphone,
+  User,
 } from "lucide-react";
 import useStore from "@/store/store";
 
@@ -196,6 +191,12 @@ function Planet({
 export default function TechSolarSystem() {
   const { isDarkMode } = useStore();
   const [activePlanet, setActivePlanet] = useState<string | null>(null);
+  const [achievements, setAchievements] = useState<string[]>([]);
+  const [discoveredEasterEggs, setDiscoveredEasterEggs] = useState<string[]>(
+    []
+  );
+  const [earthClicks, setEarthClicks] = useState(0);
+  const [showSecretMessage, setShowSecretMessage] = useState(false);
 
   const [isMobile] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -264,48 +265,62 @@ export default function TechSolarSystem() {
       description: "Backend - Database & Auth service",
     },
     {
-      name: "AWS EC2",
-      color: "#FF9900",
-      emissive: "#E68900",
+      name: "Earth (Developer)",
+      color: "#4A90E2",
+      emissive: "#357ABD",
+      radius: 0.8,
+      distance: 4,
+      speed: 0.2,
+      rotationSpeed: 0.3,
+      hasRing: true,
+      isSpecial: true,
+      techIcon: <User size={16} className="text-[#4A90E2]" />,
+      description: "Developer - Click to explore hidden achievements!",
+      hiddenFeatures: ["secret_code", "easter_egg", "achievement_unlock"],
+    },
+    {
+      name: "Docker",
+      color: "#2496ED",
+      emissive: "#0073EC",
       radius: 0.6,
       distance: 8.5,
       speed: 0.12,
       rotationSpeed: 0.4,
-      techIcon: <Server size={16} className="text-[#FF9900]" />,
-      description: "Cloud - Virtual server instances",
+      techIcon: <Package size={16} className="text-[#2496ED]" />,
+      description: "DevOps - Container platform",
     },
     {
-      name: "AWS S3",
-      color: "#FF9900",
-      emissive: "#E68900",
+      name: "Kubernetes",
+      color: "#326CE5",
+      emissive: "#2466D9",
       radius: 0.55,
       distance: 10,
       speed: 0.1,
       rotationSpeed: 0.3,
-      techIcon: <Database size={16} className="text-[#FF9900]" />,
-      description: "Storage - Object storage service",
+      techIcon: <Package size={16} className="text-[#326CE5]" />,
+      description: "DevOps - Container orchestration",
     },
     {
-      name: "Azure",
-      color: "#0078D4",
-      emissive: "#106EBE",
+      name: "Jenkins",
+      color: "#D24939",
+      emissive: "#B83A2A",
       radius: 0.65,
       distance: 11.5,
       speed: 0.08,
       rotationSpeed: 0.5,
-      techIcon: <Cloud size={16} className="text-[#0078D4]" />,
-      description: "Cloud - Microsoft cloud platform",
+      techIcon: <Settings size={16} className="text-[#D24939]" />,
+      description: "DevOps - CI/CD automation",
     },
     {
-      name: "Cloudinary",
-      color: "#3448C5",
-      emissive: "#2A3A9F",
-      radius: 0.5,
+      name: "ThreeJS",
+      color: "#049EF4",
+      emissive: "#0369A1",
+      radius: 0.65,
       distance: 13,
-      speed: 0.06,
+      speed: 0.05,
       rotationSpeed: 0.6,
-      techIcon: <Globe size={16} className="text-[#3448C5]" />,
-      description: "Media - Image & video management",
+      techIcon: <Globe size={16} className="text-[#049EF4]" />,
+      description: "3D Library - WebGL renderer",
     },
     {
       name: "SEO",
@@ -320,19 +335,48 @@ export default function TechSolarSystem() {
       description: "Optimization - Search Engine Optimization",
     },
     {
-      name: "ThreeJS",
-      color: "#049EF4",
-      emissive: "#0369A1",
+      name: "Mobile Development",
+      color: "#61DAFB",
+      emissive: "#4FA8C5",
       radius: 0.65,
-      distance: 14.5,
-      speed: 0.05,
-      rotationSpeed: 0.6,
-      techIcon: <Globe size={16} className="text-[#049EF4]" />,
-      description: "3D Library - WebGL renderer",
+      distance: 16,
+      speed: 0.04,
+      rotationSpeed: 0.7,
+      techIcon: <Smartphone size={16} className="text-[#61DAFB]" />,
+      description: "Mobile - React Native & Flutter apps",
     },
   ];
 
   const handlePlanetClick = (name: string) => {
+    // Special Earth interactions
+    if (name === "Earth (Developer)") {
+      setEarthClicks((prev) => prev + 1);
+
+      // Achievement: First Earth click
+      if (earthClicks === 0) {
+        setAchievements((prev) => [...prev, "earth_explorer"]);
+        setShowSecretMessage(true);
+        setTimeout(() => setShowSecretMessage(false), 3000);
+      }
+
+      // Achievement: Earth enthusiast (5 clicks)
+      if (earthClicks === 4) {
+        setAchievements((prev) => [...prev, "earth_enthusiast"]);
+      }
+
+      // Achievement: Earth master (10 clicks)
+      if (earthClicks === 9) {
+        setAchievements((prev) => [...prev, "earth_master"]);
+        setDiscoveredEasterEggs((prev) => [...prev, "secret_code"]);
+      }
+
+      // Achievement: Hidden easter egg (25 clicks)
+      if (earthClicks === 24) {
+        setAchievements((prev) => [...prev, "easter_egg_hunter"]);
+        setDiscoveredEasterEggs((prev) => [...prev, "easter_egg"]);
+      }
+    }
+
     setActivePlanet(name === activePlanet ? null : name);
   };
 
@@ -356,7 +400,15 @@ export default function TechSolarSystem() {
         <Canvas
           camera={{ position: [0, 2, 12], fov: isMobile ? 75 : 65 }}
           dpr={isMobile ? [1, 1.25] : [1, 2]}
-          gl={{ powerPreference: "high-performance", antialias: !isMobile }}
+          gl={{
+            powerPreference: "high-performance",
+            antialias: !isMobile,
+            alpha: false,
+            stencil: false,
+            depth: true,
+          }}
+          touch-action={isMobile ? "none" : "auto"}
+          style={{ touchAction: isMobile ? "none" : "auto" }}
         >
           <Suspense fallback={null}>
             <Stars
@@ -384,11 +436,15 @@ export default function TechSolarSystem() {
               enablePan={!isMobile}
               enableZoom={!isMobile}
               zoomSpeed={isMobile ? 0.4 : 0.6}
-              rotateSpeed={0.5}
+              rotateSpeed={isMobile ? 0.8 : 0.5}
               maxDistance={30}
               minDistance={5}
               autoRotate
               autoRotateSpeed={isMobile ? 0.35 : 0.5}
+              enableDamping={true}
+              dampingFactor={isMobile ? 0.1 : 0.05}
+              minPolarAngle={Math.PI / 6}
+              maxPolarAngle={Math.PI / 2.5}
             />
 
             {!isMobile && (

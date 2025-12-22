@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Volume2 } from "lucide-react";
 import useStore from "@/store/store";
+import { Button } from "@/components/ui/Button";
 
 interface AudioExperiencePopupProps {
   onAccept: () => void;
@@ -141,23 +142,24 @@ export default function AudioExperiencePopup({
 
                 {/* Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button
+                  <Button
                     onClick={handleAccept}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+                    variant="gradient"
+                    size="md"
+                    icon={<Music className="w-5 h-5" />}
+                    iconPosition="left"
+                    className="flex-1 transform hover:scale-105"
                   >
-                    <Music className="w-5 h-5" />
                     Yes, Play Music
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleDecline}
-                    className={`flex-1 px-6 py-3 rounded-lg font-semibold border-2 transition-all duration-300 ${
-                      isDarkMode
-                        ? "border-gray-600 text-gray-300 hover:bg-gray-800"
-                        : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                    }`}
+                    variant="outline"
+                    size="md"
+                    className="flex-1"
                   >
                     No Thanks, Keep Silent
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Note */}
