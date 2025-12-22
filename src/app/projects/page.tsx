@@ -48,6 +48,7 @@ export default function ProjectsPage() {
   const {
     data: projectsResponse,
     isPending: loading,
+    isFetching: isRefetching,
     error,
   } = useProjectsFiltered({
     category: activeTab,
@@ -69,8 +70,7 @@ export default function ProjectsPage() {
   // Debug logging
   console.log("Projects page debug:", {
     activeTab,
-    loading,
-    projectsLength: projects.length,
+    loading,    isRefetching,    projectsLength: projects.length,
     projectsResponse: projectsResponse ? "has response" : "no response",
     hasData: !!projectsResponse?.data,
     isArray: Array.isArray(projectsResponse?.data),
@@ -345,7 +345,7 @@ export default function ProjectsPage() {
         </AnimatedSection>
 
         {/* Projects Grid */}
-        {loading ? (
+        {loading || isRefetching ? (
           <StaggeredContainer
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             staggerDelay={0.1}
@@ -393,7 +393,7 @@ export default function ProjectsPage() {
         ) : (
           <>
             <StaggeredContainer
-              key={`projects-${activeTab}-${currentPage}`}
+              key={`projects-${activeTab}-${searchTerm}-${sortField}-${sortOrder}-${currentPage}`}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 enhanced-scrollbar"
               staggerDelay={0.15}
             >

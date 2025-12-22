@@ -100,13 +100,18 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
             setSortField(field);
             setSortOrder("asc");
         }
+        // Reset to first page when sorting changes
+        goToPage(1);
     };
 
-    const clearFilters = () => {
-        setSearchTerm("");
-        setSelectedTag("");
-        setSortField("created_at");
-        setSortOrder("desc");
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        goToPage(1);
+    };
+
+    const handleTagChange = (value: string) => {
+        setSelectedTag(value);
+        goToPage(1);
     };
 
     const hasActiveFilters = searchTerm || selectedTag || sortField !== "created_at" || sortOrder !== "desc";
@@ -138,7 +143,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                                     type="text"
                                     placeholder="Search articles by title, content, author, or tags..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className={`${getInputClasses("w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500")}`}
                                 />
                             </div>
@@ -240,7 +245,11 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                     </AnimatedSection>
                 ) : (
                     <>
-                        <StaggeredContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
+                        <StaggeredContainer
+                            key={`blogs-${sortField}-${sortOrder}-${currentPage}`}
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                            staggerDelay={0.15}
+                        >
                             {paginatedData.map((blog) => (
                                 <Link
                                     key={blog.id}
