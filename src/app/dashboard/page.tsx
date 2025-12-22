@@ -15,10 +15,8 @@ import {
 } from "lucide-react";
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
-import {
-  useProjects,
-  useDeleteProject,
-} from "@/hooks/useProjects";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useProjects, useDeleteProject } from "@/hooks/useProjects";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
@@ -35,25 +33,29 @@ const Dashboard = () => {
   // TanStack Query hooks
   const { data: projects = [], isLoading } = useProjects();
   const deleteProject = useDeleteProject();
+  const confirm = useConfirm();
 
   const [activeTab, setActiveTab] = useState<
     "projects" | "analytics" | "blogs" | "testimonials" | "cv"
   >((searchParams?.get("tab") as any) || "projects");
-
-
-
 
   const handleEdit = (project: Project) => {
     router.push(`/dashboard/projects/edit/${project.id}`);
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this project?")) {
-      try {
-        await deleteProject.mutateAsync(id);
-      } catch (error) {
-        console.error("Error deleting project:", error);
-      }
+    const ok = await confirm({
+      title: "Delete project",
+      message:
+        "Are you sure you want to delete this project? This action cannot be undone.",
+      confirmText: "Delete",
+      confirmVariant: "danger",
+    });
+    if (!ok) return;
+    try {
+      await deleteProject.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting project:", error);
     }
   };
 
@@ -74,9 +76,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div
-      className={`min-h-screen ${colorScheme.page} p-8`}
-    >
+    <div className={`min-h-screen ${colorScheme.page} p-8`}>
       <div className="max-w-7xl mx-auto pt-20">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold">Dashboard</h1>
@@ -104,10 +104,11 @@ const Dashboard = () => {
         <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
           <button
             onClick={() => setActiveTab("projects")}
-            className={`px-4 py-2 font-medium ${activeTab === "projects"
-              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "projects"
+                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
           >
             <div className="flex items-center gap-2">
               <FolderKanban size={18} />
@@ -116,10 +117,11 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-4 py-2 font-medium ${activeTab === "analytics"
-              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "analytics"
+                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
           >
             <div className="flex items-center gap-2">
               <BarChart3 size={18} />
@@ -128,10 +130,11 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("blogs")}
-            className={`px-4 py-2 font-medium ${activeTab === "blogs"
-              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "blogs"
+                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
           >
             <div className="flex items-center gap-2">
               <BookOpen size={18} />
@@ -140,10 +143,11 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("testimonials")}
-            className={`px-4 py-2 font-medium ${activeTab === "testimonials"
-              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "testimonials"
+                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
           >
             <div className="flex items-center gap-2">
               <MessageSquare size={18} />
@@ -152,10 +156,11 @@ const Dashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab("cv")}
-            className={`px-4 py-2 font-medium ${activeTab === "cv"
-              ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
-              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              }`}
+            className={`px-4 py-2 font-medium ${
+              activeTab === "cv"
+                ? "border-b-2 border-blue-500 text-blue-600 dark:text-blue-400"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            }`}
           >
             <div className="flex items-center gap-2">
               <FileText size={18} />

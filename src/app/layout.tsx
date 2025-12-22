@@ -14,6 +14,7 @@ import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
+import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 
 
 const geistSans = Geist({
@@ -367,15 +368,16 @@ export default function RootLayout({
             <ThemeProvider>
               <AnalyticsProvider>
                 <ServiceWorkerProvider />
-                <ScrollProgressBar />
-                <Header />
-                <main id="main-content" role="main">
-                  {children}
-                </main>
-                <Footer />
-                <ConsentManager />
-                <CustomCursor />
-                <ToastContainer
+                <ConfirmDialogProvider>
+                  <ScrollProgressBar />
+                  <Header />
+                  <main id="main-content" role="main">
+                    {children}
+                  </main>
+                  <Footer />
+                  <ConsentManager />
+                  <CustomCursor />
+                  <ToastContainer
                   position="top-right"
                   autoClose={3000}
                   hideProgressBar
@@ -395,6 +397,7 @@ export default function RootLayout({
                     maxWidth: "400px",
                   }}
                 />
+                </ConfirmDialogProvider>
               </AnalyticsProvider>
             </ThemeProvider>
           </AuthProvider>

@@ -10,6 +10,7 @@ import {
   useBlogsFiltered,
   useBlogCounts,
 } from "@/hooks/useBlogs";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import {
   Edit2,
@@ -36,6 +37,7 @@ export default function BlogManager() {
   const router = useRouter();
   const { isDarkMode } = useStore();
   const deleteBlog = useDeleteBlog();
+  const confirm = useConfirm();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -135,12 +137,17 @@ export default function BlogManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this blog post?")) return;
+    const ok = await confirm({
+      title: "Delete blog post",
+      message: "Are you sure you want to delete this blog post? This action cannot be undone.",
+      confirmText: "Delete",
+      confirmVariant: "danger",
+    });
+    if (!ok) return;
     try {
       await deleteBlog.mutateAsync(id);
     } catch (error) {
       console.error("Failed to delete blog:", error);
-      alert("Failed to delete blog");
     }
   };
 

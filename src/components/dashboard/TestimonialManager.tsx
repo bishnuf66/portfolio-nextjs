@@ -10,6 +10,7 @@ import {
   useTestimonialsFiltered,
   useTestimonialCounts,
 } from "@/hooks/useTestimonials";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
 import {
   Edit2,
@@ -36,6 +37,7 @@ export default function TestimonialManager() {
   const router = useRouter();
   const { isDarkMode } = useStore();
   const deleteTestimonial = useDeleteTestimonial();
+  const confirm = useConfirm();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -140,12 +142,17 @@ export default function TestimonialManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this testimonial?")) return;
+    const ok = await confirm({
+      title: "Delete testimonial",
+      message: "Are you sure you want to delete this testimonial? This action cannot be undone.",
+      confirmText: "Delete",
+      confirmVariant: "danger",
+    });
+    if (!ok) return;
     try {
       await deleteTestimonial.mutateAsync(id);
     } catch (error) {
       console.error("Failed to delete testimonial:", error);
-      alert("Failed to delete testimonial");
     }
   };
 

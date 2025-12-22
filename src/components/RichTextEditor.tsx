@@ -13,6 +13,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Underline from "@tiptap/extension-underline";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { createLowlight } from "lowlight";
+import { toast } from "react-toastify";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
 import css from "highlight.js/lib/languages/css";
@@ -120,14 +121,15 @@ export default function RichTextEditor({
     // Validate file size (max 1MB)
     const maxSize = 1 * 1024 * 1024; // 1MB in bytes
     if (file.size > maxSize) {
-      alert(`${file.name} is too large (max 1MB)`);
+      toast.error(`${file.name} is too large (max 1MB)`);
       return null;
     }
 
     // Recommend WebP format
     if (file.type !== "image/webp") {
-      alert(
-        `${file.name}: Consider converting to WebP format for better compression and performance`
+      toast.info(
+        `${file.name}: Consider converting to WebP format for better compression and performance`,
+        { autoClose: 5000 }
       );
     }
 
@@ -147,7 +149,7 @@ export default function RichTextEditor({
       throw new Error("Upload failed");
     } catch (error) {
       console.error("Image upload failed:", error);
-      alert("Failed to upload image");
+      toast.error("Failed to upload image");
       return null;
     }
   }, []);

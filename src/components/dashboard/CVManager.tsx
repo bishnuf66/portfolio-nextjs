@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { Upload, FileText, Trash2, Download, Eye, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import useStore from "@/store/store";
 import { toast } from "react-toastify";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useCVDocuments, useUploadCV, useSetActiveCV, useDeleteCV, CVDocument } from "@/hooks/useCV";
 
 const CVManager: React.FC = () => {
     const { isDarkMode } = useStore();
     const [uploading, setUploading] = useState(false);
+    const confirm = useConfirm();
     const [uploadProgress, setUploadProgress] = useState(0);
 
     // Use React Query hooks
@@ -61,7 +63,13 @@ const CVManager: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this CV?")) return;
+        const ok = await confirm({
+            title: "Delete CV",
+            message: "Are you sure you want to delete this CV? This action cannot be undone.",
+            confirmText: "Delete",
+            confirmVariant: "danger",
+        });
+        if (!ok) return;
 
         try {
             await deleteCVMutation.mutateAsync(id);

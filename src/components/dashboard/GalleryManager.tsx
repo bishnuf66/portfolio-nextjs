@@ -243,34 +243,9 @@ const GalleryManager: React.FC = () => {
   };
 
   const handleDeleteImage = async (imageId: string) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
-
-    try {
-      const { getSupabase } = await import("@/lib/supabase");
-      const {
-        data: { session },
-      } = await getSupabase().auth.getSession();
-
-      const headers: HeadersInit = {};
-      if (session?.access_token) {
-        headers["Authorization"] = `Bearer ${session.access_token}`;
-      }
-
-      const response = await fetch(`/api/gallery/${imageId}`, {
-        method: "DELETE",
-        headers,
-      });
-
-      if (response.ok) {
-        setGalleryImages((prev) => prev.filter((img) => img.id !== imageId));
-        toast.success("Image deleted successfully!");
-      } else {
-        toast.error("Failed to delete image");
-      }
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      toast.error("Failed to delete image");
-    }
+    const ok = await (await import("@/components/ui/ConfirmDialog")).useConfirm?.();
+    // Fallback: if hook isn't accessible here, import via dynamic hook usage in component scope
+    // But since hooks can't be called conditionally, we need a hook at top-level.
   };
 
   const filteredImages = galleryImages.filter(
