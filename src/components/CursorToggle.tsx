@@ -6,22 +6,26 @@ import useStore from "@/store/store";
 
 const CursorToggle = () => {
   const { isDarkMode } = useStore();
-  const [customCursorEnabled, setCustomCursorEnabled] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    // Set client flag and initialize from localStorage
-    setIsClient(true);
-    const stored = localStorage.getItem("customCursorEnabled");
-    if (stored !== null) {
-      setCustomCursorEnabled(JSON.parse(stored));
+  const [customCursorEnabled, setCustomCursorEnabled] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("customCursorEnabled");
+      return stored !== null ? JSON.parse(stored) : true;
     }
-  }, []);
+    return true;
+  });
+  const [isClient] = useState(() => typeof window !== "undefined");
+  const [isMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const isMobileViewport = window.innerWidth < 768;
+    const isCoarsePointer = window.matchMedia
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
+    return isMobileViewport || isCoarsePointer;
+  });
 
   useEffect(() => {
     if (!isClient) return;
 
-    // This effect now only handles side effects, not state initialization
     // Store user preference
     localStorage.setItem(
       "customCursorEnabled",
@@ -45,7 +49,7 @@ const CursorToggle = () => {
       document.documentElement.style.cursor = "auto";
     }
 
-    // Dispatch custom event to notify SimpleCursor component
+    // Dispatch custom event to notify CustomCursor component
     window.dispatchEvent(
       new CustomEvent("cursorToggle", {
         detail: { enabled: customCursorEnabled },
@@ -57,13 +61,16 @@ const CursorToggle = () => {
     setCustomCursorEnabled(!customCursorEnabled);
   };
 
+  if (isMobile) return null;
+
   return (
     <button
       onClick={toggleCursor}
-      className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${isDarkMode
-        ? "bg-gray-700 hover:bg-gray-600"
-        : "bg-gray-200 hover:bg-gray-300"
-        }`}
+      className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+        isDarkMode
+          ? "bg-gray-700 hover:bg-gray-600"
+          : "bg-gray-200 hover:bg-gray-300"
+      }`}
       title={
         customCursorEnabled ? "Disable Custom Cursor" : "Enable Custom Cursor"
       }
