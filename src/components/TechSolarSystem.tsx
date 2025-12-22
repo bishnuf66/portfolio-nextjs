@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useRef, Suspense, useState } from "react";
+import React, {
+  useRef,
+  Suspense,
+  useState,
+  useEffect,
+  useReducer,
+} from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text, Html, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,7 +19,6 @@ import {
 import {
   Code,
   Cpu,
-  Globe,
   Database,
   Terminal,
   Server,
@@ -200,6 +205,57 @@ function Planet({
   );
 }
 
+// Reducer for localStorage state management
+interface ExplorationState {
+  clickedPlanets: Set<string>;
+  achievements: string[];
+  discoveredEasterEggs: string[];
+  earthClicks: number;
+}
+
+type ExplorationAction =
+  | { type: "LOAD_FROM_STORAGE"; payload: Partial<ExplorationState> }
+  | { type: "ADD_CLICKED_PLANET"; payload: string }
+  | { type: "ADD_ACHIEVEMENT"; payload: string }
+  | { type: "ADD_EASTER_EGG"; payload: string }
+  | { type: "INCREMENT_EARTH_CLICKS" };
+
+function explorationReducer(
+  state: ExplorationState,
+  action: ExplorationAction
+): ExplorationState {
+  switch (action.type) {
+    case "LOAD_FROM_STORAGE":
+      return {
+        ...state,
+        ...action.payload,
+        clickedPlanets: action.payload.clickedPlanets || new Set(),
+      };
+    case "ADD_CLICKED_PLANET":
+      return {
+        ...state,
+        clickedPlanets: new Set([...state.clickedPlanets, action.payload]),
+      };
+    case "ADD_ACHIEVEMENT":
+      return {
+        ...state,
+        achievements: [...state.achievements, action.payload],
+      };
+    case "ADD_EASTER_EGG":
+      return {
+        ...state,
+        discoveredEasterEggs: [...state.discoveredEasterEggs, action.payload],
+      };
+    case "INCREMENT_EARTH_CLICKS":
+      return {
+        ...state,
+        earthClicks: state.earthClicks + 1,
+      };
+    default:
+      return state;
+  }
+}
+
 // Main Solar System Component
 export default function TechSolarSystem() {
   const { isDarkMode } = useStore();
@@ -214,15 +270,64 @@ export default function TechSolarSystem() {
       description: string;
     }>;
   } | null>(null);
-  const [clickedPlanets, setClickedPlanets] = useState<Set<string>>(new Set());
-  const [achievements, setAchievements] = useState<string[]>([]);
-  const [discoveredEasterEggs, setDiscoveredEasterEggs] = useState<string[]>(
-    []
-  );
-  const [earthClicks, setEarthClicks] = useState(0);
   const [showSecretMessage, setShowSecretMessage] = useState(false);
   const [showAllPlanetsAchievement, setShowAllPlanetsAchievement] =
     useState(false);
+
+  // Use useReducer to manage all localStorage state in one place
+  const [explorationState, dispatch] = useReducer(explorationReducer, {
+    clickedPlanets: new Set(),
+    achievements: [],
+    discoveredEasterEggs: [],
+    earthClicks: 0,
+  });
+
+  // Load exploration state from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedExplored = localStorage.getItem("exploredPlanets");
+      const savedAchievements = localStorage.getItem("planetAchievements");
+      const savedEasterEggs = localStorage.getItem("discoveredEasterEggs");
+      const savedEarthClicks = localStorage.getItem("earthClicks");
+
+      // Single dispatch to load all state at once
+      dispatch({
+        type: "LOAD_FROM_STORAGE",
+        payload: {
+          clickedPlanets: savedExplored
+            ? new Set(JSON.parse(savedExplored))
+            : new Set(),
+          achievements: savedAchievements ? JSON.parse(savedAchievements) : [],
+          discoveredEasterEggs: savedEasterEggs
+            ? JSON.parse(savedEasterEggs)
+            : [],
+          earthClicks: savedEarthClicks ? parseInt(savedEarthClicks, 10) : 0,
+        },
+      });
+    }
+  }, []);
+
+  // Save exploration state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "exploredPlanets",
+        JSON.stringify(Array.from(explorationState.clickedPlanets))
+      );
+      localStorage.setItem(
+        "planetAchievements",
+        JSON.stringify(explorationState.achievements)
+      );
+      localStorage.setItem(
+        "discoveredEasterEggs",
+        JSON.stringify(explorationState.discoveredEasterEggs)
+      );
+      localStorage.setItem(
+        "earthClicks",
+        explorationState.earthClicks.toString()
+      );
+    }
+  }, [explorationState]);
 
   const [isMobile] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -521,7 +626,7 @@ export default function TechSolarSystem() {
       ],
     },
     {
-      title: "Storage & Media",
+      title: "Analytics & Storage",
       gradient: "from-indigo-500 to-purple-500",
       technologies: [
         {
@@ -547,36 +652,6 @@ export default function TechSolarSystem() {
           icon: Settings,
           color: "#FF6C2C",
           description: "Hosting Management",
-        },
-      ],
-    },
-    {
-      title: "Optimization & Analytics",
-      gradient: "from-orange-500 to-red-500",
-      technologies: [
-        {
-          name: "SEO",
-          icon: TrendingUp,
-          color: "#34A853",
-          description: "Search Optimization",
-        },
-        {
-          name: "Performance",
-          icon: Globe,
-          color: "#FF9500",
-          description: "Speed Optimization",
-        },
-        {
-          name: "Analytics",
-          icon: TrendingUp,
-          color: "#4285F4",
-          description: "Data Insights",
-        },
-        {
-          name: "PWA",
-          icon: Smartphone,
-          color: "#5A0FC8",
-          description: "Progressive Web App",
         },
       ],
     },
@@ -614,16 +689,14 @@ export default function TechSolarSystem() {
 
   const handlePlanetClick = (name: string) => {
     // Track clicked planets for achievement
-    const newClickedPlanets = new Set(clickedPlanets);
-    newClickedPlanets.add(name);
-    setClickedPlanets(newClickedPlanets);
+    dispatch({ type: "ADD_CLICKED_PLANET", payload: name });
 
     // Check if all planets have been clicked for achievement
     if (
-      newClickedPlanets.size === planets.length &&
+      explorationState.clickedPlanets.size + 1 === planets.length &&
       !showAllPlanetsAchievement
     ) {
-      setAchievements((prev) => [...prev, "all_planets_explored"]);
+      dispatch({ type: "ADD_ACHIEVEMENT", payload: "all_planets_explored" });
       setShowAllPlanetsAchievement(true);
       setTimeout(() => setShowAllPlanetsAchievement(false), 5000);
     }
@@ -636,30 +709,30 @@ export default function TechSolarSystem() {
       setSelectedCategory(category);
     } else if (name === "Developer Earth") {
       // Special Earth interactions
-      setEarthClicks((prev) => prev + 1);
+      dispatch({ type: "INCREMENT_EARTH_CLICKS" });
 
       // Achievement: First Earth click
-      if (earthClicks === 0) {
-        setAchievements((prev) => [...prev, "earth_explorer"]);
+      if (explorationState.earthClicks === 0) {
+        dispatch({ type: "ADD_ACHIEVEMENT", payload: "earth_explorer" });
         setShowSecretMessage(true);
         setTimeout(() => setShowSecretMessage(false), 3000);
       }
 
       // Achievement: Earth enthusiast (5 clicks)
-      if (earthClicks === 4) {
-        setAchievements((prev) => [...prev, "earth_enthusiast"]);
+      if (explorationState.earthClicks === 4) {
+        dispatch({ type: "ADD_ACHIEVEMENT", payload: "earth_enthusiast" });
       }
 
       // Achievement: Earth master (10 clicks)
-      if (earthClicks === 9) {
-        setAchievements((prev) => [...prev, "earth_master"]);
-        setDiscoveredEasterEggs((prev) => [...prev, "secret_code"]);
+      if (explorationState.earthClicks === 9) {
+        dispatch({ type: "ADD_ACHIEVEMENT", payload: "earth_master" });
+        dispatch({ type: "ADD_EASTER_EGG", payload: "secret_code" });
       }
 
       // Achievement: Hidden easter egg (25 clicks)
-      if (earthClicks === 24) {
-        setAchievements((prev) => [...prev, "easter_egg_hunter"]);
-        setDiscoveredEasterEggs((prev) => [...prev, "easter_egg"]);
+      if (explorationState.earthClicks === 24) {
+        dispatch({ type: "ADD_ACHIEVEMENT", payload: "easter_egg_hunter" });
+        dispatch({ type: "ADD_EASTER_EGG", payload: "easter_egg" });
       }
     }
 
@@ -779,75 +852,99 @@ export default function TechSolarSystem() {
       <div className="mt-12">
         <AnimatedSection animation="fadeIn" className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-            Technology Categories
+            Explored Technology Categories
           </h2>
           <p
             className={`text-lg ${
               isDarkMode ? "text-gray-300" : "text-gray-600"
             }`}
           >
-            Explore the complete technology stack organized by category
+            {explorationState.clickedPlanets.size === 0
+              ? "Click on planets to explore and unlock technology categories"
+              : `You've explored ${explorationState.clickedPlanets.size} of ${planets.length} technology categories`}
           </p>
         </AnimatedSection>
 
-        <StaggeredContainer
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          staggerDelay={0.15}
-        >
-          {techCategories.map((category, categoryIndex) => (
-            <div
-              key={categoryIndex}
-              className={`${getCardClasses(
-                "rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300"
-              )}`}
-            >
-              <div className="mb-6">
-                <h3
-                  className={`text-2xl font-bold mb-2 bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
+        {explorationState.clickedPlanets.size > 0 && (
+          <StaggeredContainer
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            staggerDelay={0.15}
+          >
+            {techCategories
+              .filter((category) => {
+                console.log(
+                  "Filtering:",
+                  category.title,
+                  "in clicked planets:",
+                  explorationState.clickedPlanets.has(category.title)
+                );
+                return explorationState.clickedPlanets.has(category.title);
+              })
+              .map((category, categoryIndex) => (
+                <div
+                  key={categoryIndex}
+                  className={`${getCardClasses(
+                    "rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300"
+                  )}`}
                 >
-                  {category.title}
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {category.technologies.map((tech, techIndex) => {
-                  const Icon = tech.icon;
-                  return (
-                    <div
-                      key={techIndex}
-                      className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                  <div className="mb-6">
+                    <h3
+                      className={`text-2xl font-bold mb-2 bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div
-                          className="p-2 rounded-lg"
-                          style={{ backgroundColor: `${tech.color}20` }}
-                        >
-                          <Icon size={20} style={{ color: tech.color }} />
-                        </div>
-                        <div>
-                          <h4
-                            className={`font-semibold ${
-                              isDarkMode ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {tech.name}
-                          </h4>
-                        </div>
-                      </div>
-                      <p
+                      {category.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span
                         className={`text-sm ${
-                          isDarkMode ? "text-gray-400" : "text-gray-600"
+                          isDarkMode ? "text-green-400" : "text-green-600"
                         }`}
                       >
-                        {tech.description}
-                      </p>
+                        Explored
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </StaggeredContainer>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {category.technologies.map((tech, techIndex) => {
+                      const Icon = tech.icon;
+                      return (
+                        <div
+                          key={techIndex}
+                          className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <div
+                              className="p-2 rounded-lg"
+                              style={{ backgroundColor: `${tech.color}20` }}
+                            >
+                              <Icon size={20} style={{ color: tech.color }} />
+                            </div>
+                            <div>
+                              <h4
+                                className={`font-semibold ${
+                                  isDarkMode ? "text-white" : "text-gray-900"
+                                }`}
+                              >
+                                {tech.name}
+                              </h4>
+                            </div>
+                          </div>
+                          <p
+                            className={`text-sm ${
+                              isDarkMode ? "text-gray-400" : "text-gray-600"
+                            }`}
+                          >
+                            {tech.description}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+          </StaggeredContainer>
+        )}
       </div>
 
       {/* Planet Detail Modal */}
@@ -881,8 +978,12 @@ export default function TechSolarSystem() {
       {/* Debug Info - Remove in production */}
       {process.env.NODE_ENV === "development" && (
         <div className="fixed bottom-4 left-4 z-50 bg-black/50 text-white p-2 rounded text-xs">
-          Achievements: {achievements.length} | Easter Eggs:{" "}
-          {discoveredEasterEggs.length}
+          <div>
+            Clicked Planets:{" "}
+            {Array.from(explorationState.clickedPlanets).join(", ")}
+          </div>
+          <div>Achievements: {explorationState.achievements.length}</div>
+          <div>Easter Eggs: {explorationState.discoveredEasterEggs.length}</div>
         </div>
       )}
     </div>
