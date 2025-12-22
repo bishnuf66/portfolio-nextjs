@@ -198,7 +198,7 @@ export default function UnifiedShowcase() {
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             <ScrollReveal direction="up" delay={0.1}>
               <div className="h-full">
-                <GlowingStarsBackgroundCard>
+                <GlowingStarsBackgroundCard glowingStarsCount={5}>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
                       Frontend
@@ -226,7 +226,7 @@ export default function UnifiedShowcase() {
 
             <ScrollReveal direction="up" delay={0.2}>
               <div className="h-full">
-                <GlowingStarsBackgroundCard>
+                <GlowingStarsBackgroundCard glowingStarsCount={3}>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
                       Mobile
@@ -254,7 +254,7 @@ export default function UnifiedShowcase() {
 
             <ScrollReveal direction="up" delay={0.3}>
               <div className="h-full">
-                <GlowingStarsBackgroundCard>
+                <GlowingStarsBackgroundCard glowingStarsCount={5}>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
                       Backend
@@ -284,7 +284,7 @@ export default function UnifiedShowcase() {
           <div className="grid md:grid-cols-2 gap-8 mb-16">
             <ScrollReveal direction="up" delay={0.4}>
               <div className="h-full">
-                <GlowingStarsBackgroundCard>
+                <GlowingStarsBackgroundCard glowingStarsCount={5}>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
                       Tools
@@ -308,7 +308,7 @@ export default function UnifiedShowcase() {
 
             <ScrollReveal direction="up" delay={0.5}>
               <div className="h-full">
-                <GlowingStarsBackgroundCard>
+                <GlowingStarsBackgroundCard glowingStarsCount={4}>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
                       DevOps
