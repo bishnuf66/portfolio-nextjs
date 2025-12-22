@@ -31,7 +31,7 @@ export const metadata: Metadata = {
         siteName: "Bishnu BK Portfolio",
         images: [
             {
-                url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.png`,
+                url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.webp`,
                 width: 1200,
                 height: 630,
                 alt: "Bishnu BK Blog - Web Development Articles and Tutorials",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
         site: "@bishnubk",
         images: [
             {
-                url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.png`,
+                url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://www.bishnubk.com.np"}/coding2.webp`,
                 alt: "Bishnu BK Blog - Web Development Articles",
             }
         ],

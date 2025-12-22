@@ -1,5 +1,59 @@
 import { getSupabase } from "./supabase";
 
+// Batch analytics data
+let analyticsQueue: any[] = [];
+let batchTimeout: NodeJS.Timeout | null = null;
+
+const BATCH_SIZE = 10;
+const BATCH_DELAY = 5000; // 5 seconds
+
+// Flush analytics queue
+const flushAnalytics = async () => {
+    if (analyticsQueue.length === 0) return;
+
+    const batch = [...analyticsQueue];
+    analyticsQueue = [];
+
+    try {
+        const { error } = await getSupabase()
+            .from("analytics")
+            .insert(batch);
+
+        if (error) {
+            console.error("Analytics batch insert failed:", error);
+            // Re-queue failed items
+            analyticsQueue.unshift(...batch);
+        }
+    } catch (error) {
+        console.error("Analytics batch error:", error);
+        // Re-queue failed items
+        analyticsQueue.unshift(...batch);
+    }
+};
+
+// Queue analytics data
+const queueAnalytics = (data: any) => {
+    analyticsQueue.push(data);
+
+    // Flush immediately if batch is full
+    if (analyticsQueue.length >= BATCH_SIZE) {
+        flushAnalytics();
+        if (batchTimeout) {
+            clearTimeout(batchTimeout);
+            batchTimeout = null;
+        }
+        return;
+    }
+
+    // Set timeout for batch flush
+    if (!batchTimeout) {
+        batchTimeout = setTimeout(() => {
+            flushAnalytics();
+            batchTimeout = null;
+        }, BATCH_DELAY);
+    }
+};
+
 // Generate or get session ID
 export const getSessionId = (): string => {
     if (typeof window === "undefined") return "";

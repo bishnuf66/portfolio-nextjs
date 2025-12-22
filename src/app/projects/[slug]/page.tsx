@@ -95,7 +95,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         name: project.name,
         description: project.description.replace(/<[^>]*>/g, ""),
         url: projectUrl,
-        image: project.cover_image_url || `${baseUrl}/coding2.png`,
+        image: project.cover_image_url || `${baseUrl}/coding2.webp`,
         author: {
             "@type": "Person",
             name: "Bishnu BK",

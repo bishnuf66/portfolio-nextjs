@@ -13,7 +13,8 @@ import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -365,6 +366,7 @@ export default function RootLayout({
           <AuthProvider>
             <ThemeProvider>
               <AnalyticsProvider>
+                <ServiceWorkerProvider />
                 <ScrollProgressBar />
                 <Header />
                 <main id="main-content" role="main">

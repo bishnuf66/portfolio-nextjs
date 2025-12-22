@@ -190,7 +190,7 @@ const Home = () => {
         >
           <div className="relative w-full h-full">
             <Image
-              src="/coding2.png"
+              src="/coding2.webp"
               alt="Coding workspace"
               fill
               className={`object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"

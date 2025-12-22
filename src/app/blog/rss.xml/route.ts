@@ -2,18 +2,18 @@ import { getSupabase } from "@/lib/supabase";
 import { Blog } from "@/types/blog";
 
 export async function GET() {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
-        "https://www.bishnubk.com.np";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://www.bishnubk.com.np";
 
-    const supabase = getSupabase();
-    const { data: blogs } = await supabase
-        .from("blogs")
-        .select("*")
-        .eq("published", true)
-        .order("created_at", { ascending: false })
-        .limit(20);
+  const supabase = getSupabase();
+  const { data: blogs } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+    .limit(20);
 
-    const rssItems = blogs?.map((blog: Blog) => `
+  const rssItems = blogs?.map((blog: Blog) => `
     <item>
       <title><![CDATA[${blog.title}]]></title>
       <description><![CDATA[${blog.excerpt || ""}]]></description>
@@ -23,14 +23,14 @@ export async function GET() {
       <author>contact@bishnubk.com.np (${blog.author})</author>
       ${blog.tags?.map((tag) => `<category>${tag}</category>`).join("") || ""}
       ${
-        blog.cover_image_url
-            ? `<enclosure url="${blog.cover_image_url}" type="image/jpeg" />`
-            : ""
-    }
+    blog.cover_image_url
+      ? `<enclosure url="${blog.cover_image_url}" type="image/jpeg" />`
+      : ""
+  }
     </item>
   `).join("") || "";
 
-    const rss = `<?xml version="1.0" encoding="UTF-8" ?>
+  const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Bishnu BK Blog - Web Development Articles</title>
@@ -46,7 +46,7 @@ export async function GET() {
     <category>Programming</category>
     <ttl>60</ttl>
     <image>
-      <url>${baseUrl}/coding2.png</url>
+      <url>${baseUrl}/coding2.webp</url>
       <title>Bishnu BK Blog</title>
       <link>${baseUrl}/blog</link>
       <width>144</width>
@@ -56,11 +56,10 @@ export async function GET() {
   </channel>
 </rss>`;
 
-    return new Response(rss, {
-        headers: {
-            "Content-Type": "application/xml",
-            "Cache-Control":
-                "public, s-maxage=3600, stale-while-revalidate=86400",
-        },
-    });
+  return new Response(rss, {
+    headers: {
+      "Content-Type": "application/xml",
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+    },
+  });
 }
