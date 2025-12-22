@@ -33,6 +33,7 @@ interface Particle {
 export default function SpaceShooterGame() {
   const { isDarkMode } = useStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [score, setScore] = useState(0);
@@ -47,6 +48,63 @@ export default function SpaceShooterGame() {
     down: false,
   });
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
+  const [canvasSize, setCanvasSize] = useState(() => ({
+    width: 800,
+    height: 500,
+  }));
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileViewport = window.innerWidth < 768;
+      const isCoarsePointer = window.matchMedia
+        ? window.matchMedia("(pointer: coarse)").matches
+        : false;
+      setIsMobile(isMobileViewport || isCoarsePointer);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateCanvasSize = () => {
+      const el = canvasContainerRef.current;
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const maxWidth = 800;
+      const width = Math.max(320, Math.min(maxWidth, Math.floor(rect.width)));
+
+      // Keep the original 800x500 aspect ratio (1.6)
+      const idealHeight = Math.round(width * (500 / 800));
+      const height = Math.max(260, Math.min(500, idealHeight));
+
+      setCanvasSize({ width, height });
+    };
+
+    updateCanvasSize();
+
+    // Use ResizeObserver when available for accurate container changes
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && canvasContainerRef.current) {
+      ro = new ResizeObserver(() => updateCanvasSize());
+      ro.observe(canvasContainerRef.current);
+    } else {
+      window.addEventListener("resize", updateCanvasSize);
+    }
+
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener("resize", updateCanvasSize);
+    };
+  }, []);
+
   // Game state refs
   const shipRef = useRef({ x: 400, y: 450, width: 40, height: 40 });
   const asteroidsRef = useRef<GameObject[]>([]);
@@ -57,6 +115,33 @@ export default function SpaceShooterGame() {
   const lastShotRef = useRef(0);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const touchControlsRef = useRef(touchControls);
+  const gameStartTimeRef = useRef<number | null>(null);
+  const asteroidTimeoutRef = useRef<number | undefined>(undefined);
+  const starTimeoutRef = useRef<number | undefined>(undefined);
+
+  const getDifficulty = () => {
+    const start = gameStartTimeRef.current;
+    if (!start) {
+      return {
+        asteroidSpawnMs: 1400,
+        starSpawnMs: 2600,
+        asteroidSpeedMin: 1.2,
+        asteroidSpeedMax: 2.0,
+      };
+    }
+
+    const elapsedMs = Date.now() - start;
+    const t = Math.max(0, Math.min(1, elapsedMs / 90000));
+
+    const lerp = (a: number, b: number) => a + (b - a) * t;
+
+    return {
+      asteroidSpawnMs: Math.round(lerp(1400, 550)),
+      starSpawnMs: Math.round(lerp(2600, 1800)),
+      asteroidSpeedMin: lerp(1.2, 2.4),
+      asteroidSpeedMax: lerp(2.0, 4.0),
+    };
+  };
 
   // Update touchControlsRef when touchControls changes
   useEffect(() => {
@@ -217,30 +302,33 @@ export default function SpaceShooterGame() {
 
     // Update ship position
     const ship = shipRef.current;
+    const halfW = ship.width / 2;
+    const halfH = ship.height / 2;
+    const moveStep = isMobile ? 4 : 5;
     if (
       keysRef.current["ArrowLeft"] ||
       keysRef.current["a"] ||
       touchControlsRef.current.left
     )
-      ship.x = Math.max(20, ship.x - 5);
+      ship.x = Math.max(halfW, ship.x - moveStep);
     if (
       keysRef.current["ArrowRight"] ||
       keysRef.current["d"] ||
       touchControlsRef.current.right
     )
-      ship.x = Math.min(canvas.width - 20, ship.x + 5);
+      ship.x = Math.min(canvas.width - halfW, ship.x + moveStep);
     if (
       keysRef.current["ArrowUp"] ||
       keysRef.current["w"] ||
       touchControlsRef.current.up
     )
-      ship.y = Math.max(20, ship.y - 5);
+      ship.y = Math.max(halfH, ship.y - moveStep);
     if (
       keysRef.current["ArrowDown"] ||
       keysRef.current["s"] ||
       touchControlsRef.current.down
     )
-      ship.y = Math.min(canvas.height - 20, ship.y + 5);
+      ship.y = Math.min(canvas.height - halfH, ship.y + moveStep);
 
     // Auto-shoot
     const now = Date.now();
@@ -363,31 +451,56 @@ export default function SpaceShooterGame() {
   useEffect(() => {
     if (!isPlaying || isPaused || gameOver) return;
 
-    const asteroidInterval = setInterval(() => {
+    const scheduleAsteroid = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+
+      const { asteroidSpawnMs, asteroidSpeedMin, asteroidSpeedMax } =
+        getDifficulty();
+
+      const speed =
+        asteroidSpeedMin +
+        Math.random() * (asteroidSpeedMax - asteroidSpeedMin);
+
       asteroidsRef.current.push({
         id: Date.now(),
         x: Math.random() * (canvas.width - 40) + 20,
         y: -20,
-        speed: 2 + Math.random() * 2,
+        speed,
       });
-    }, 1000);
 
-    const starInterval = setInterval(() => {
+      asteroidTimeoutRef.current = window.setTimeout(
+        scheduleAsteroid,
+        asteroidSpawnMs
+      );
+    };
+
+    const scheduleStar = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
+
+      const { starSpawnMs } = getDifficulty();
+
       starsRef.current.push({
         id: Date.now(),
         x: Math.random() * (canvas.width - 40) + 20,
         y: -20,
         speed: 3,
       });
-    }, 2000);
+
+      starTimeoutRef.current = window.setTimeout(scheduleStar, starSpawnMs);
+    };
+
+    scheduleAsteroid();
+    scheduleStar();
 
     return () => {
-      clearInterval(asteroidInterval);
-      clearInterval(starInterval);
+      if (asteroidTimeoutRef.current) {
+        clearTimeout(asteroidTimeoutRef.current);
+      }
+      if (starTimeoutRef.current) {
+        clearTimeout(starTimeoutRef.current);
+      }
     };
   }, [isPlaying, isPaused, gameOver]);
 
@@ -433,18 +546,42 @@ export default function SpaceShooterGame() {
   }, [isPlaying, isPaused, gameOver]);
 
   const startGame = () => {
+    gameStartTimeRef.current = Date.now();
     setIsPlaying(true);
     setIsPaused(false);
     setGameOver(false);
     setScore(0);
     setLives(3);
-    shipRef.current = { x: 400, y: 450, width: 40, height: 40 };
+
+    const canvas = canvasRef.current;
+    const cw = canvas?.width ?? canvasSize.width;
+    const ch = canvas?.height ?? canvasSize.height;
+
+    shipRef.current = {
+      x: cw / 2,
+      y: Math.max(40, ch - 60),
+      width: 40,
+      height: 40,
+    };
     asteroidsRef.current = [];
     starsRef.current = [];
     bulletsRef.current = [];
     particlesRef.current = [];
     setShowInstructions(false);
   };
+
+  useEffect(() => {
+    // Keep ship within bounds if screen/canvas size changes (rotation / responsive)
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ship = shipRef.current;
+    const halfW = ship.width / 2;
+    const halfH = ship.height / 2;
+
+    ship.x = Math.max(halfW, Math.min(canvas.width - halfW, ship.x));
+    ship.y = Math.max(halfH, Math.min(canvas.height - halfH, ship.y));
+  }, [canvasSize.width, canvasSize.height]);
 
   const togglePause = () => {
     setIsPaused(!isPaused);
@@ -474,61 +611,104 @@ export default function SpaceShooterGame() {
               </h2>
             </motion.div>
             <p
-              className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+              className={`text-xl ${
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
             >
               Take a break and play a quick game!
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto" ref={canvasContainerRef}>
             {/* Game Stats */}
-            <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+            <div
+              className={`flex ${
+                isMobile
+                  ? "flex-col gap-3 mb-4"
+                  : "justify-between items-center mb-4 flex-wrap gap-4"
+              }`}
+            >
               <div
-                className={`flex gap-4 ${isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                className={`flex ${
+                  isMobile ? "justify-between w-full" : "gap-4"
+                } ${isDarkMode ? "text-white" : "text-gray-900"}`}
               >
                 <div
-                  className={`px-4 py-2 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } shadow-lg`}
+                  className={`px-3 py-2 rounded-lg ${
+                    isDarkMode ? "bg-gray-800" : "bg-white"
+                  } shadow-lg ${isMobile ? "flex-1 text-center" : ""}`}
                 >
-                  <span className="text-sm opacity-70">Score: </span>
-                  <span className="text-2xl font-bold text-blue-500">
+                  <span
+                    className={`text-sm opacity-70 ${isMobile ? "block" : ""}`}
+                  >
+                    Score:{" "}
+                  </span>
+                  <span
+                    className={`text-xl ${
+                      isMobile ? "text-lg" : "text-2xl"
+                    } font-bold text-blue-500`}
+                  >
                     {score}
                   </span>
                 </div>
                 <div
-                  className={`px-4 py-2 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } shadow-lg`}
+                  className={`px-3 py-2 rounded-lg ${
+                    isDarkMode ? "bg-gray-800" : "bg-white"
+                  } shadow-lg ${isMobile ? "flex-1 text-center" : ""}`}
                 >
-                  <span className="text-sm opacity-70">Lives: </span>
-                  <span className="text-2xl font-bold text-red-500">{lives}</span>
+                  <span
+                    className={`text-sm opacity-70 ${isMobile ? "block" : ""}`}
+                  >
+                    Lives:{" "}
+                  </span>
+                  <span
+                    className={`text-xl ${
+                      isMobile ? "text-lg" : "text-2xl"
+                    } font-bold text-red-500`}
+                  >
+                    {lives}
+                  </span>
                 </div>
                 <div
-                  className={`px-4 py-2 rounded-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
-                    } shadow-lg flex items-center gap-2`}
+                  className={`px-3 py-2 rounded-lg ${
+                    isDarkMode ? "bg-gray-800" : "bg-white"
+                  } shadow-lg flex items-center gap-2 ${
+                    isMobile ? "flex-1 justify-center" : ""
+                  }`}
                 >
-                  <Trophy size={20} className="text-yellow-500" />
-                  <span className="text-sm opacity-70">Best: </span>
-                  <span className="text-xl font-bold text-yellow-500">
+                  <Trophy
+                    size={isMobile ? 16 : 20}
+                    className="text-yellow-500"
+                  />
+                  <span
+                    className={`text-sm opacity-70 ${isMobile ? "hidden" : ""}`}
+                  >
+                    Best:{" "}
+                  </span>
+                  <span
+                    className={`text-lg ${
+                      isMobile ? "text-base" : "text-xl"
+                    } font-bold text-yellow-500`}
+                  >
                     {highScore}
                   </span>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className={`flex ${isMobile ? "w-full" : "gap-2"}`}>
                 {isPlaying && !gameOver && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={togglePause}
-                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${isDarkMode
-                      ? "bg-gray-800 text-white hover:bg-gray-700"
-                      : "bg-white text-gray-900 hover:bg-gray-100"
-                      } shadow-lg`}
+                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${
+                      isDarkMode
+                        ? "bg-gray-800 text-white hover:bg-gray-700"
+                        : "bg-white text-gray-900 hover:bg-gray-100"
+                    } shadow-lg ${isMobile ? "flex-1 justify-center" : ""}`}
                   >
                     {isPaused ? <Play size={20} /> : <Pause size={20} />}
-                    {isPaused ? "Resume" : "Pause"}
+                    {isMobile ? "" : isPaused ? "Resume" : "Pause"}
                   </motion.button>
                 )}
                 {!isPlaying && (
@@ -536,7 +716,9 @@ export default function SpaceShooterGame() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={startGame}
-                    className="px-6 py-2 rounded-lg font-semibold flex items-center gap-2 bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg ${
+                      isMobile ? "flex-1 justify-center" : ""
+                    }`}
                   >
                     <Play size={20} />
                     {gameOver ? "Play Again" : "Start Game"}
@@ -547,15 +729,16 @@ export default function SpaceShooterGame() {
 
             {/* Game Canvas */}
             <div
-              className={`relative rounded-xl overflow-hidden shadow-2xl ${isDarkMode ? "bg-gray-900" : "bg-gray-800"
-                }`}
+              className={`relative rounded-xl overflow-hidden shadow-2xl ${
+                isDarkMode ? "bg-gray-900" : "bg-gray-800"
+              }`}
             >
               <canvas
                 ref={canvasRef}
-                width={800}
-                height={500}
+                width={canvasSize.width}
+                height={canvasSize.height}
                 className="w-full h-auto"
-                style={{ display: "block" }}
+                style={{ display: "block", maxWidth: "100%" }}
               />
 
               {/* Idle State - Cool Background */}
@@ -669,7 +852,8 @@ export default function SpaceShooterGame() {
                           <span>
                             Use <strong>Arrow Keys</strong> or{" "}
                             <strong>WASD</strong> (Desktop) or{" "}
-                            <strong>D-Pad</strong> (Mobile) to move your spaceship
+                            <strong>D-Pad</strong> (Mobile) to move your
+                            spaceship
                           </span>
                         </p>
                         <p className="flex items-start gap-3">
@@ -759,85 +943,123 @@ export default function SpaceShooterGame() {
             <div className="md:hidden mt-6">
               <div className="flex justify-center items-center gap-4">
                 {/* D-Pad */}
-                <div className="relative w-32 h-32">
+                <div className="grid grid-cols-3 grid-rows-3 gap-2">
                   {/* Up */}
+                  <div />
                   <button
-                    onTouchStart={() => handleTouchStart("up")}
-                    onTouchEnd={() => handleTouchEnd("up")}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      handleTouchStart("up");
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleTouchEnd("up");
+                    }}
                     onMouseDown={() => handleTouchStart("up")}
                     onMouseUp={() => handleTouchEnd("up")}
-                    className={`absolute top-0 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-lg ${touchControls.up
-                      ? "bg-blue-500"
-                      : isDarkMode
+                    className={`w-14 h-14 rounded-xl text-lg font-bold touch-none select-none ${
+                      touchControls.up
+                        ? "bg-blue-500"
+                        : isDarkMode
                         ? "bg-gray-700"
                         : "bg-gray-300"
-                      } 
-                    ${isDarkMode ? "text-white" : "text-gray-900"
-                      } flex items-center justify-center`}
+                    } ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    } flex items-center justify-center`}
                   >
                     ▲
                   </button>
-                  {/* Down */}
-                  <button
-                    onTouchStart={() => handleTouchStart("down")}
-                    onTouchEnd={() => handleTouchEnd("down")}
-                    onMouseDown={() => handleTouchStart("down")}
-                    onMouseUp={() => handleTouchEnd("down")}
-                    className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-lg ${touchControls.down
-                      ? "bg-blue-500"
-                      : isDarkMode
-                        ? "bg-gray-700"
-                        : "bg-gray-300"
-                      } 
-                    ${isDarkMode ? "text-white" : "text-gray-900"
-                      } flex items-center justify-center`}
-                  >
-                    ▼
-                  </button>
+                  <div />
+
                   {/* Left */}
                   <button
-                    onTouchStart={() => handleTouchStart("left")}
-                    onTouchEnd={() => handleTouchEnd("left")}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      handleTouchStart("left");
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleTouchEnd("left");
+                    }}
                     onMouseDown={() => handleTouchStart("left")}
                     onMouseUp={() => handleTouchEnd("left")}
-                    className={`absolute left-0 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-lg ${touchControls.left
-                      ? "bg-blue-500"
-                      : isDarkMode
+                    className={`w-14 h-14 rounded-xl text-lg font-bold touch-none select-none ${
+                      touchControls.left
+                        ? "bg-blue-500"
+                        : isDarkMode
                         ? "bg-gray-700"
                         : "bg-gray-300"
-                      } 
-                    ${isDarkMode ? "text-white" : "text-gray-900"
-                      } flex items-center justify-center`}
+                    } ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    } flex items-center justify-center`}
                   >
                     ◄
                   </button>
+
+                  {/* Center */}
+                  <div
+                    className={`w-14 h-14 rounded-xl ${
+                      isDarkMode ? "bg-gray-600" : "bg-gray-400"
+                    }`}
+                  />
+
                   {/* Right */}
                   <button
-                    onTouchStart={() => handleTouchStart("right")}
-                    onTouchEnd={() => handleTouchEnd("right")}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      handleTouchStart("right");
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleTouchEnd("right");
+                    }}
                     onMouseDown={() => handleTouchStart("right")}
                     onMouseUp={() => handleTouchEnd("right")}
-                    className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-lg ${touchControls.right
-                      ? "bg-blue-500"
-                      : isDarkMode
+                    className={`w-14 h-14 rounded-xl text-lg font-bold touch-none select-none ${
+                      touchControls.right
+                        ? "bg-blue-500"
+                        : isDarkMode
                         ? "bg-gray-700"
                         : "bg-gray-300"
-                      } 
-                    ${isDarkMode ? "text-white" : "text-gray-900"
-                      } flex items-center justify-center`}
+                    } ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    } flex items-center justify-center`}
                   >
                     ►
                   </button>
-                  {/* Center */}
-                  <div
-                    className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-400"
-                      }`}
-                  ></div>
+
+                  {/* Down */}
+                  <div />
+                  <button
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      handleTouchStart("down");
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      handleTouchEnd("down");
+                    }}
+                    onMouseDown={() => handleTouchStart("down")}
+                    onMouseUp={() => handleTouchEnd("down")}
+                    className={`w-14 h-14 rounded-xl text-lg font-bold touch-none select-none ${
+                      touchControls.down
+                        ? "bg-blue-500"
+                        : isDarkMode
+                        ? "bg-gray-700"
+                        : "bg-gray-300"
+                    } ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    } flex items-center justify-center`}
+                  >
+                    ▼
+                  </button>
+                  <div />
                 </div>
               </div>
               <p
-                className={`text-center text-xs mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                  }`}
+                className={`text-center text-xs mt-4 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
               >
                 Use the D-Pad to move your spaceship
               </p>
@@ -845,8 +1067,9 @@ export default function SpaceShooterGame() {
 
             {/* Controls Info */}
             <div
-              className={`mt-4 text-center text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
+              className={`mt-4 text-center text-sm ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
             >
               <p>
                 Controls: Arrow Keys / WASD to Move • Auto-Shoot 🔫 • Collect ⭐
