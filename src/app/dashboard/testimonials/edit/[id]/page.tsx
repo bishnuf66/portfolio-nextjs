@@ -7,6 +7,7 @@ import { useTestimonials, useUpdateTestimonial } from "@/hooks/useTestimonials";
 import withAuth from "@/components/withAuth";
 import TestimonialFormPage from "@/components/dashboard/TestimonialFormPage";
 import { Testimonial } from "@/types/blog";
+import { toast } from "react-toastify";
 
 const EditTestimonialPage = () => {
   const router = useRouter();
@@ -34,7 +35,7 @@ const EditTestimonialPage = () => {
       router.push("/dashboard?tab=testimonials");
     } catch (error) {
       console.error("Failed to update testimonial:", error);
-      alert("Failed to update testimonial");
+      toast.error("Failed to update testimonial");
     } finally {
       setUploading(false);
     }

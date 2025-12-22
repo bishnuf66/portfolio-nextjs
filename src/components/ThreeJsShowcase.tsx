@@ -28,6 +28,7 @@ import {
   Terminal,
 } from "lucide-react";
 import useStore from "@/store/store";
+import { toast } from "react-toastify";
 
 // -----------------------
 // Solar System Core
@@ -175,8 +176,9 @@ function Planet({
           <Html distanceFactor={15} center>
             <div className="flex items-center justify-center">
               <div
-                className={`p-2 rounded-full backdrop-blur-sm ${hovered ? "bg-black/50" : "bg-transparent"
-                  }`}
+                className={`p-2 rounded-full backdrop-blur-sm ${
+                  hovered ? "bg-black/50" : "bg-transparent"
+                }`}
               >
                 {techIcon}
               </div>
@@ -374,8 +376,9 @@ function TechSatellite({
 
         <Html distanceFactor={20} center>
           <div
-            className={`p-1 rounded ${hovered ? "bg-black/70" : "bg-transparent"
-              }`}
+            className={`p-1 rounded ${
+              hovered ? "bg-black/70" : "bg-transparent"
+            }`}
           >
             {icon}
           </div>
@@ -573,7 +576,7 @@ export default function TechSolarSystem() {
 
   const handleConsoleSubmit = () => {
     if (consoleInput.toLowerCase() === "opensesame") {
-      alert("🎉 Achievement Unlocked: Senior Developer Mode!");
+      toast.info("🎉 Achievement Unlocked: Senior Developer Mode!");
       setFoundEasterEggs((prev) => [...prev, "console"]);
       setShowConsole(false);
     }
@@ -591,8 +594,9 @@ export default function TechSolarSystem() {
   return (
     <section
       id="tech-solar-system"
-      className={`py-20 ${isDarkMode ? "bg-gray-900" : "bg-gradient-to-b from-gray-900 to-black"
-        }`}
+      className={`py-20 ${
+        isDarkMode ? "bg-gray-900" : "bg-gradient-to-b from-gray-900 to-black"
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12">
@@ -604,8 +608,9 @@ export default function TechSolarSystem() {
             <Rocket size={40} className="text-cyan-400" />
           </div>
           <p
-            className={`text-lg ${isDarkMode ? "text-gray-300" : "text-gray-300"
-              }`}
+            className={`text-lg ${
+              isDarkMode ? "text-gray-300" : "text-gray-300"
+            }`}
           >
             Each planet represents a technology. Click to explore, find hidden
             easter eggs!
@@ -622,8 +627,9 @@ export default function TechSolarSystem() {
 
         <div className="max-w-6xl mx-auto">
           <div
-            className={`relative rounded-xl overflow-hidden shadow-2xl ${isDarkMode ? "bg-gray-900" : "bg-gray-800"
-              }`}
+            className={`relative rounded-xl overflow-hidden shadow-2xl ${
+              isDarkMode ? "bg-gray-900" : "bg-gray-800"
+            }`}
             style={{ height: "600px" }}
           >
             {/* Controls panel */}
@@ -761,10 +767,11 @@ export default function TechSolarSystem() {
             {planets.map((planet) => (
               <div
                 key={planet.name}
-                className={`p-4 rounded-lg backdrop-blur-sm ${activePlanet === planet.name
+                className={`p-4 rounded-lg backdrop-blur-sm ${
+                  activePlanet === planet.name
                     ? "bg-blue-500/20 border border-blue-500"
                     : "bg-gray-800/50 border border-gray-700"
-                  }`}
+                }`}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-full bg-gray-700">

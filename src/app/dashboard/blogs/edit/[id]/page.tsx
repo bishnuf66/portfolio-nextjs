@@ -7,6 +7,7 @@ import { useBlogs, useUpdateBlog } from "@/hooks/useBlogs";
 import withAuth from "@/components/withAuth";
 import BlogFormPage from "@/components/dashboard/BlogFormPage";
 import { Database } from "@/lib/database.types";
+import { toast } from "react-toastify";
 
 type Blog = Database["public"]["Tables"]["blogs"]["Row"];
 
@@ -36,7 +37,7 @@ const EditBlogPage = () => {
       router.push("/dashboard?tab=blogs");
     } catch (error) {
       console.error("Failed to update blog:", error);
-      alert("Failed to update blog");
+      toast.error("Failed to update blog");
     } finally {
       setUploading(false);
     }

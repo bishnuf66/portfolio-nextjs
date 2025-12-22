@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import RichTextEditor from "../RichTextEditor";
+import { toast } from "react-toastify";
 
 interface BlogFormPageProps {
   initialData?: any;
@@ -42,13 +43,13 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
     // Validate file size (max 1MB)
     const maxSize = 1 * 1024 * 1024; // 1MB in bytes
     if (file.size > maxSize) {
-      alert(`${file.name} is too large (max 1MB)`);
+      toast.error(`${file.name} is too large (max 1MB)`);
       return "";
     }
 
     // Recommend WebP format
     if (file.type !== "image/webp") {
-      alert(
+      toast.warn(
         `${file.name}: Consider converting to WebP format for better compression and performance`
       );
     }

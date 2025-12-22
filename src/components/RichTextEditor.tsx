@@ -162,7 +162,7 @@ export default function RichTextEditor({
       setImageUrl("");
       setShowImageDialog(false);
     } else {
-      alert("Please enter a valid image URL");
+      toast.error("Please enter a valid image URL");
     }
   }, [imageUrl, editor]);
 
