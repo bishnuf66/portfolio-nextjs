@@ -7,7 +7,6 @@ import FeaturedBlogs from "@/components/FeaturedBlogs";
 import Testimonials from "@/components/Testimonials";
 import SpaceShooterGame from "@/components/SpaceShooterGame";
 import UnifiedShowcase from "@/components/UnifiedShowcase";
-import TechStackGrid from "@/components/TechStackGrid";
 import { BookOpen, Code2 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { colorScheme } from "@/utils/colorUtils";
@@ -26,14 +25,6 @@ export default function HomePage() {
         {/* Unified Showcase - Skills, Tech Stack, Solar System */}
         <UnifiedShowcase />
 
-        {/* Technology Stack Section */}
-        <div
-          id="tech-stack"
-          className={`py-20 ${colorScheme.background.secondary}`}
-        >
-          <TechStackGrid />
-        </div>
-
         {/* Featured Projects Section */}
         <div
           id="projects"
@@ -48,7 +39,8 @@ export default function HomePage() {
                 </h2>
               </div>
               <p className={`text-xl ${colorScheme.text.secondary}`}>
-                Showcasing innovative web solutions by Nepal&apos;s top fullstack developer
+                Showcasing innovative web solutions by Nepal&apos;s top
+                fullstack developer
               </p>
             </AnimatedSection>
 
@@ -57,10 +49,7 @@ export default function HomePage() {
         </div>
 
         {/* Featured Blog Section */}
-        <div
-          id="blog"
-          className={`py-20 ${colorScheme.background.secondary}`}
-        >
+        <div id="blog" className={`py-20 ${colorScheme.background.secondary}`}>
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <AnimatedSection animation="fadeIn" className="text-center mb-16">
               <div className="flex items-center justify-center gap-3 mb-4">
@@ -70,7 +59,8 @@ export default function HomePage() {
                 </h2>
               </div>
               <p className={`text-xl ${colorScheme.text.secondary}`}>
-                Expert insights on modern web development from Nepal&apos;s leading developer
+                Expert insights on modern web development from Nepal&apos;s
+                leading developer
               </p>
             </AnimatedSection>
 

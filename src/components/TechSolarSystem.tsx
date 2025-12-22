@@ -16,14 +16,27 @@ import {
   Globe,
   Database,
   Terminal,
-  Search,
-  Package,
+  Server,
+  Cloud,
   Settings,
   TrendingUp,
+  Layers,
   Smartphone,
+  Palette,
+  Zap,
+  HardDrive,
+  Image,
+  PenTool,
+  Brush,
   User,
 } from "lucide-react";
 import useStore from "@/store/store";
+import {
+  AnimatedSection,
+  StaggeredContainer,
+} from "@/components/ui/AnimatedSection";
+import { colorScheme, getCardClasses } from "@/utils/colorUtils";
+import PlanetDetail from "@/components/PlanetDetail";
 
 // Sun Component
 function Sun() {
@@ -191,12 +204,25 @@ function Planet({
 export default function TechSolarSystem() {
   const { isDarkMode } = useStore();
   const [activePlanet, setActivePlanet] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<{
+    title: string;
+    gradient: string;
+    technologies: Array<{
+      name: string;
+      icon: React.ComponentType<{ size?: number; className?: string }>;
+      color: string;
+      description: string;
+    }>;
+  } | null>(null);
+  const [clickedPlanets, setClickedPlanets] = useState<Set<string>>(new Set());
   const [achievements, setAchievements] = useState<string[]>([]);
   const [discoveredEasterEggs, setDiscoveredEasterEggs] = useState<string[]>(
     []
   );
   const [earthClicks, setEarthClicks] = useState(0);
   const [showSecretMessage, setShowSecretMessage] = useState(false);
+  const [showAllPlanetsAchievement, setShowAllPlanetsAchievement] =
+    useState(false);
 
   const [isMobile] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -209,68 +235,101 @@ export default function TechSolarSystem() {
 
   const planets = [
     {
-      name: "React",
-      color: "#61DAFB",
-      emissive: "#2D79A7",
-      radius: 0.5,
+      name: "Frontend Development",
+      color: "#8C7853",
+      emissive: "#6B5D54",
+      radius: 0.3,
       distance: 2.5,
-      speed: 0.3,
+      speed: 0.48,
       rotationSpeed: 0.4,
-      techIcon: <Code size={16} className="text-[#61DAFB]" />,
-      description: "UI Library - Component-based architecture",
+      techIcon: <Code size={16} className="text-[#8C7853]" />,
+      description: "React, Next.js, TypeScript, Tailwind CSS",
     },
     {
-      name: "NodeJS",
-      color: "#68A063",
-      emissive: "#3C873A",
-      radius: 0.6,
-      distance: 4,
-      speed: 0.25,
-      rotationSpeed: 0.3,
-      techIcon: <Cpu size={16} className="text-[#68A063]" />,
-      description: "Runtime - Server-side JavaScript",
-    },
-    {
-      name: "TypeScript",
-      color: "#3178C6",
-      emissive: "#235A97",
-      radius: 0.55,
-      distance: 5.5,
-      speed: 0.2,
-      rotationSpeed: 0.5,
-      techIcon: <Terminal size={16} className="text-[#3178C6]" />,
-      description: "Superset - Static typing for JS",
-    },
-    {
-      name: "Edge Functions",
-      color: "#3ECF8E",
-      emissive: "#2EBF7E",
+      name: "Mobile Development",
+      color: "#FFC649",
+      emissive: "#E6A833",
       radius: 0.45,
-      distance: 6.5,
-      speed: 0.18,
+      distance: 3.5,
+      speed: 0.35,
+      rotationSpeed: 0.3,
+      techIcon: <Smartphone size={16} className="text-[#FFC649]" />,
+      description: "React Native, Flutter, iOS, Android",
+    },
+    {
+      name: "Backend Development",
+      color: "#4A90E2",
+      emissive: "#357ABD",
+      radius: 0.5,
+      distance: 4.5,
+      speed: 0.3,
+      rotationSpeed: 0.5,
+      techIcon: <Cpu size={16} className="text-[#4A90E2]" />,
+      description: "Node.js, Supabase, Edge Functions, Next.js",
+    },
+    {
+      name: "Database Systems",
+      color: "#CD5C5C",
+      emissive: "#B22222",
+      radius: 0.35,
+      distance: 5.5,
+      speed: 0.24,
       rotationSpeed: 0.7,
-      techIcon: <Search size={16} className="text-[#3ECF8E]" />,
-      description: "Serverless - Edge computing functions",
+      techIcon: <Database size={16} className="text-[#CD5C5C]" />,
+      description: "MongoDB, MySQL, PostgreSQL, QTA",
     },
     {
-      name: "Supabase",
-      color: "#3ECF8E",
-      emissive: "#2EBF7E",
-      radius: 0.7,
-      distance: 7,
-      speed: 0.15,
-      rotationSpeed: 0.2,
+      name: "Caching Systems",
+      color: "#DAA520",
+      emissive: "#B8860B",
+      radius: 0.9,
+      distance: 7.5,
+      speed: 0.13,
+      rotationSpeed: 0.6,
+      techIcon: <Zap size={16} className="text-[#DAA520]" />,
+      description: "Redis, Cassandra, Memcached, Elasticsearch",
+    },
+    {
+      name: "UI/UX Design",
+      color: "#F4E4C1",
+      emissive: "#D4A76A",
+      radius: 0.75,
+      distance: 9.5,
+      speed: 0.09,
+      rotationSpeed: 0.4,
       hasRing: true,
-      techIcon: <Database size={16} className="text-[#3ECF8E]" />,
-      description: "Backend - Database & Auth service",
+      techIcon: <PenTool size={16} className="text-[#F4E4C1]" />,
+      description: "Figma, Canva, Adobe XD, Sketch",
     },
     {
-      name: "Earth (Developer)",
+      name: "Cloud Infrastructure",
+      color: "#4FD0E7",
+      emissive: "#3BA0B5",
+      radius: 0.55,
+      distance: 11.5,
+      speed: 0.07,
+      rotationSpeed: 0.3,
+      techIcon: <Cloud size={16} className="text-[#4FD0E7]" />,
+      description: "AWS EC2, AWS S3, Azure, VPS Hosting",
+    },
+    {
+      name: "Analytics & Storage",
+      color: "#4B70DD",
+      emissive: "#3A5FCD",
+      radius: 0.52,
+      distance: 13.5,
+      speed: 0.05,
+      rotationSpeed: 0.2,
+      techIcon: <TrendingUp size={16} className="text-[#4B70DD]" />,
+      description: "Google Analytics, Data Insights, PWA, Search Optimization",
+    },
+    {
+      name: "Developer Earth",
       color: "#4A90E2",
       emissive: "#357ABD",
       radius: 0.8,
-      distance: 4,
-      speed: 0.2,
+      distance: 16,
+      speed: 0.03,
       rotationSpeed: 0.3,
       hasRing: true,
       isSpecial: true,
@@ -278,78 +337,305 @@ export default function TechSolarSystem() {
       description: "Developer - Click to explore hidden achievements!",
       hiddenFeatures: ["secret_code", "easter_egg", "achievement_unlock"],
     },
+  ];
+
+  const techCategories = [
     {
-      name: "Docker",
-      color: "#2496ED",
-      emissive: "#0073EC",
-      radius: 0.6,
-      distance: 8.5,
-      speed: 0.12,
-      rotationSpeed: 0.4,
-      techIcon: <Package size={16} className="text-[#2496ED]" />,
-      description: "DevOps - Container platform",
+      title: "Frontend Development",
+      gradient: "from-blue-500 to-cyan-500",
+      technologies: [
+        {
+          name: "React",
+          icon: Code,
+          color: "#61DAFB",
+          description: "UI Library",
+        },
+        {
+          name: "Next.js",
+          icon: Layers,
+          color: "#000000",
+          description: "React Framework",
+        },
+        {
+          name: "TypeScript",
+          icon: Terminal,
+          color: "#3178C6",
+          description: "Type Safety",
+        },
+        {
+          name: "Tailwind CSS",
+          icon: Palette,
+          color: "#06B6D4",
+          description: "Styling",
+        },
+      ],
     },
     {
-      name: "Kubernetes",
-      color: "#326CE5",
-      emissive: "#2466D9",
-      radius: 0.55,
-      distance: 10,
-      speed: 0.1,
-      rotationSpeed: 0.3,
-      techIcon: <Package size={16} className="text-[#326CE5]" />,
-      description: "DevOps - Container orchestration",
+      title: "Mobile Development",
+      gradient: "from-indigo-500 to-purple-500",
+      technologies: [
+        {
+          name: "React Native",
+          icon: Smartphone,
+          color: "#61DAFB",
+          description: "Cross-Platform Mobile",
+        },
+        {
+          name: "Flutter",
+          icon: Smartphone,
+          color: "#02569B",
+          description: "Google's UI Toolkit",
+        },
+        {
+          name: "iOS Development",
+          icon: Smartphone,
+          color: "#007AFF",
+          description: "Native iOS Apps",
+        },
+        {
+          name: "Android Development",
+          icon: Smartphone,
+          color: "#3DDC84",
+          description: "Native Android Apps",
+        },
+      ],
     },
     {
-      name: "Jenkins",
-      color: "#D24939",
-      emissive: "#B83A2A",
-      radius: 0.65,
-      distance: 11.5,
-      speed: 0.08,
-      rotationSpeed: 0.5,
-      techIcon: <Settings size={16} className="text-[#D24939]" />,
-      description: "DevOps - CI/CD automation",
+      title: "Backend Development",
+      gradient: "from-green-500 to-emerald-500",
+      technologies: [
+        {
+          name: "Node.js",
+          icon: Cpu,
+          color: "#68A063",
+          description: "Runtime",
+        },
+        {
+          name: "Supabase",
+          icon: Database,
+          color: "#3ECF8E",
+          description: "Backend as a Service",
+        },
+        {
+          name: "Edge Functions",
+          icon: Zap,
+          color: "#3ECF8E",
+          description: "Serverless Functions",
+        },
+        {
+          name: "Next.js",
+          icon: Layers,
+          color: "#000000",
+          description: "Full-stack Framework",
+        },
+      ],
     },
     {
-      name: "ThreeJS",
-      color: "#049EF4",
-      emissive: "#0369A1",
-      radius: 0.65,
-      distance: 13,
-      speed: 0.05,
-      rotationSpeed: 0.6,
-      techIcon: <Globe size={16} className="text-[#049EF4]" />,
-      description: "3D Library - WebGL renderer",
+      title: "Database Systems",
+      gradient: "from-blue-500 to-indigo-500",
+      technologies: [
+        {
+          name: "MongoDB",
+          icon: Database,
+          color: "#47A248",
+          description: "NoSQL Database",
+        },
+        {
+          name: "MySQL",
+          icon: Database,
+          color: "#4479A1",
+          description: "SQL Database",
+        },
+        {
+          name: "PostgreSQL",
+          icon: Database,
+          color: "#336791",
+          description: "SQL Database",
+        },
+        {
+          name: "QTA",
+          icon: Database,
+          color: "#FF6B35",
+          description: "Query Analytics",
+        },
+      ],
     },
     {
-      name: "SEO",
-      color: "#34A853",
-      emissive: "#2E7D32",
-      radius: 0.55,
-      distance: 14.5,
-      speed: 0.05,
-      rotationSpeed: 0.6,
-      hasRing: true,
-      techIcon: <TrendingUp size={16} className="text-[#34A853]" />,
-      description: "Optimization - Search Engine Optimization",
+      title: "Caching Systems",
+      gradient: "from-red-500 to-orange-500",
+      technologies: [
+        {
+          name: "Redis",
+          icon: Zap,
+          color: "#DC382D",
+          description: "In-memory Cache",
+        },
+        {
+          name: "Cassandra",
+          icon: Database,
+          color: "#1287BF",
+          description: "Distributed Database",
+        },
+        {
+          name: "Memcached",
+          icon: HardDrive,
+          color: "#9B59B6",
+          description: "Memory Cache",
+        },
+        {
+          name: "Elasticsearch",
+          icon: Server,
+          color: "#005571",
+          description: "Search & Analytics",
+        },
+      ],
     },
     {
-      name: "Mobile Development",
-      color: "#61DAFB",
-      emissive: "#4FA8C5",
-      radius: 0.65,
-      distance: 16,
-      speed: 0.04,
-      rotationSpeed: 0.7,
-      techIcon: <Smartphone size={16} className="text-[#61DAFB]" />,
-      description: "Mobile - React Native & Flutter apps",
+      title: "Cloud Infrastructure",
+      gradient: "from-purple-500 to-pink-500",
+      technologies: [
+        {
+          name: "AWS EC2",
+          icon: Server,
+          color: "#FF9900",
+          description: "Virtual Servers",
+        },
+        {
+          name: "AWS S3",
+          icon: HardDrive,
+          color: "#FF9900",
+          description: "Object Storage",
+        },
+        {
+          name: "Azure",
+          icon: Cloud,
+          color: "#0078D4",
+          description: "Microsoft Cloud",
+        },
+        {
+          name: "VPS Hosting",
+          icon: Server,
+          color: "#FF6B35",
+          description: "Virtual Private Server",
+        },
+      ],
+    },
+    {
+      title: "Storage & Media",
+      gradient: "from-indigo-500 to-purple-500",
+      technologies: [
+        {
+          name: "Supabase Storage",
+          icon: HardDrive,
+          color: "#3ECF8E",
+          description: "File Storage",
+        },
+        {
+          name: "Cloudinary",
+          icon: Image,
+          color: "#3448C5",
+          description: "Media Management",
+        },
+        {
+          name: "MongoDB",
+          icon: Database,
+          color: "#47A248",
+          description: "NoSQL Database",
+        },
+        {
+          name: "cPanel",
+          icon: Settings,
+          color: "#FF6C2C",
+          description: "Hosting Management",
+        },
+      ],
+    },
+    {
+      title: "Optimization & Analytics",
+      gradient: "from-orange-500 to-red-500",
+      technologies: [
+        {
+          name: "SEO",
+          icon: TrendingUp,
+          color: "#34A853",
+          description: "Search Optimization",
+        },
+        {
+          name: "Performance",
+          icon: Globe,
+          color: "#FF9500",
+          description: "Speed Optimization",
+        },
+        {
+          name: "Analytics",
+          icon: TrendingUp,
+          color: "#4285F4",
+          description: "Data Insights",
+        },
+        {
+          name: "PWA",
+          icon: Smartphone,
+          color: "#5A0FC8",
+          description: "Progressive Web App",
+        },
+      ],
+    },
+    {
+      title: "UI/UX Design",
+      gradient: "from-pink-500 to-rose-500",
+      technologies: [
+        {
+          name: "Figma",
+          icon: PenTool,
+          color: "#F24E1E",
+          description: "Design Tool",
+        },
+        {
+          name: "Canva",
+          icon: Brush,
+          color: "#00C4CC",
+          description: "Graphic Design",
+        },
+        {
+          name: "Adobe XD",
+          icon: PenTool,
+          color: "#FF61F6",
+          description: "UI Design",
+        },
+        {
+          name: "Sketch",
+          icon: Brush,
+          color: "#F7B500",
+          description: "Digital Design",
+        },
+      ],
     },
   ];
 
   const handlePlanetClick = (name: string) => {
-    // Special Earth interactions
-    if (name === "Earth (Developer)") {
+    // Track clicked planets for achievement
+    const newClickedPlanets = new Set(clickedPlanets);
+    newClickedPlanets.add(name);
+    setClickedPlanets(newClickedPlanets);
+
+    // Check if all planets have been clicked for achievement
+    if (
+      newClickedPlanets.size === planets.length &&
+      !showAllPlanetsAchievement
+    ) {
+      setAchievements((prev) => [...prev, "all_planets_explored"]);
+      setShowAllPlanetsAchievement(true);
+      setTimeout(() => setShowAllPlanetsAchievement(false), 5000);
+    }
+
+    // Find the corresponding category
+    const category = techCategories.find((cat) => cat.title === name);
+
+    if (category) {
+      // Show category details
+      setSelectedCategory(category);
+    } else if (name === "Developer Earth") {
+      // Special Earth interactions
       setEarthClicks((prev) => prev + 1);
 
       // Achievement: First Earth click
@@ -489,48 +775,116 @@ export default function TechSolarSystem() {
         </div>
       </div>
 
-      <div
-        className={`mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4`}
-      >
-        {planets.map((planet) => (
-          <div
-            key={planet.name}
-            className={`p-4 rounded-lg backdrop-blur-sm transition-all ${
-              activePlanet === planet.name
-                ? isDarkMode
-                  ? "bg-blue-500/20 border-2 border-blue-500"
-                  : "bg-blue-100 border-2 border-blue-600"
-                : isDarkMode
-                ? "bg-gray-800/50 border border-gray-700 hover:bg-gray-800"
-                : "bg-gray-100 border border-gray-300 hover:bg-gray-200"
+      {/* Tech Stack Grid Cards */}
+      <div className="mt-12">
+        <AnimatedSection animation="fadeIn" className="text-center mb-12">
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            Technology Categories
+          </h2>
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
             }`}
           >
-            <div className="flex items-center gap-3 mb-2">
-              <div
-                className={`p-2 rounded-full ${
-                  isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                }`}
-              >
-                {planet.techIcon}
-              </div>
-              <h3
-                className={`font-bold ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                {planet.name}
-              </h3>
-            </div>
-            <p
-              className={`text-sm ${
-                isDarkMode ? "text-gray-300" : "text-gray-600"
-              }`}
+            Explore the complete technology stack organized by category
+          </p>
+        </AnimatedSection>
+
+        <StaggeredContainer
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          staggerDelay={0.15}
+        >
+          {techCategories.map((category, categoryIndex) => (
+            <div
+              key={categoryIndex}
+              className={`${getCardClasses(
+                "rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300"
+              )}`}
             >
-              {planet.description}
-            </p>
-          </div>
-        ))}
+              <div className="mb-6">
+                <h3
+                  className={`text-2xl font-bold mb-2 bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
+                >
+                  {category.title}
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {category.technologies.map((tech, techIndex) => {
+                  const Icon = tech.icon;
+                  return (
+                    <div
+                      key={techIndex}
+                      className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div
+                          className="p-2 rounded-lg"
+                          style={{ backgroundColor: `${tech.color}20` }}
+                        >
+                          <Icon size={20} style={{ color: tech.color }} />
+                        </div>
+                        <div>
+                          <h4
+                            className={`font-semibold ${
+                              isDarkMode ? "text-white" : "text-gray-900"
+                            }`}
+                          >
+                            {tech.name}
+                          </h4>
+                        </div>
+                      </div>
+                      <p
+                        className={`text-sm ${
+                          isDarkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
+                        {tech.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </StaggeredContainer>
       </div>
+
+      {/* Planet Detail Modal */}
+      {selectedCategory && (
+        <PlanetDetail
+          category={selectedCategory}
+          isDarkMode={isDarkMode}
+          onClose={() => setSelectedCategory(null)}
+        />
+      )}
+
+      {/* Achievement Notifications */}
+      {showAllPlanetsAchievement && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white p-4 rounded-lg shadow-lg">
+          <h3 className="font-bold">Achievement Unlocked!</h3>
+          <p>
+            All Planets Explored - You&apos;ve discovered all technology
+            categories!
+          </p>
+        </div>
+      )}
+
+      {/* Secret Message */}
+      {showSecretMessage && (
+        <div className="fixed top-20 right-4 z-50 bg-purple-500 text-white p-4 rounded-lg shadow-lg">
+          <h3 className="font-bold">Secret Found!</h3>
+          <p>Welcome, Explorer! Keep clicking to discover more secrets...</p>
+        </div>
+      )}
+
+      {/* Debug Info - Remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed bottom-4 left-4 z-50 bg-black/50 text-white p-2 rounded text-xs">
+          Achievements: {achievements.length} | Easter Eggs:{" "}
+          {discoveredEasterEggs.length}
+        </div>
+      )}
     </div>
   );
 }
