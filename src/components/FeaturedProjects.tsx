@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ProjectCard from "./ProjectCard";
-import { Project } from "@/lib/supabase";
 import Link from "next/link";
 import useStore from "@/store/store";
 import { ProjectCardSkeleton } from "./LoadingSkeleton";
 import { Sparkles } from "lucide-react";
 import { getSafeImageUrl } from "@/utils/imageUtils";
 import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import { useFeaturedProjects } from "@/hooks/useProjects";
 
 const FeaturedProjects = () => {
     const { isDarkMode } = useStore();
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: projects = [], isLoading: loading } = useFeaturedProjects();
 
     // Track featured projects section view
     React.useEffect(() => {
@@ -26,22 +25,6 @@ const FeaturedProjects = () => {
             });
         }
     }, [loading, projects]);
-
-    useEffect(() => {
-        fetchFeaturedProjects();
-    }, []);
-
-    const fetchFeaturedProjects = async () => {
-        try {
-            const response = await fetch("/api/projects?featured=true&limit=6");
-            const data = await response.json();
-            setProjects(data);
-        } catch (error) {
-            console.error("Failed to fetch featured projects:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (loading) {
         return (

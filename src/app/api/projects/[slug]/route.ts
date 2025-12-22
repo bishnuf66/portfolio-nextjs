@@ -17,14 +17,31 @@ export async function GET(
     try {
         const { slug } = await params;
 
-        const { data, error } = await supabasePublic()
+        // Check if the parameter is a UUID (ID) or a slug
+        const isUUID =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                .test(slug);
+
+        let query = supabasePublic()
             .from("projects")
-            .select("*")
-            .eq("slug", slug)
-            .single();
+            .select("*");
+
+        if (isUUID) {
+            query = query.eq("id", slug);
+        } else {
+            query = query.eq("slug", slug);
+        }
+
+        const { data, error } = await query.maybeSingle();
 
         if (error) {
-            return NextResponse.json({ error: error.message }, { status: 404 });
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        if (!data) {
+            return NextResponse.json({ error: "Project not found" }, {
+                status: 404,
+            });
         }
 
         return NextResponse.json(data);
@@ -103,12 +120,22 @@ export async function PUT(
         // Create an authenticated client with the user's token for RLS
         const authenticatedSupabase = createAuthenticatedClient(token);
 
-        // Update the project with proper typing
-        const { data, error } = await authenticatedSupabase
+        // Check if the parameter is a UUID (ID) or a slug
+        const isUUID =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                .test(slug);
+
+        let updateQuery = authenticatedSupabase
             .from("projects")
-            .update<ProjectUpdateData>(body)
-            .eq("slug", slug)
-            .select();
+            .update<ProjectUpdateData>(body);
+
+        if (isUUID) {
+            updateQuery = updateQuery.eq("id", slug);
+        } else {
+            updateQuery = updateQuery.eq("slug", slug);
+        }
+
+        const { data, error } = await updateQuery.select();
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 });
@@ -123,7 +150,7 @@ export async function PUT(
         // Revalidate pages after updating project
         revalidatePath("/");
         revalidatePath("/projects");
-        revalidatePath(`/projects/${slug}`);
+        revalidatePath(`/projects/${data[0].slug}`);
 
         return NextResponse.json(data[0]);
     } catch {
@@ -172,6 +199,12 @@ export async function DELETE(
         }
 
         console.log("User authenticated, proceeding with delete");
+        console.log("Parameter received:", slug);
+        console.log(
+            "Is UUID:",
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                .test(slug),
+        );
 
         // Rate limiting: 10 deletes per minute per user
         const rateLimitResult = rateLimit(`delete-project:${user.id}`, {
@@ -192,14 +225,31 @@ export async function DELETE(
         // Create an authenticated client with the user's token for RLS
         const authenticatedSupabase = createAuthenticatedClient(token);
 
+        // Check if the parameter is a UUID (ID) or a slug
+        const isUUID =
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                .test(slug);
+
         // First, get the project data to clean up associated images
-        const { data: project, error: fetchError } = await authenticatedSupabase
+        let fetchQuery = authenticatedSupabase
             .from("projects")
             .select(
-                "cover_image_url, gallery_images, gallery_images_with_titles",
-            )
-            .eq("slug", slug)
-            .single();
+                "slug, cover_image_url, gallery_images, gallery_images_with_titles",
+            );
+
+        if (isUUID) {
+            fetchQuery = fetchQuery.eq("id", slug);
+            console.log("Querying by ID:", slug);
+        } else {
+            fetchQuery = fetchQuery.eq("slug", slug);
+            console.log("Querying by slug:", slug);
+        }
+
+        console.log("Executing fetch query...");
+        const { data: project, error: fetchError } = await fetchQuery
+            .maybeSingle();
+
+        console.log("Fetch query result:", { project, fetchError });
 
         if (fetchError) {
             console.error("Error fetching project for cleanup:", fetchError);
@@ -208,11 +258,47 @@ export async function DELETE(
             });
         }
 
+        if (!project) {
+            console.log("Project not found for deletion:", slug);
+
+            // Let's try to check if the project exists at all (without RLS)
+            const { data: publicCheck, error: publicError } =
+                await supabasePublic()
+                    .from("projects")
+                    .select("id, slug")
+                    .eq("id", slug)
+                    .maybeSingle();
+
+            console.log("Public check result:", { publicCheck, publicError });
+
+            // Let's also check what projects exist in the database
+            const { data: allProjects, error: allError } =
+                await supabasePublic()
+                    .from("projects")
+                    .select("id, slug, name")
+                    .limit(10);
+
+            console.log("Available projects:", { allProjects, allError });
+
+            // If the project doesn't exist, treat it as already deleted (success)
+            return NextResponse.json({
+                message: "Project already deleted or not found",
+                storageCleanup: "skipped",
+            });
+        }
+
         // Delete the project from database first
-        const { error: deleteError } = await authenticatedSupabase
+        let deleteQuery = authenticatedSupabase
             .from("projects")
-            .delete()
-            .eq("slug", slug);
+            .delete();
+
+        if (isUUID) {
+            deleteQuery = deleteQuery.eq("id", slug);
+        } else {
+            deleteQuery = deleteQuery.eq("slug", slug);
+        }
+
+        const { error: deleteError } = await deleteQuery;
 
         if (deleteError) {
             console.error("Delete error:", deleteError);
@@ -254,7 +340,9 @@ export async function DELETE(
         // Revalidate pages after deleting project
         revalidatePath("/");
         revalidatePath("/projects");
-        revalidatePath(`/projects/${slug}`);
+        if (project?.slug) {
+            revalidatePath(`/projects/${project.slug}`);
+        }
 
         return NextResponse.json({
             message: "Project deleted successfully",

@@ -13,6 +13,17 @@ export function useProjects() {
     });
 }
 
+// Hook for fetching featured projects
+export function useFeaturedProjects() {
+    return useQuery({
+        queryKey: ["projects", "featured"],
+        queryFn: async () => {
+            const response = await api.get("/projects?featured=true&limit=6");
+            return response.data as Project[];
+        },
+    });
+}
+
 // Hook for creating a project
 export function useCreateProject() {
     const queryClient = useQueryClient();
@@ -24,6 +35,9 @@ export function useCreateProject() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "featured"],
+            });
         },
         onError: (error: unknown) => {
             console.error("Project creation failed:", error);
@@ -43,8 +57,30 @@ export function useUpdateProject() {
             const response = await api.put(`/projects/${id}`, projectData);
             return response.data as Project;
         },
-        onSuccess: () => {
+        onSuccess: (updatedProject) => {
+            console.log(
+                "Update mutation successful, updating cache with:",
+                updatedProject,
+            );
+
+            // Update the specific project in cache immediately
+            queryClient.setQueryData(
+                ["projects"],
+                (oldData: Project[] | undefined) => {
+                    if (!oldData) return oldData;
+                    return oldData.map((project) =>
+                        project.id === updatedProject.id
+                            ? updatedProject
+                            : project
+                    );
+                },
+            );
+
+            // Also invalidate to ensure fresh data for both regular and featured projects
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "featured"],
+            });
         },
         onError: (error: unknown) => {
             console.error("Project update failed:", error);
@@ -60,13 +96,39 @@ export function useDeleteProject() {
     return useMutation({
         mutationFn: async (id: string) => {
             console.log("Attempting to delete project:", id);
-            const response = await api.delete(`/projects/${id}`);
-            console.log("Delete response:", response.status, response.data);
-            return id;
+            try {
+                const response = await api.delete(`/projects/${id}`);
+                console.log("Delete response:", response.status, response.data);
+                return id;
+            } catch (error: any) {
+                // If the project is not found (404), treat it as already deleted
+                if (error.response?.status === 404) {
+                    console.log(
+                        "Project already deleted or not found, treating as success",
+                    );
+                    return id;
+                }
+                throw error;
+            }
         },
-        onSuccess: () => {
+        onSuccess: (deletedId) => {
             console.log("Delete mutation successful, invalidating cache");
+            // Invalidate and refetch projects
             queryClient.invalidateQueries({ queryKey: ["projects"] });
+            queryClient.invalidateQueries({
+                queryKey: ["projects", "featured"],
+            });
+
+            // Also remove the specific project from cache immediately for better UX
+            queryClient.setQueryData(
+                ["projects"],
+                (oldData: Project[] | undefined) => {
+                    if (!oldData) return oldData;
+                    return oldData.filter((project) =>
+                        project.id !== deletedId
+                    );
+                },
+            );
         },
         onError: (error) => {
             console.error("Delete mutation failed:", error);
