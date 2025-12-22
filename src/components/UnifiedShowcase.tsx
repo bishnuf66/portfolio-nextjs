@@ -192,13 +192,6 @@ export default function UnifiedShowcase() {
                   className={isDarkMode ? "text-cyan-400" : "text-cyan-600"}
                 />
               </div>
-              <p
-                className={`text-xl ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
-              >
-                Explore my technology universe - Interactive 3D solar system
-              </p>
             </div>
           </ScrollFade>
 

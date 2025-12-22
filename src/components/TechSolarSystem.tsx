@@ -135,6 +135,8 @@ function Planet({
           ref={meshRef}
           onPointerOver={() => setHovered(true)}
           onPointerOut={() => setHovered(false)}
+          onPointerDown={() => setHovered(true)}
+          onPointerUp={() => setHovered(false)}
           onClick={() => {
             onClick();
             setActive(!active);
@@ -336,8 +338,15 @@ export default function TechSolarSystem() {
 
   return (
     <div className="max-w-6xl mx-auto">
+      <p
+        className={`text-xl text-center mb-4 ${
+          isDarkMode ? "text-gray-300" : "text-gray-600"
+        }`}
+      >
+        Explore my technology universe - Interactive 3D solar system
+      </p>
       <div
-        className={`relative rounded-xl overflow-hidden shadow-2xl ${
+        className={`relative rounded-xl overflow-hidden shadow-2xl w-full ${
           isDarkMode ? "bg-gray-900/50" : "bg-gray-800/90"
         } backdrop-blur-sm border ${
           isDarkMode ? "border-gray-800" : "border-gray-700"
@@ -345,7 +354,7 @@ export default function TechSolarSystem() {
         style={{ height: isMobile ? "420px" : "600px" }}
       >
         <Canvas
-          camera={{ position: [0, 5, 15], fov: isMobile ? 65 : 60 }}
+          camera={{ position: [0, 2, 12], fov: isMobile ? 75 : 65 }}
           dpr={isMobile ? [1, 1.25] : [1, 2]}
           gl={{ powerPreference: "high-performance", antialias: !isMobile }}
         >
