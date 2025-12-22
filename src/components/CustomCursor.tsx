@@ -281,7 +281,13 @@ const CustomCursor = () => {
       const isCoarsePointer = window.matchMedia
         ? window.matchMedia("(pointer: coarse)").matches
         : false;
-      return isMobileViewport || isCoarsePointer;
+      const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      const isMobileUA =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      return isMobileViewport || isCoarsePointer || isTouchDevice || isMobileUA;
     };
 
     // Check if mobile or cursor is disabled
@@ -375,7 +381,12 @@ const CustomCursor = () => {
   const isMobileEnv =
     typeof window !== "undefined" &&
     (window.innerWidth < 768 ||
-      (window.matchMedia && window.matchMedia("(pointer: coarse)").matches));
+      (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0);
   if (isMobileEnv || !isEnabled) return null;
 
   const currentStyles = getCursorVariantStyles(cursorVariant, cursorTheme);
