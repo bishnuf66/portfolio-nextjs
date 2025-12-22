@@ -2,6 +2,8 @@ import React, { ChangeEvent, useRef, useEffect } from "react";
 import { X, Star } from "lucide-react";
 import Image from "next/image";
 import RichTextEditor from "../../RichTextEditor";
+import { Select } from "@/components/ui/Select";
+import { getInputClasses } from "@/utils/colorUtils";
 
 type Project = {
   id?: string;
@@ -238,21 +240,21 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 <label className="block text-sm font-medium mb-2">
                   Category
                 </label>
-                <select
+                <Select
                   value={formData.category}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      category: e.target.value as "professional" | "personal",
+                      category: (e.target as HTMLSelectElement).value as
+                        | "professional"
+                        | "personal",
                     }))
                   }
-                  className={`${getInputClasses(
-                    "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 cursor-text"
-                  )}`}
-                >
-                  <option value="professional">Professional</option>
-                  <option value="personal">Personal</option>
-                </select>
+                  options={[
+                    { value: "professional", label: "Professional" },
+                    { value: "personal", label: "Personal" },
+                  ]}
+                />
               </div>
 
               <div>

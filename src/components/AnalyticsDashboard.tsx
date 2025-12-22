@@ -17,6 +17,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
+import { Select } from "@/components/ui/Select";
+import { getInputClasses } from "@/utils/colorUtils";
 
 interface AnalyticsData {
   totalViews: number;

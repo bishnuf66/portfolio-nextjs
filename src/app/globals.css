@@ -396,6 +396,25 @@ body, #__next, main {
   }
 }
 
+/* Custom select styling for dark mode */
+select {
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.dark select {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
+}
+
+select option {
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+  color: rgb(17 24 39 / var(--tw-bg-opacity));
+}
+
+.dark select option {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
+  color: rgb(243 244 246 / var(--tw-bg-opacity));
+}
+
 /* Smooth cursor transitions */
 .cursor-transition {
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);

@@ -25,6 +25,8 @@ import {
   List,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
+import { getInputClasses } from "@/utils/colorUtils";
 
 type SortField = "title" | "created_at" | "updated_at" | "published" | "author";
 type SortOrder = "asc" | "desc";
@@ -252,21 +254,22 @@ export default function BlogManager() {
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Status
             </label>
-            <select
+            <Select
               value={publishedFilter}
               onChange={(e) =>
                 handlePublishedChange(
-                  e.target.value as "all" | "published" | "draft"
+                  (e.target as HTMLSelectElement).value as
+                    | "all"
+                    | "published"
+                    | "draft"
                 )
               }
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              )}`}
-            >
-              <option value="all">All Posts</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
+              options={[
+                { value: "all", label: "All Posts" },
+                { value: "published", label: "Published" },
+                { value: "draft", label: "Draft" },
+              ]}
+            />
           </div>
 
           {/* Author Filter */}
@@ -290,18 +293,18 @@ export default function BlogManager() {
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Per Page
             </label>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              )}`}
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
+            <Select
+              value={itemsPerPage.toString()}
+              onChange={(e) =>
+                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+              }
+              options={[
+                { value: "5", label: "5 per page" },
+                { value: "10", label: "10 per page" },
+                { value: "20", label: "20 per page" },
+                { value: "50", label: "50 per page" },
+              ]}
+            />
           </div>
 
           {/* Clear Filters */}

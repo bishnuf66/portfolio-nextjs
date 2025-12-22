@@ -15,6 +15,8 @@ import {
 import useStore from "@/store/store";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { Select } from "@/components/ui/Select";
+import { getInputClasses } from "@/utils/colorUtils";
 
 interface GalleryImage {
   id: string;
@@ -392,25 +394,20 @@ const GalleryManager: React.FC = () => {
                         <label className="block text-sm font-medium mb-1">
                           Category
                         </label>
-                        <select
+                        <Select
                           value={upload.category}
                           onChange={(e) =>
                             updatePendingUpload(
                               index,
                               "category",
-                              e.target.value
+                              (e.target as HTMLSelectElement).value
                             )
                           }
-                          className={`${getInputClasses(
-                            "px-3 py-2 border rounded"
-                          )}`}
-                        >
-                          {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                            </option>
-                          ))}
-                        </select>
+                          options={categories.map((cat) => ({
+                            value: cat,
+                            label: cat.charAt(0).toUpperCase() + cat.slice(1),
+                          }))}
+                        />
                       </div>
                     </div>
                     <button
@@ -457,18 +454,17 @@ const GalleryManager: React.FC = () => {
           </h3>
 
           {/* Category Filter */}
-          <select
+          <Select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className={`${getInputClasses("px-3 py-2 border rounded")}`}
-          >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </option>
-            ))}
-          </select>
+            onChange={(e) => setSelectedCategory((e.target as HTMLSelectElement).value)}
+            options={[
+              { value: "all", label: "All Categories" },
+              ...categories.map((cat) => ({
+                value: cat,
+                label: cat.charAt(0).toUpperCase() + cat.slice(1),
+              })),
+            ]}
+          />
         </div>
 
         {filteredImages.length === 0 ? (
@@ -597,24 +593,19 @@ const GalleryManager: React.FC = () => {
                 <label className="block text-sm font-medium mb-1">
                   Category
                 </label>
-                <select
+                <Select
                   value={editingImage.category}
                   onChange={(e) =>
                     setEditingImage({
                       ...editingImage,
-                      category: e.target.value,
+                      category: (e.target as HTMLSelectElement).value,
                     })
                   }
-                  className={`${getInputClasses(
-                    "w-full px-3 py-2 border rounded cursor-text"
-                  )}`}
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                  options={categories.map((cat) => ({
+                    value: cat,
+                    label: cat.charAt(0).toUpperCase() + cat.slice(1),
+                  }))}
+                />
               </div>
 
               <div className="flex items-center gap-2">

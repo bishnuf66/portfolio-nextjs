@@ -26,6 +26,7 @@ import {
   List,
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
+import { Select } from "@/components/ui/Select";
 
 type SortField = "name" | "created_at" | "updated_at" | "published" | "rating";
 type SortOrder = "asc" | "desc";
@@ -258,21 +259,22 @@ export default function TestimonialManager() {
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Status
             </label>
-            <select
+            <Select
               value={publishedFilter}
               onChange={(e) =>
                 handlePublishedChange(
-                  e.target.value as "all" | "published" | "draft"
+                  (e.target as HTMLSelectElement).value as
+                    | "all"
+                    | "published"
+                    | "draft"
                 )
               }
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              )}`}
-            >
-              <option value="all">All Testimonials</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-            </select>
+              options={[
+                { value: "all", label: "All Testimonials" },
+                { value: "published", label: "Published" },
+                { value: "draft", label: "Draft" },
+              ]}
+            />
           </div>
 
           {/* Rating Filter */}
@@ -280,24 +282,24 @@ export default function TestimonialManager() {
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Rating
             </label>
-            <select
-              value={ratingFilter}
+            <Select
+              value={ratingFilter === "all" ? "all" : String(ratingFilter)}
               onChange={(e) =>
                 handleRatingChange(
-                  e.target.value === "all" ? "all" : Number(e.target.value)
+                  (e.target as HTMLSelectElement).value === "all"
+                    ? "all"
+                    : Number((e.target as HTMLSelectElement).value)
                 )
               }
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              )}`}
-            >
-              <option value="all">All Ratings</option>
-              <option value={5}>5 Stars</option>
-              <option value={4}>4 Stars</option>
-              <option value={3}>3 Stars</option>
-              <option value={2}>2 Stars</option>
-              <option value={1}>1 Star</option>
-            </select>
+              options={[
+                { value: "all", label: "All Ratings" },
+                { value: "5", label: "5 Stars" },
+                { value: "4", label: "4 Stars" },
+                { value: "3", label: "3 Stars" },
+                { value: "2", label: "2 Stars" },
+                { value: "1", label: "1 Star" },
+              ]}
+            />
           </div>
 
           {/* Items Per Page */}
@@ -305,18 +307,18 @@ export default function TestimonialManager() {
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Per Page
             </label>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              )}`}
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
+            <Select
+              value={itemsPerPage.toString()}
+              onChange={(e) =>
+                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+              }
+              options={[
+                { value: "5", label: "5 per page" },
+                { value: "10", label: "10 per page" },
+                { value: "20", label: "20 per page" },
+                { value: "50", label: "50 per page" },
+              ]}
+            />
           </div>
 
           {/* Clear Filters */}

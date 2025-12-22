@@ -27,6 +27,8 @@ export const colorScheme = {
     "bg-light-primary dark:bg-dark-secondary border-light-border dark:border-dark-border",
   input:
     "bg-light-primary dark:bg-dark-tertiary border-light-border dark:border-dark-border text-light-text dark:text-dark-text placeholder-light-text-muted dark:placeholder-dark-text-muted cursor-text",
+  select:
+    "bg-light-primary dark:bg-dark-tertiary border-light-border dark:border-dark-border text-light-text dark:text-dark-text cursor-text appearance-none",
   page:
     "bg-light-primary dark:bg-dark-primary text-light-text dark:text-dark-text",
   section: "bg-light-secondary dark:bg-dark-secondary",
@@ -71,4 +73,11 @@ export const getCardClasses = (additionalClasses = "") => {
  */
 export const getInputClasses = (additionalClasses = "") => {
   return `${colorScheme.input} ${additionalClasses}`;
+};
+
+/**
+ * Get select classes for consistent dropdown styling
+ */
+export const getSelectClasses = (additionalClasses = "") => {
+  return `${colorScheme.select} ${additionalClasses}`;
 };

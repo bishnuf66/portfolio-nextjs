@@ -7,6 +7,7 @@ import {
   getInputClasses,
   colorScheme,
 } from "@/utils/colorUtils";
+import { Select } from "@/components/ui/Select";
 import useStore from "@/store/store";
 import {
   Briefcase,
@@ -179,20 +180,18 @@ export default function ProjectsPage() {
 
             {/* Items per page */}
             <div className="min-w-[120px]">
-              <select
-                value={itemsPerPage}
+              <Select
+                value={itemsPerPage.toString()}
                 onChange={(e) =>
                   handleItemsPerPageChange(Number(e.target.value))
                 }
-                className={`${getInputClasses(
-                  "w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                )}`}
-              >
-                <option value={6}>6 per page</option>
-                <option value={9}>9 per page</option>
-                <option value={12}>12 per page</option>
-                <option value={18}>18 per page</option>
-              </select>
+                options={[
+                  { value: "6", label: "6 per page" },
+                  { value: "9", label: "9 per page" },
+                  { value: "12", label: "12 per page" },
+                  { value: "18", label: "18 per page" },
+                ]}
+              />
             </div>
 
             {/* Clear Filters */}

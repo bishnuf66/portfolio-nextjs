@@ -16,6 +16,8 @@ import {
 import { Project } from "@/lib/supabase";
 import Pagination from "@/components/ui/Pagination";
 import { useProjectsFiltered } from "@/hooks/useProjects";
+import { Select } from "@/components/ui/Select";
+import { getInputClasses } from "@/utils/colorUtils";
 
 interface ProjectListProps {
   isDarkMode: boolean;
@@ -238,21 +240,22 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Category
             </label>
-            <select
+            <Select
               value={categoryFilter}
               onChange={(e) =>
                 handleCategoryChange(
-                  e.target.value as "all" | "professional" | "personal"
+                  (e.target as HTMLSelectElement).value as
+                    | "all"
+                    | "professional"
+                    | "personal"
                 )
               }
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
-              )}`}
-            >
-              <option value="all">All Categories</option>
-              <option value="professional">Professional</option>
-              <option value="personal">Personal</option>
-            </select>
+              options={[
+                { value: "all", label: "All Categories" },
+                { value: "professional", label: "Professional" },
+                { value: "personal", label: "Personal" },
+              ]}
+            />
           </div>
 
           {/* Featured Filter */}
@@ -260,21 +263,22 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Featured Status
             </label>
-            <select
+            <Select
               value={featuredFilter}
               onChange={(e) =>
                 handleFeaturedChange(
-                  e.target.value as "all" | "featured" | "not-featured"
+                  (e.target as HTMLSelectElement).value as
+                    | "all"
+                    | "featured"
+                    | "not-featured"
                 )
               }
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
-              )}`}
-            >
-              <option value="all">All Projects</option>
-              <option value="featured">Featured Only</option>
-              <option value="not-featured">Not Featured</option>
-            </select>
+              options={[
+                { value: "all", label: "All Projects" },
+                { value: "featured", label: "Featured Only" },
+                { value: "not-featured", label: "Not Featured" },
+              ]}
+            />
           </div>
 
           {/* Items Per Page */}
@@ -282,18 +286,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Per Page
             </label>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`${getInputClasses(
-                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
-              )}`}
-            >
-              <option value={5}>5 per page</option>
-              <option value={10}>10 per page</option>
-              <option value={20}>20 per page</option>
-              <option value={50}>50 per page</option>
-            </select>
+            <Select
+              value={itemsPerPage.toString()}
+              onChange={(e) =>
+                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+              }
+              options={[
+                { value: "5", label: "5 per page" },
+                { value: "10", label: "10 per page" },
+                { value: "20", label: "20 per page" },
+                { value: "50", label: "50 per page" },
+              ]}
+            />
           </div>
 
           {/* Clear Filters */}
