@@ -29,6 +29,23 @@ interface AnalyticsData {
   projectViews: { project_id: string; count: number }[];
 }
 
+interface PaginatedResponse {
+  items: Array<{
+    country?: string;
+    page?: string;
+    device?: string;
+    count: number;
+  }>;
+  total: number;
+  page: number;
+  totalPages: number;
+  summary: {
+    totalViews: number;
+    uniqueVisitors: number;
+    avgDuration: number;
+  };
+}
+
 interface FilterState {
   searchTerm: string;
   selectedCountries: string[];
@@ -51,6 +68,13 @@ export default function AnalyticsDashboard() {
   const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d" | "all">(
     "7d"
   );
+  const [paginatedData, setPaginatedData] = useState<PaginatedResponse>({
+    items: [],
+    total: 0,
+    page: 1,
+    totalPages: 0,
+    summary: { totalViews: 0, uniqueVisitors: 0, avgDuration: 0 },
+  });
 
   // New state for enhanced filtering and sorting
   const [filters, setFilters] = useState<FilterState>({
@@ -79,17 +103,18 @@ export default function AnalyticsDashboard() {
   >("countries");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [maxViewsInitialized, setMaxViewsInitialized] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange]);
+  }, [timeRange, filters, sortConfig, activeView, currentPage]);
 
-  // Reset pagination when filters change
+  // Reset pagination when filters/view/sort change
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, sortConfig, activeView]);
 
-  // Filtered and sorted data
+  // Filtered and sorted data (kept for backward compatibility with summary stats)
   const filteredData = useMemo(() => {
     if (!analytics) return { countries: [], pages: [], devices: [] };
 
@@ -177,38 +202,18 @@ export default function AnalyticsDashboard() {
     if (!analytics) return { countries: [], devices: [] };
 
     return {
-      countries: [...new Set(analytics.topCountries.map((c) => c.country))],
-      devices: [...new Set(analytics.deviceBreakdown.map((d) => d.device))],
+      countries: [
+        ...new Set(
+          paginatedData.items.map((c) => c.country).filter(Boolean) as string[]
+        ),
+      ],
+      devices: [
+        ...new Set(
+          paginatedData.items.map((d) => d.device).filter(Boolean) as string[]
+        ),
+      ],
     };
-  }, [analytics]);
-
-  // Pagination logic
-  const paginatedData = useMemo(() => {
-    const currentData =
-      activeView === "countries"
-        ? filteredData.countries
-        : activeView === "pages"
-        ? filteredData.pages
-        : filteredData.devices;
-
-    const startIdx = (currentPage - 1) * itemsPerPage;
-    const endIdx = startIdx + itemsPerPage;
-    const totalPages = Math.ceil(currentData.length / itemsPerPage);
-    const totalCount = currentData.reduce((sum, item) => sum + item.count, 0);
-
-    return {
-      items: currentData.slice(startIdx, endIdx) as Array<{
-        country?: string;
-        page?: string;
-        device?: string;
-        count: number;
-      }>,
-      totalItems: currentData.length,
-      totalCount,
-      totalPages,
-      currentPage,
-    };
-  }, [activeView, filteredData, currentPage]);
+  }, [paginatedData.items]);
 
   const fetchAnalytics = async () => {
     try {
@@ -223,9 +228,34 @@ export default function AnalyticsDashboard() {
         headers["Authorization"] = `Bearer ${session.access_token}`;
       }
 
-      const response = await fetch(`/api/analytics?range=${timeRange}`, {
+      // Build query params
+      const params = new URLSearchParams();
+      params.append("range", timeRange);
+      params.append("view", activeView);
+      params.append("page", currentPage.toString());
+      params.append("limit", itemsPerPage.toString());
+      params.append("sortField", sortConfig.field);
+      params.append("sortDirection", sortConfig.direction);
+
+      if (filters.searchTerm) {
+        params.append("searchTerm", filters.searchTerm);
+      }
+      filters.selectedCountries.forEach((c) => {
+        params.append("selectedCountries", c);
+      });
+      filters.selectedDevices.forEach((d) => {
+        params.append("selectedDevices", d);
+      });
+      if (filters.minViews > 0) {
+        params.append("minViews", filters.minViews.toString());
+      }
+      if (filters.maxViews > 0) {
+        params.append("maxViews", filters.maxViews.toString());
+      }
+
+      const response = await fetch(`/api/analytics?${params.toString()}`, {
         headers,
-        credentials: "include", // Include cookies
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -234,24 +264,32 @@ export default function AnalyticsDashboard() {
           response.status,
           response.statusText
         );
-        const errorData = await response.json();
-        console.error("Error details:", errorData);
         throw new Error(`Failed to fetch analytics: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setAnalytics(data);
+      const data: PaginatedResponse = await response.json();
+      setPaginatedData(data);
 
-      // Set max views for filter
-      if (data.topPages?.length > 0) {
-        const maxViews = Math.max(
-          ...data.topPages.map((p: { count: number }) => p.count)
-        );
+      // Set analytics from summary
+      setAnalytics({
+        totalViews: data.summary.totalViews,
+        uniqueVisitors: data.summary.uniqueVisitors,
+        topCountries: [],
+        topPages: [],
+        deviceBreakdown: [],
+        avgDuration: data.summary.avgDuration,
+        recentVisitors: [],
+        projectViews: [],
+      });
+
+      // Set max views for filter only on first load
+      if (!maxViewsInitialized && data.items.length > 0) {
+        const maxViews = Math.max(...data.items.map((p) => p.count));
         setFilters((prev) => ({ ...prev, maxViews: maxViews }));
+        setMaxViewsInitialized(true);
       }
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
-      // Set empty analytics data to prevent errors
       setAnalytics({
         totalViews: 0,
         uniqueVisitors: 0,
@@ -261,6 +299,13 @@ export default function AnalyticsDashboard() {
         avgDuration: 0,
         recentVisitors: [],
         projectViews: [],
+      });
+      setPaginatedData({
+        items: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        summary: { totalViews: 0, uniqueVisitors: 0, avgDuration: 0 },
       });
     } finally {
       setLoading(false);
@@ -281,9 +326,7 @@ export default function AnalyticsDashboard() {
       selectedCountries: [],
       selectedDevices: [],
       minViews: 0,
-      maxViews: analytics?.topPages
-        ? Math.max(...analytics.topPages.map((p) => p.count))
-        : 0,
+      maxViews: filters.maxViews, // Keep the current maxViews to avoid infinite loops
       customDateRange: { start: "", end: "" },
     });
   };
@@ -756,7 +799,7 @@ export default function AnalyticsDashboard() {
             isDarkMode ? "bg-black" : "bg-white"
           }`}
         >
-          {paginatedData.totalItems === 0 ? (
+          {paginatedData.total === 0 ? (
             <div className="p-8 text-center">
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                 No data available for the current filters
@@ -835,8 +878,12 @@ export default function AnalyticsDashboard() {
                         },
                         index: number
                       ) => {
+                        const totalCount = paginatedData.items.reduce(
+                          (sum, i) => sum + i.count,
+                          0
+                        );
                         const percentage = (
-                          (item.count / paginatedData.totalCount) *
+                          (item.count / totalCount) *
                           100
                         ).toFixed(1);
                         return (
@@ -901,21 +948,21 @@ export default function AnalyticsDashboard() {
                       isDarkMode ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                    Showing {(paginatedData.page - 1) * itemsPerPage + 1} to{" "}
                     {Math.min(
-                      currentPage * itemsPerPage,
-                      paginatedData.totalItems
+                      paginatedData.page * itemsPerPage,
+                      paginatedData.total
                     )}{" "}
-                    of {paginatedData.totalItems} items
+                    of {paginatedData.total} items
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(prev - 1, 1))
                       }
-                      disabled={currentPage === 1}
+                      disabled={paginatedData.page === 1}
                       className={`p-2 rounded-lg transition-all ${
-                        currentPage === 1
+                        paginatedData.page === 1
                           ? isDarkMode
                             ? "bg-gray-800 text-gray-600 cursor-not-allowed"
                             : "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -934,15 +981,18 @@ export default function AnalyticsDashboard() {
                         (_, i) => i + 1
                       )
                         .slice(
-                          Math.max(0, currentPage - 2),
-                          Math.min(paginatedData.totalPages, currentPage + 1)
+                          Math.max(0, paginatedData.page - 2),
+                          Math.min(
+                            paginatedData.totalPages,
+                            paginatedData.page + 1
+                          )
                         )
                         .map((page) => (
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
                             className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                              currentPage === page
+                              paginatedData.page === page
                                 ? "bg-blue-500 text-white"
                                 : isDarkMode
                                 ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
@@ -960,9 +1010,9 @@ export default function AnalyticsDashboard() {
                           Math.min(prev + 1, paginatedData.totalPages)
                         )
                       }
-                      disabled={currentPage === paginatedData.totalPages}
+                      disabled={paginatedData.page === paginatedData.totalPages}
                       className={`p-2 rounded-lg transition-all ${
-                        currentPage === paginatedData.totalPages
+                        paginatedData.page === paginatedData.totalPages
                           ? isDarkMode
                             ? "bg-gray-800 text-gray-600 cursor-not-allowed"
                             : "bg-gray-200 text-gray-400 cursor-not-allowed"

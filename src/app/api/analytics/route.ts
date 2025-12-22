@@ -78,7 +78,32 @@ export async function GET(request: Request) {
         console.log("Analytics API - User authenticated:", user.id);
 
         const { searchParams } = new URL(request.url);
-        const range = searchParams.get("range") || "7d";
+
+        // Parse filter parameters
+        const range = (searchParams.get("range") || "7d") as
+            | "24h"
+            | "7d"
+            | "30d"
+            | "all";
+        const view = (searchParams.get("view") || "countries") as
+            | "countries"
+            | "pages"
+            | "devices";
+        const searchTerm = searchParams.get("searchTerm") || "";
+        const selectedCountries = searchParams.getAll("selectedCountries");
+        const selectedDevices = searchParams.getAll("selectedDevices");
+        const minViews = parseInt(searchParams.get("minViews") || "0");
+        const maxViews = parseInt(searchParams.get("maxViews") || "999999");
+        const sortField = (searchParams.get("sortField") || "count") as
+            | "country"
+            | "page"
+            | "device"
+            | "count";
+        const sortDirection = (searchParams.get("sortDirection") || "desc") as
+            | "asc"
+            | "desc";
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
 
         // Calculate date range
         let dateFilter = new Date();
@@ -92,7 +117,7 @@ export async function GET(request: Request) {
             dateFilter = new Date(0); // All time
         }
 
-        // Fetch analytics data with type
+        // Fetch analytics data
         const { data: analyticsData, error: analyticsError } = await supabase
             .from("analytics")
             .select("*")
@@ -103,72 +128,39 @@ export async function GET(request: Request) {
 
         if (analyticsError) {
             console.error("Analytics fetch error:", analyticsError);
-            // Return empty data instead of error
             return NextResponse.json({
-                totalViews: 0,
-                uniqueVisitors: 0,
-                topCountries: [],
-                topPages: [],
-                deviceBreakdown: [],
-                avgDuration: 0,
-                recentVisitors: [],
-                projectViews: [],
+                items: [],
+                total: 0,
+                page: 1,
+                totalPages: 0,
+                summary: {
+                    totalViews: 0,
+                    uniqueVisitors: 0,
+                    avgDuration: 0,
+                },
             });
         }
 
         // Handle empty data
         if (!analyticsData || analyticsData.length === 0) {
             return NextResponse.json({
-                totalViews: 0,
-                uniqueVisitors: 0,
-                topCountries: [],
-                topPages: [],
-                deviceBreakdown: [],
-                avgDuration: 0,
-                recentVisitors: [],
-                projectViews: [],
+                items: [],
+                total: 0,
+                page: 1,
+                totalPages: 0,
+                summary: {
+                    totalViews: 0,
+                    uniqueVisitors: 0,
+                    avgDuration: 0,
+                },
             });
         }
 
-        // Calculate metrics
+        // Calculate summary metrics
         const totalViews = analyticsData.length;
         const uniqueVisitors = new Set(
             analyticsData.map((a) => a.visitor_id),
         ).size;
-
-        // Top countries
-        const countryCount: Record<string, number> = {};
-        analyticsData.forEach((a) => {
-            if (a.country) {
-                countryCount[a.country] = (countryCount[a.country] || 0) + 1;
-            }
-        });
-        const topCountries = Object.entries(countryCount)
-            .map(([country, count]) => ({ country, count }))
-            .sort((a, b) => b.count - a.count);
-
-        // Top pages
-        const pageCount: Record<string, number> = {};
-        analyticsData.forEach((a) => {
-            pageCount[a.page_path] = (pageCount[a.page_path] || 0) + 1;
-        });
-        const topPages = Object.entries(pageCount)
-            .map(([page, count]) => ({ page, count }))
-            .sort((a, b) => b.count - a.count);
-
-        // Device breakdown
-        const deviceCount: Record<string, number> = {};
-        analyticsData.forEach((a) => {
-            if (a.device_type) {
-                deviceCount[a.device_type] = (deviceCount[a.device_type] || 0) +
-                    1;
-            }
-        });
-        const deviceBreakdown = Object.entries(deviceCount)
-            .map(([device, count]) => ({ device, count }))
-            .sort((a, b) => b.count - a.count);
-
-        // Average duration
         const totalDuration = analyticsData.reduce(
             (sum, a) => sum + (a.duration_seconds || 0),
             0,
@@ -177,54 +169,123 @@ export async function GET(request: Request) {
             ? Math.floor(totalDuration / totalViews)
             : 0;
 
-        // Recent visitors
-        const recentVisitors = analyticsData
-            .sort(
-                (a, b) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime(),
-            )
-            .slice(0, 10);
+        // Process data based on view type
+        let items: Array<
+            { country?: string; page?: string; device?: string; count: number }
+        > = [];
 
-        // Project views
-        const { data: projectViewsData } = await supabase
-            .from("project_views")
-            .select("project_id, viewed_at")
-            .gte("viewed_at", dateFilter.toISOString()) as {
-                data: ProjectView[] | null;
-            };
+        if (view === "countries") {
+            const countryCount: Record<string, number> = {};
+            analyticsData.forEach((a) => {
+                if (a.country) {
+                    countryCount[a.country] = (countryCount[a.country] || 0) +
+                        1;
+                }
+            });
+            items = Object.entries(countryCount)
+                .map(([country, count]) => ({ country, count }));
+        } else if (view === "pages") {
+            const pageCount: Record<string, number> = {};
+            analyticsData.forEach((a) => {
+                pageCount[a.page_path] = (pageCount[a.page_path] || 0) + 1;
+            });
+            items = Object.entries(pageCount)
+                .map(([page, count]) => ({ page, count }));
+        } else if (view === "devices") {
+            const deviceCount: Record<string, number> = {};
+            analyticsData.forEach((a) => {
+                if (a.device_type) {
+                    deviceCount[a.device_type] =
+                        (deviceCount[a.device_type] || 0) + 1;
+                }
+            });
+            items = Object.entries(deviceCount)
+                .map(([device, count]) => ({ device, count }));
+        }
 
-        const projectViewCount: Record<string, number> = {};
-        projectViewsData?.forEach((pv) => {
-            projectViewCount[pv.project_id] =
-                (projectViewCount[pv.project_id] || 0) + 1;
+        // Apply filtering
+        let filtered = items.filter((item) => {
+            // Search filter
+            if (searchTerm) {
+                const searchableField = item.country || item.page ||
+                    item.device || "";
+                if (
+                    !searchableField.toLowerCase().includes(
+                        searchTerm.toLowerCase(),
+                    )
+                ) {
+                    return false;
+                }
+            }
+
+            // Country filter
+            if (selectedCountries.length > 0 && view === "countries") {
+                if (!selectedCountries.includes(item.country || "")) {
+                    return false;
+                }
+            }
+
+            // Device filter
+            if (selectedDevices.length > 0 && view === "devices") {
+                if (!selectedDevices.includes(item.device || "")) {
+                    return false;
+                }
+            }
+
+            // View count filters
+            if (item.count < minViews || item.count > maxViews) {
+                return false;
+            }
+
+            return true;
         });
-        const projectViews = Object.entries(projectViewCount)
-            .map(([project_id, count]) => ({ project_id, count }))
-            .sort((a, b) => b.count - a.count);
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            let aVal: any = a[sortField as keyof typeof a] || 0;
+            let bVal: any = b[sortField as keyof typeof b] || 0;
+
+            if (typeof aVal === "string") {
+                aVal = aVal.toLowerCase();
+                bVal = (bVal as string).toLowerCase();
+                return sortDirection === "asc"
+                    ? aVal.localeCompare(bVal)
+                    : bVal.localeCompare(aVal);
+            }
+
+            return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+        });
+
+        // Apply pagination
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIdx = (page - 1) * limit;
+        const endIdx = startIdx + limit;
+        const paginatedItems = filtered.slice(startIdx, endIdx);
 
         return NextResponse.json({
-            totalViews,
-            uniqueVisitors,
-            topCountries,
-            topPages,
-            deviceBreakdown,
-            avgDuration,
-            recentVisitors,
-            projectViews,
+            items: paginatedItems,
+            total,
+            page,
+            totalPages,
+            summary: {
+                totalViews,
+                uniqueVisitors,
+                avgDuration,
+            },
         });
     } catch (error) {
         console.error("Analytics API error:", error);
-        // Return empty data instead of error to prevent dashboard crashes
         return NextResponse.json({
-            totalViews: 0,
-            uniqueVisitors: 0,
-            topCountries: [],
-            topPages: [],
-            deviceBreakdown: [],
-            avgDuration: 0,
-            recentVisitors: [],
-            projectViews: [],
+            items: [],
+            total: 0,
+            page: 1,
+            totalPages: 0,
+            summary: {
+                totalViews: 0,
+                uniqueVisitors: 0,
+                avgDuration: 0,
+            },
         });
     }
 }
