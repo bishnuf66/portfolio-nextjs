@@ -171,11 +171,21 @@ export const useCreateTestimonial = () => {
             return data;
         },
         onSuccess: () => {
+            // Invalidate all testimonial-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
             queryClient.invalidateQueries({
                 queryKey: ["testimonials", "filtered"],
             });
             queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["testimonials"] });
+            queryClient.refetchQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.refetchQueries({
                 queryKey: ["testimonials", "counts"],
             });
         },
@@ -207,11 +217,21 @@ export const useUpdateTestimonial = () => {
             return data;
         },
         onSuccess: () => {
+            // Invalidate all testimonial-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
             queryClient.invalidateQueries({
                 queryKey: ["testimonials", "filtered"],
             });
             queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["testimonials"] });
+            queryClient.refetchQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.refetchQueries({
                 queryKey: ["testimonials", "counts"],
             });
         },
@@ -230,11 +250,21 @@ export const useDeleteTestimonial = () => {
             if (error) throw error;
         },
         onSuccess: () => {
+            // Invalidate all testimonial-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
             queryClient.invalidateQueries({
                 queryKey: ["testimonials", "filtered"],
             });
             queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["testimonials"] });
+            queryClient.refetchQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.refetchQueries({
                 queryKey: ["testimonials", "counts"],
             });
         },

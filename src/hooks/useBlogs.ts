@@ -143,7 +143,6 @@ export function useBlogCounts() {
     });
 }
 
-
 export const useBlog = (slug: string) => {
     return useQuery({
         queryKey: ["blog", slug],
@@ -179,9 +178,15 @@ export const useCreateBlog = () => {
             return data;
         },
         onSuccess: () => {
+            // Invalidate all blog-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["blogs"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };
@@ -208,9 +213,15 @@ export const useUpdateBlog = () => {
             return data;
         },
         onSuccess: () => {
+            // Invalidate all blog-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["blogs"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };
@@ -227,9 +238,15 @@ export const useDeleteBlog = () => {
             if (error) throw error;
         },
         onSuccess: () => {
+            // Invalidate all blog-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
             queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["blogs"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };

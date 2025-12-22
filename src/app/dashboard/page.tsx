@@ -16,7 +16,7 @@ import {
 import withAuth from "@/components/withAuth";
 import { useAuth } from "@/components/AuthProvider";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { useProjects, useDeleteProject } from "@/hooks/useProjects";
+import { useDeleteProject } from "@/hooks/useProjects";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import BlogManager from "@/components/dashboard/BlogManager";
 import TestimonialManager from "@/components/dashboard/TestimonialManager";
@@ -31,7 +31,6 @@ const Dashboard = () => {
   const { signOut } = useAuth();
 
   // TanStack Query hooks
-  const { data: projects = [], isLoading } = useProjects();
   const deleteProject = useDeleteProject();
   const confirm = useConfirm();
 
@@ -67,7 +66,7 @@ const Dashboard = () => {
     await signOut();
   };
 
-  if (isLoading) {
+  if (false) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>

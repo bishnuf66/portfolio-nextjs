@@ -113,12 +113,15 @@ export function useProjectCounts() {
             ]);
 
             // Handle both array and paginated response formats
-            const getLength = (data: any) => {
+            const getLength = (data: unknown) => {
                 if (Array.isArray(data)) {
                     return data.length;
                 }
-                if (data?.data && Array.isArray(data.data)) {
-                    return data.data.length;
+                if (
+                    data && typeof data === "object" && "data" in data &&
+                    Array.isArray((data as { data: unknown }).data)
+                ) {
+                    return (data as { data: unknown[] }).data.length;
                 }
                 return 0;
             };
@@ -158,6 +161,7 @@ export function useCreateProject() {
             return response.data as Project;
         },
         onSuccess: () => {
+            // Invalidate all project-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["projects"] });
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
@@ -166,6 +170,12 @@ export function useCreateProject() {
                 queryKey: ["projects", "filtered"],
             });
             queryClient.invalidateQueries({ queryKey: ["projects", "counts"] });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["projects"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "featured"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "counts"] });
         },
         onError: (error: unknown) => {
             console.error("Project creation failed:", error);
@@ -269,9 +279,13 @@ export function useDeleteProject() {
                 const response = await api.delete(`/projects/${id}`);
                 console.log("Delete response:", response.status, response.data);
                 return id;
-            } catch (error: any) {
+            } catch (error: unknown) {
                 // If the project is not found (404), treat it as already deleted
-                if (error.response?.status === 404) {
+                if (
+                    error && typeof error === "object" && "response" in error &&
+                    (error as { response?: { status?: number } }).response
+                            ?.status === 404
+                ) {
                     console.log(
                         "Project already deleted or not found, treating as success",
                     );
@@ -282,7 +296,8 @@ export function useDeleteProject() {
         },
         onSuccess: (deletedId) => {
             console.log("Delete mutation successful, invalidating cache");
-            // Invalidate and refetch projects
+
+            // Invalidate all project-related queries with proper query key patterns
             queryClient.invalidateQueries({ queryKey: ["projects"] });
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
@@ -291,6 +306,12 @@ export function useDeleteProject() {
                 queryKey: ["projects", "filtered"],
             });
             queryClient.invalidateQueries({ queryKey: ["projects", "counts"] });
+
+            // Force immediate refetch to ensure UI updates
+            queryClient.refetchQueries({ queryKey: ["projects"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "featured"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "filtered"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "counts"] });
 
             // Also remove the specific project from cache immediately for better UX
             queryClient.setQueryData(
@@ -303,7 +324,7 @@ export function useDeleteProject() {
                 },
             );
         },
-        onError: (error) => {
+        onError: (error: unknown) => {
             console.error("Delete mutation failed:", error);
         },
     });
