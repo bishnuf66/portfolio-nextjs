@@ -117,6 +117,20 @@ export default function RichTextEditor({
   });
 
   const handleImageUpload = useCallback(async (file: File) => {
+    // Validate file size (max 1MB)
+    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+    if (file.size > maxSize) {
+      alert(`${file.name} is too large (max 1MB)`);
+      return null;
+    }
+
+    // Recommend WebP format
+    if (file.type !== "image/webp") {
+      alert(
+        `${file.name}: Consider converting to WebP format for better compression and performance`
+      );
+    }
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -409,7 +423,7 @@ export default function RichTextEditor({
                 </label>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml"
                   onChange={handleImageFileUpload}
                   className={`w-full px-3 py-2 border rounded-lg ${
                     isDarkMode

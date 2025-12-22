@@ -39,6 +39,20 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
   };
 
   const handleImageUpload = async (file: File) => {
+    // Validate file size (max 1MB)
+    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+    if (file.size > maxSize) {
+      alert(`${file.name} is too large (max 1MB)`);
+      return "";
+    }
+
+    // Recommend WebP format
+    if (file.type !== "image/webp") {
+      alert(
+        `${file.name}: Consider converting to WebP format for better compression and performance`
+      );
+    }
+
     const uploadFormData = new FormData();
     uploadFormData.append("file", file);
     uploadFormData.append("bucket", "blog-images");
@@ -68,8 +82,9 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? " text-white" : " text-gray-900"
-        }`}
+      className={`min-h-screen ${
+        isDarkMode ? " text-white" : " text-gray-900"
+      }`}
     >
       <div className="max-w-4xl mx-auto p-8 pt-24">
         <button
@@ -81,8 +96,9 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
         </button>
 
         <div
-          className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-            } rounded-lg shadow-xl p-8`}
+          className={`${
+            isDarkMode ? "bg-gray-800" : "bg-white"
+          } rounded-lg shadow-xl p-8`}
         >
           <h1 className="text-3xl font-bold mb-8">
             {initialData ? "Edit Blog Post" : "Add New Blog Post"}
@@ -106,10 +122,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                         : prev.slug,
                   }));
                 }}
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
             </div>
 
@@ -122,10 +139,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, slug: e.target.value }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
             </div>
 
@@ -141,10 +159,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     excerpt: e.target.value,
                   }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
             </div>
 
@@ -170,7 +189,7 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml"
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -181,10 +200,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     }));
                   }
                 }}
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
               {formData.cover_image_url && (
                 <Image
@@ -210,10 +230,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                     author: e.target.value,
                   }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
             </div>
 
@@ -228,10 +249,11 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, tags: e.target.value }))
                 }
-                className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600"
-                  : "bg-white border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600"
+                    : "bg-white border-gray-300"
+                }`}
               />
             </div>
 
@@ -269,8 +291,8 @@ const BlogFormPage: React.FC<BlogFormPageProps> = ({
                 {uploading
                   ? "Saving..."
                   : initialData
-                    ? "Update Blog"
-                    : "Add Blog"}
+                  ? "Update Blog"
+                  : "Add Blog"}
               </button>
             </div>
           </form>

@@ -104,10 +104,19 @@ const GalleryManager: React.FC = () => {
         return;
       }
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 10MB)`);
+      // Validate file size (max 1MB)
+      const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large (max 1MB)`);
         return;
+      }
+
+      // Recommend WebP format
+      if (file.type !== "image/webp") {
+        toast.info(
+          `${file.name}: Consider converting to WebP format for better compression and performance`,
+          { autoClose: 5000 }
+        );
       }
 
       const preview = URL.createObjectURL(file);
@@ -301,7 +310,7 @@ const GalleryManager: React.FC = () => {
         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-6">
           <input
             type="file"
-            accept="image/*"
+            accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml"
             multiple
             onChange={handleFileSelect}
             disabled={uploading}
@@ -318,7 +327,8 @@ const GalleryManager: React.FC = () => {
             <div>
               <p className="text-lg font-medium">Upload Gallery Images</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select multiple images (JPG, PNG, WebP, max 10MB each)
+                Select multiple images (WebP recommended for better performance,
+                max 1MB each)
               </p>
             </div>
           </label>
@@ -456,7 +466,9 @@ const GalleryManager: React.FC = () => {
           {/* Category Filter */}
           <Select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory((e.target as HTMLSelectElement).value)}
+            onChange={(e) =>
+              setSelectedCategory((e.target as HTMLSelectElement).value)
+            }
             options={[
               { value: "all", label: "All Categories" },
               ...categories.map((cat) => ({

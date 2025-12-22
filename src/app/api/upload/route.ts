@@ -11,6 +11,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
+    // Server-side validations
+    const MAX_SIZE = 1 * 1024 * 1024; // 1MB
+    if (file.size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: "File too large. Max size is 1MB." },
+        { status: 413 }
+      );
+    }
+
+    if (!file.type || !file.type.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "Invalid file type. Only image files are allowed." },
+        { status: 400 }
+      );
+    }
+
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = fileName;

@@ -4,6 +4,7 @@ import React, { useState, ChangeEvent, useRef } from "react";
 import { ArrowLeft, Star, X, Upload, Loader2 } from "lucide-react";
 import Image from "next/image";
 import RichTextEditor from "../../RichTextEditor";
+import { getInputClasses } from "@/utils/colorUtils";
 
 export type ProjectData = {
   name: string;
@@ -117,6 +118,21 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
   };
 
   const handleCoverImageChange = async (file: File) => {
+    // Validate file size (max 1MB)
+    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+    if (file.size > maxSize) {
+      toast.error(`${file.name} is too large (max 1MB)`);
+      return;
+    }
+
+    // Recommend WebP format
+    if (file.type !== "image/webp") {
+      toast.info(
+        `${file.name}: Consider converting to WebP format for better compression and performance`,
+        { autoClose: 5000 }
+      );
+    }
+
     // Cancel any existing cover upload
     if (coverUploadController.current) {
       coverUploadController.current.abort();
@@ -164,8 +180,29 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
   const handleGalleryImageUpload = async (files: FileList) => {
     const fileArray = Array.from(files);
 
-    // Add files to pending uploads immediately for user to add titles
-    const newPendingImages: PendingGalleryImage[] = fileArray.map((file) => ({
+    // Validate each file
+    const validFiles: File[] = [];
+    for (const file of fileArray) {
+      // Validate file size (max 1MB)
+      const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large (max 1MB)`);
+        continue;
+      }
+
+      // Recommend WebP format
+      if (file.type !== "image/webp") {
+        toast.info(
+          `${file.name}: Consider converting to WebP format for better compression and performance`,
+          { autoClose: 5000 }
+        );
+      }
+
+      validFiles.push(file);
+    }
+
+    // Add valid files to pending uploads immediately for user to add titles
+    const newPendingImages: PendingGalleryImage[] = validFiles.map((file) => ({
       file,
       title: "",
       preview: URL.createObjectURL(file),
@@ -557,7 +594,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
               <div className="space-y-3">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml"
                   disabled={uploadStates.coverUploading}
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -629,7 +666,7 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
               <div className="space-y-3">
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/webp,image/jpeg,image/png,image/gif,image/svg+xml"
                   multiple
                   disabled={uploadStates.galleryUploading}
                   onChange={(e) => {
