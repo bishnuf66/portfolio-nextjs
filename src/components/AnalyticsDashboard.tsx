@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import useStore from "@/store/store";
 import {
   Users,
   Eye,
-  Globe,
   TrendingUp,
   Clock,
-  MousePointer,
-  BarChart3,
-  Activity,
+  Search,
+  Filter,
+  Download,
+  ChevronUp,
+  ChevronDown,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 
@@ -21,9 +25,24 @@ interface AnalyticsData {
   topPages: { page: string; count: number }[];
   deviceBreakdown: { device: string; count: number }[];
   avgDuration: number;
-  recentVisitors: any[];
+  recentVisitors: { [key: string]: unknown }[];
   projectViews: { project_id: string; count: number }[];
 }
+
+interface FilterState {
+  searchTerm: string;
+  selectedCountries: string[];
+  selectedDevices: string[];
+  minViews: number;
+  maxViews: number;
+  customDateRange: {
+    start: string;
+    end: string;
+  };
+}
+
+type SortField = "country" | "count" | "page" | "device";
+type SortDirection = "asc" | "desc";
 
 export default function AnalyticsDashboard() {
   const { isDarkMode } = useStore();
@@ -33,9 +52,163 @@ export default function AnalyticsDashboard() {
     "7d"
   );
 
+  // New state for enhanced filtering and sorting
+  const [filters, setFilters] = useState<FilterState>({
+    searchTerm: "",
+    selectedCountries: [],
+    selectedDevices: [],
+    minViews: 0,
+    maxViews: 0,
+    customDateRange: {
+      start: "",
+      end: "",
+    },
+  });
+
+  const [sortConfig, setSortConfig] = useState<{
+    field: SortField;
+    direction: SortDirection;
+  }>({
+    field: "count",
+    direction: "desc",
+  });
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeView, setActiveView] = useState<
+    "countries" | "pages" | "devices"
+  >("countries");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     fetchAnalytics();
   }, [timeRange]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, sortConfig, activeView]);
+
+  // Filtered and sorted data
+  const filteredData = useMemo(() => {
+    if (!analytics) return { countries: [], pages: [], devices: [] };
+
+    const filterBySearch = (
+      items: { [key: string]: any }[],
+      searchFields: string[]
+    ) => {
+      if (!filters.searchTerm) return items;
+      return items.filter((item) =>
+        searchFields.some((field) =>
+          item[field]?.toLowerCase().includes(filters.searchTerm.toLowerCase())
+        )
+      );
+    };
+
+    const filterByViews = (items: { [key: string]: any }[]) => {
+      if (filters.minViews === 0 && filters.maxViews === 0) return items;
+      return items.filter((item) => {
+        const count = item.count;
+        const minCheck = filters.minViews === 0 || count >= filters.minViews;
+        const maxCheck = filters.maxViews === 0 || count <= filters.maxViews;
+        return minCheck && maxCheck;
+      });
+    };
+
+    const sortData = (items: { [key: string]: any }[], field: string) => {
+      return [...items].sort((a, b) => {
+        let aVal = a[field];
+        let bVal = b[field];
+
+        if (typeof aVal === "string") {
+          aVal = aVal.toLowerCase();
+          bVal = bVal.toLowerCase();
+        }
+
+        if (sortConfig.direction === "asc") {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
+    };
+
+    // Ensure arrays exist with fallbacks
+    const topCountries = analytics.topCountries || [];
+    const topPages = analytics.topPages || [];
+    const deviceBreakdown = analytics.deviceBreakdown || [];
+
+    // Filter countries
+    let countries = filterBySearch(topCountries, ["country"]);
+    if (filters.selectedCountries.length > 0) {
+      countries = countries.filter((c) =>
+        filters.selectedCountries.includes(c.country)
+      );
+    }
+    countries = filterByViews(countries);
+    countries = sortData(
+      countries,
+      sortConfig.field === "country" ? "country" : "count"
+    );
+
+    // Filter pages
+    let pages = filterBySearch(topPages, ["page"]);
+    pages = filterByViews(pages);
+    pages = sortData(pages, sortConfig.field === "page" ? "page" : "count");
+
+    // Filter devices
+    let devices = filterBySearch(deviceBreakdown, ["device"]);
+    if (filters.selectedDevices.length > 0) {
+      devices = devices.filter((d) =>
+        filters.selectedDevices.includes(d.device)
+      );
+    }
+    devices = filterByViews(devices);
+    devices = sortData(
+      devices,
+      sortConfig.field === "device" ? "device" : "count"
+    );
+
+    return { countries, pages, devices };
+  }, [analytics, filters, sortConfig]);
+
+  // Get unique values for filter dropdowns
+  const filterOptions = useMemo(() => {
+    if (!analytics) return { countries: [], devices: [] };
+
+    return {
+      countries: [...new Set(analytics.topCountries.map((c) => c.country))],
+      devices: [...new Set(analytics.deviceBreakdown.map((d) => d.device))],
+    };
+  }, [analytics]);
+
+  // Pagination logic
+  const paginatedData = useMemo(() => {
+    const currentData =
+      activeView === "countries"
+        ? filteredData.countries
+        : activeView === "pages"
+        ? filteredData.pages
+        : filteredData.devices;
+
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    const totalPages = Math.ceil(currentData.length / itemsPerPage);
+    const totalCount = currentData.reduce((sum, item) => sum + item.count, 0);
+
+    return {
+      items: currentData.slice(startIdx, endIdx) as Array<{
+        country?: string;
+        page?: string;
+        device?: string;
+        count: number;
+      }>,
+      totalItems: currentData.length,
+      totalCount,
+      totalPages,
+      currentPage,
+    };
+  }, [activeView, filteredData, currentPage]);
 
   const fetchAnalytics = async () => {
     try {
@@ -68,6 +241,14 @@ export default function AnalyticsDashboard() {
 
       const data = await response.json();
       setAnalytics(data);
+
+      // Set max views for filter
+      if (data.topPages?.length > 0) {
+        const maxViews = Math.max(
+          ...data.topPages.map((p: { count: number }) => p.count)
+        );
+        setFilters((prev) => ({ ...prev, maxViews: maxViews }));
+      }
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
       // Set empty analytics data to prevent errors
@@ -84,6 +265,58 @@ export default function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSort = (field: SortField) => {
+    setSortConfig((prev) => ({
+      field,
+      direction:
+        prev.field === field && prev.direction === "desc" ? "asc" : "desc",
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      searchTerm: "",
+      selectedCountries: [],
+      selectedDevices: [],
+      minViews: 0,
+      maxViews: analytics?.topPages
+        ? Math.max(...analytics.topPages.map((p) => p.count))
+        : 0,
+      customDateRange: { start: "", end: "" },
+    });
+  };
+
+  const exportData = () => {
+    if (!analytics) return;
+
+    const data = {
+      summary: {
+        totalViews: analytics.totalViews,
+        uniqueVisitors: analytics.uniqueVisitors,
+        avgDuration: analytics.avgDuration,
+        timeRange,
+        exportDate: new Date().toISOString(),
+      },
+      countries: filteredData.countries,
+      pages: filteredData.pages,
+      devices: filteredData.devices,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `analytics-${timeRange}-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -145,84 +378,310 @@ export default function AnalyticsDashboard() {
     subtitle,
     color,
   }: {
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     title: string;
     value: string | number;
     subtitle?: string;
-    color: string;
-  }) => (
-    <BackgroundGradient className="rounded-[22px] p-1">
-      <div
-        className={`p-6 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"}`}
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <p
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
-              }`}
-            >
-              {title}
-            </p>
-            <p
-              className={`text-3xl font-bold mt-2 ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              {value}
-            </p>
-            {subtitle && (
-              <p
-                className={`text-xs mt-1 ${
-                  isDarkMode ? "text-gray-500" : "text-gray-500"
-                }`}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
-          <div className={`p-3 rounded-lg bg-${color}-500/10`}>
-            <Icon className={`w-6 h-6 text-${color}-500`} />
-          </div>
-        </div>
-      </div>
-    </BackgroundGradient>
-  );
+    color: "blue" | "purple" | "green" | "pink";
+  }) => {
+    const colorBgMap = {
+      blue: "bg-blue-500/10",
+      purple: "bg-purple-500/10",
+      green: "bg-green-500/10",
+      pink: "bg-pink-500/10",
+    };
+    const colorTextMap = {
+      blue: "text-blue-500",
+      purple: "text-purple-500",
+      green: "text-green-500",
+      pink: "text-pink-500",
+    };
 
-  return (
-    <div className="space-y-8">
-      {/* Time Range Selector */}
-      <div className="flex justify-between items-center">
-        <h2
-          className={`text-3xl font-bold ${
-            isDarkMode ? "text-white" : "text-gray-900"
+    return (
+      <BackgroundGradient className="rounded-[22px] p-1">
+        <div
+          className={`p-6 rounded-[20px] ${
+            isDarkMode ? "bg-black" : "bg-white"
           }`}
         >
-          Analytics Overview
-        </h2>
-        <div className="flex gap-2">
-          {(["24h", "7d", "30d", "all"] as const).map((range) => (
+          <div className="flex items-start justify-between">
+            <div>
+              <p
+                className={`text-sm font-medium ${
+                  isDarkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {title}
+              </p>
+              <p
+                className={`text-3xl font-bold mt-2 ${
+                  isDarkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                {value}
+              </p>
+              {subtitle && (
+                <p
+                  className={`text-xs mt-1 ${
+                    isDarkMode ? "text-gray-500" : "text-gray-500"
+                  }`}
+                >
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            <div className={`p-3 rounded-lg ${colorBgMap[color]}`}>
+              <Icon className={`w-6 h-6 ${colorTextMap[color]}`} />
+            </div>
+          </div>
+        </div>
+      </BackgroundGradient>
+    );
+  };
+  return (
+    <div className="space-y-8">
+      {/* Enhanced Header with Search and Filters */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2
+            className={`text-3xl font-bold ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Analytics Overview
+          </h2>
+          <div className="flex gap-2">
+            {(["24h", "7d", "30d", "all"] as const).map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  timeRange === range
+                    ? "bg-blue-500 text-white"
+                    : isDarkMode
+                    ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {range === "24h"
+                  ? "24 Hours"
+                  : range === "7d"
+                  ? "7 Days"
+                  : range === "30d"
+                  ? "30 Days"
+                  : "All Time"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Search and Filter Controls */}
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Search Bar */}
+          <div className="relative flex-1 min-w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search countries, pages, or devices..."
+              value={filters.searchTerm}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))
+              }
+              className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
+                isDarkMode
+                  ? "bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            />
+          </div>
+
+          {/* Filter Toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+              showFilters
+                ? "bg-blue-500 text-white border-blue-500"
+                : isDarkMode
+                ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <Filter className="w-4 h-4" />
+            Filters
+          </button>
+
+          {/* Export Button */}
+          <button
+            onClick={exportData}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+              isDarkMode
+                ? "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+
+          {/* Clear Filters */}
+          {(filters.searchTerm ||
+            filters.selectedCountries.length > 0 ||
+            filters.selectedDevices.length > 0 ||
+            filters.minViews > 0) && (
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                timeRange === range
-                  ? "bg-blue-500 text-white"
-                  : isDarkMode
-                  ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              onClick={clearFilters}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Advanced Filters Panel */}
+        {showFilters && (
+          <BackgroundGradient className="rounded-[22px] p-1">
+            <div
+              className={`p-6 rounded-[20px] ${
+                isDarkMode ? "bg-black" : "bg-white"
               }`}
             >
-              {range === "24h"
-                ? "24 Hours"
-                : range === "7d"
-                ? "7 Days"
-                : range === "30d"
-                ? "30 Days"
-                : "All Time"}
-            </button>
-          ))}
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Country Filter */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Countries
+                  </label>
+                  <select
+                    multiple
+                    value={filters.selectedCountries}
+                    onChange={(e) => {
+                      const values = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      );
+                      setFilters((prev) => ({
+                        ...prev,
+                        selectedCountries: values,
+                      }));
+                    }}
+                    className={`w-full p-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    } focus:ring-2 focus:ring-blue-500`}
+                    size={3}
+                  >
+                    {filterOptions.countries.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Device Filter */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Devices
+                  </label>
+                  <select
+                    multiple
+                    value={filters.selectedDevices}
+                    onChange={(e) => {
+                      const values = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value
+                      );
+                      setFilters((prev) => ({
+                        ...prev,
+                        selectedDevices: values,
+                      }));
+                    }}
+                    className={`w-full p-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    } focus:ring-2 focus:ring-blue-500`}
+                    size={3}
+                  >
+                    {filterOptions.devices.map((device) => (
+                      <option
+                        key={device}
+                        value={device}
+                        className="capitalize"
+                      >
+                        {device}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Min Views Filter */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Min Views
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.minViews}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        minViews: parseInt(e.target.value) || 0,
+                      }))
+                    }
+                    className={`w-full p-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    } focus:ring-2 focus:ring-blue-500`}
+                  />
+                </div>
+
+                {/* Max Views Filter */}
+                <div>
+                  <label
+                    className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
+                    Max Views
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.maxViews}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        maxViews: parseInt(e.target.value) || 0,
+                      }))
+                    }
+                    className={`w-full p-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-gray-800 border-gray-700 text-white"
+                        : "bg-white border-gray-300 text-gray-900"
+                    } focus:ring-2 focus:ring-blue-500`}
+                  />
+                </div>
+              </div>
+            </div>
+          </BackgroundGradient>
+        )}
       </div>
 
       {/* Stats Grid */}
@@ -261,192 +720,264 @@ export default function AnalyticsDashboard() {
         />
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Countries */}
-        <BackgroundGradient className="rounded-[22px] p-1">
-          <div
-            className={`p-6 rounded-[20px] ${
-              isDarkMode ? "bg-black" : "bg-white"
+      {/* Data View Tabs */}
+      <div
+        className="flex gap-4 border-b"
+        style={{ borderColor: isDarkMode ? "#374151" : "#e5e7eb" }}
+      >
+        {(["countries", "pages", "devices"] as const).map((view) => (
+          <button
+            key={view}
+            onClick={() => {
+              setActiveView(view);
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2 font-medium text-sm transition-colors capitalize ${
+              activeView === view
+                ? "text-blue-500 border-b-2 border-blue-500"
+                : isDarkMode
+                ? "text-gray-400 hover:text-gray-300"
+                : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <Globe className="w-6 h-6 text-blue-500" />
-              <h3
-                className={`text-xl font-bold ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Top Countries
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {(analytics.topCountries || [])
-                .slice(0, 5)
-                .map((country, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span
-                        className={`font-medium ${
-                          isDarkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
-                      >
-                        {country.country || "Unknown"}
-                      </span>
-                      <span
-                        className={`text-sm ${
-                          isDarkMode ? "text-gray-400" : "text-gray-600"
-                        }`}
-                      >
-                        {country.count} views
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${
-                            analytics.topCountries && analytics.topCountries[0]
-                              ? (country.count /
-                                  analytics.topCountries[0].count) *
-                                100
-                              : 0
-                          }%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </BackgroundGradient>
-
-        {/* Device Breakdown */}
-        <BackgroundGradient className="rounded-[22px] p-1">
-          <div
-            className={`p-6 rounded-[20px] ${
-              isDarkMode ? "bg-black" : "bg-white"
-            }`}
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <MousePointer className="w-6 h-6 text-purple-500" />
-              <h3
-                className={`text-xl font-bold ${
-                  isDarkMode ? "text-white" : "text-gray-900"
-                }`}
-              >
-                Device Types
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {(analytics.deviceBreakdown || []).map((device, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span
-                      className={`font-medium capitalize ${
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
-                      }`}
-                    >
-                      {device.device}
-                    </span>
-                    <span
-                      className={`text-sm ${
-                        isDarkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {device.count} visits
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-purple-500 h-2 rounded-full transition-all duration-500"
-                      style={{
-                        width: `${
-                          analytics.deviceBreakdown &&
-                          analytics.deviceBreakdown[0]
-                            ? (device.count /
-                                analytics.deviceBreakdown[0].count) *
-                              100
-                            : 0
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </BackgroundGradient>
+            {view === "countries"
+              ? "Top Countries"
+              : view === "pages"
+              ? "Top Pages"
+              : "Devices"}
+          </button>
+        ))}
       </div>
 
-      {/* Top Pages */}
+      {/* Data Table */}
       <BackgroundGradient className="rounded-[22px] p-1">
         <div
-          className={`p-6 rounded-[20px] ${
+          className={`rounded-[20px] overflow-hidden ${
             isDarkMode ? "bg-black" : "bg-white"
           }`}
         >
-          <div className="flex items-center gap-3 mb-6">
-            <BarChart3 className="w-6 h-6 text-green-500" />
-            <h3
-              className={`text-xl font-bold ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Most Visited Pages
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr
-                  className={`border-b ${
+          {paginatedData.totalItems === 0 ? (
+            <div className="p-8 text-center">
+              <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
+                No data available for the current filters
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr
+                      className={`border-b ${
+                        isDarkMode
+                          ? "border-gray-800 bg-gray-900"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
+                    >
+                      <th className="px-6 py-3 text-left">
+                        <button
+                          onClick={() =>
+                            handleSort(
+                              activeView === "countries"
+                                ? "country"
+                                : activeView === "pages"
+                                ? "page"
+                                : "device"
+                            )
+                          }
+                          className="flex items-center gap-1 font-semibold text-sm hover:text-blue-500 transition-colors"
+                        >
+                          {activeView === "countries"
+                            ? "Country"
+                            : activeView === "pages"
+                            ? "Page"
+                            : "Device"}
+                          {sortConfig.field ===
+                            (activeView === "countries"
+                              ? "country"
+                              : activeView === "pages"
+                              ? "page"
+                              : "device") &&
+                            (sortConfig.direction === "asc" ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-right">
+                        <button
+                          onClick={() => handleSort("count")}
+                          className="flex items-center justify-end gap-1 font-semibold text-sm hover:text-blue-500 transition-colors w-full"
+                        >
+                          Views
+                          {sortConfig.field === "count" &&
+                            (sortConfig.direction === "asc" ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-right font-semibold text-sm">
+                        Percentage
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedData.items.map(
+                      (
+                        item: {
+                          country?: string;
+                          page?: string;
+                          device?: string;
+                          count: number;
+                        },
+                        index: number
+                      ) => {
+                        const percentage = (
+                          (item.count / paginatedData.totalCount) *
+                          100
+                        ).toFixed(1);
+                        return (
+                          <tr
+                            key={index}
+                            className={`border-b ${
+                              isDarkMode
+                                ? "border-gray-800 hover:bg-gray-900"
+                                : "border-gray-200 hover:bg-gray-50"
+                            } transition-colors`}
+                          >
+                            <td
+                              className={`px-6 py-4 font-medium ${
+                                isDarkMode ? "text-white" : "text-gray-900"
+                              }`}
+                            >
+                              {item.country || item.page || item.device}
+                            </td>
+                            <td
+                              className={`px-6 py-4 text-right font-semibold ${
+                                isDarkMode ? "text-blue-400" : "text-blue-600"
+                              }`}
+                            >
+                              {item.count.toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <div className="w-24 bg-gray-300 rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className="bg-blue-500 h-full rounded-full transition-all"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+                                <span
+                                  className={`text-sm font-medium w-12 text-right ${
+                                    isDarkMode
+                                      ? "text-gray-400"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  {percentage}%
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              {paginatedData.totalPages > 1 && (
+                <div
+                  className={`flex items-center justify-between px-6 py-4 border-t ${
                     isDarkMode ? "border-gray-800" : "border-gray-200"
                   }`}
                 >
-                  <th
-                    className={`text-left py-3 px-4 font-semibold ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                  <div
+                    className={`text-sm ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
                     }`}
                   >
-                    Page
-                  </th>
-                  <th
-                    className={`text-right py-3 px-4 font-semibold ${
-                      isDarkMode ? "text-gray-300" : "text-gray-700"
-                    }`}
-                  >
-                    Views
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {(analytics.topPages || []).map((page, index) => (
-                  <tr
-                    key={index}
-                    className={`border-b ${
-                      isDarkMode ? "border-gray-800" : "border-gray-200"
-                    }`}
-                  >
-                    <td
-                      className={`py-3 px-4 ${
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                    {Math.min(
+                      currentPage * itemsPerPage,
+                      paginatedData.totalItems
+                    )}{" "}
+                    of {paginatedData.totalItems} items
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg transition-all ${
+                        currentPage === 1
+                          ? isDarkMode
+                            ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : isDarkMode
+                          ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
                     >
-                      {page.page}
-                    </td>
-                    <td
-                      className={`py-3 px-4 text-right font-semibold ${
-                        isDarkMode ? "text-white" : "text-gray-900"
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex gap-1">
+                      {Array.from(
+                        { length: paginatedData.totalPages },
+                        (_, i) => i + 1
+                      )
+                        .slice(
+                          Math.max(0, currentPage - 2),
+                          Math.min(paginatedData.totalPages, currentPage + 1)
+                        )
+                        .map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                              currentPage === page
+                                ? "bg-blue-500 text-white"
+                                : isDarkMode
+                                ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(prev + 1, paginatedData.totalPages)
+                        )
+                      }
+                      disabled={currentPage === paginatedData.totalPages}
+                      className={`p-2 rounded-lg transition-all ${
+                        currentPage === paginatedData.totalPages
+                          ? isDarkMode
+                            ? "bg-gray-800 text-gray-600 cursor-not-allowed"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          : isDarkMode
+                          ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       }`}
                     >
-                      {page.count}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </BackgroundGradient>
     </div>

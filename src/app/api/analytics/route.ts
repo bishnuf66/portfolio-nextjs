@@ -11,12 +11,25 @@ interface AnalyticsData {
     duration?: number;
     duration_seconds?: number;
     created_at: string;
-    // Add other fields from your analytics table as needed
 }
 
 interface ProjectView {
     project_id: string;
     viewed_at: string;
+}
+
+interface FilterParams {
+    range: "24h" | "7d" | "30d" | "all";
+    view: "countries" | "pages" | "devices";
+    searchTerm?: string;
+    selectedCountries?: string[];
+    selectedDevices?: string[];
+    minViews?: number;
+    maxViews?: number;
+    sortField?: "country" | "page" | "device" | "count";
+    sortDirection?: "asc" | "desc";
+    page?: number;
+    limit?: number;
 }
 
 export async function GET(request: Request) {
