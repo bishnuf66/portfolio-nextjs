@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Star, Edit2, Trash2, Search, SortAsc, SortDesc, Filter, X, RefreshCw, Grid, List } from "lucide-react";
+import {
+  Star,
+  Edit2,
+  Trash2,
+  Search,
+  SortAsc,
+  SortDesc,
+  Filter,
+  X,
+  RefreshCw,
+  Grid,
+  List,
+} from "lucide-react";
 import { Project } from "@/lib/supabase";
 import Pagination from "@/components/ui/Pagination";
 import { useProjectsFiltered } from "@/hooks/useProjects";
@@ -11,7 +23,12 @@ interface ProjectListProps {
   handleDelete: (id: string) => void;
 }
 
-type SortField = "name" | "created_at" | "category" | "is_featured" | "updated_at";
+type SortField =
+  | "name"
+  | "created_at"
+  | "category"
+  | "is_featured"
+  | "updated_at";
 type SortOrder = "asc" | "desc";
 type ViewMode = "grid" | "list";
 
@@ -24,8 +41,12 @@ const ProjectList: React.FC<ProjectListProps> = ({
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "professional" | "personal">("all");
-  const [featuredFilter, setFeaturedFilter] = useState<"all" | "featured" | "not-featured">("all");
+  const [categoryFilter, setCategoryFilter] = useState<
+    "all" | "professional" | "personal"
+  >("all");
+  const [featuredFilter, setFeaturedFilter] = useState<
+    "all" | "featured" | "not-featured"
+  >("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -41,9 +62,19 @@ const ProjectList: React.FC<ProjectListProps> = ({
   }, [searchTerm]);
 
   // Use backend filtering instead of frontend filtering
-  const featuredParam = featuredFilter === "featured" ? true : featuredFilter === "not-featured" ? false : undefined;
+  const featuredParam =
+    featuredFilter === "featured"
+      ? true
+      : featuredFilter === "not-featured"
+      ? false
+      : undefined;
 
-  const { data: projectsResponse, isLoading: loading, error, refetch } = useProjectsFiltered({
+  const {
+    data: projectsResponse,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useProjectsFiltered({
     category: categoryFilter,
     search: debouncedSearchTerm || undefined,
     sortBy: sortField,
@@ -56,7 +87,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   // Handle both array and object response formats
   const projects = Array.isArray(projectsResponse)
     ? projectsResponse
-    : (projectsResponse?.data || []);
+    : projectsResponse?.data || [];
   const pagination = Array.isArray(projectsResponse)
     ? null
     : projectsResponse?.pagination;
@@ -105,27 +136,40 @@ const ProjectList: React.FC<ProjectListProps> = ({
     refetch();
   }, [refetch]);
 
-  const hasActiveFilters = searchTerm || categoryFilter !== "all" || featuredFilter !== "all" || sortField !== "created_at" || sortOrder !== "desc";
+  const hasActiveFilters =
+    searchTerm ||
+    categoryFilter !== "all" ||
+    featuredFilter !== "all" ||
+    sortField !== "created_at" ||
+    sortOrder !== "desc";
 
   return (
     <div>
       {/* Search and Filter Controls */}
-      <div className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg mb-6`}>
+      <div
+        className={`${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        } rounded-lg p-6 shadow-lg mb-6`}
+      >
         {/* Top Row - Search, View Mode, Refresh */}
         <div className="flex flex-col lg:flex-row gap-4 mb-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Search projects by name, description, tech stack, or slug..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg ${isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                  : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
               />
               {searchTerm && (
                 <button
@@ -142,20 +186,30 @@ const ProjectList: React.FC<ProjectListProps> = ({
           <div className="flex border rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("list")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${viewMode === "list"
-                ? "bg-blue-500 text-white"
-                : `${isDarkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`
-                }`}
+              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
+                viewMode === "list"
+                  ? "bg-blue-500 text-white"
+                  : `${
+                      isDarkMode
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`
+              }`}
             >
               <List size={16} />
               List
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${viewMode === "grid"
-                ? "bg-blue-500 text-white"
-                : `${isDarkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`
-                }`}
+              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
+                viewMode === "grid"
+                  ? "bg-blue-500 text-white"
+                  : `${
+                      isDarkMode
+                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`
+              }`}
             >
               <Grid size={16} />
               Grid
@@ -166,10 +220,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className={`px-4 py-2 flex items-center gap-2 border rounded-lg transition-colors ${isDarkMode
-              ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`px-4 py-2 flex items-center gap-2 border rounded-lg transition-colors ${
+              isDarkMode
+                ? "border-gray-600 text-gray-300 hover:bg-gray-700"
+                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             Refresh
@@ -185,11 +240,14 @@ const ProjectList: React.FC<ProjectListProps> = ({
             </label>
             <select
               value={categoryFilter}
-              onChange={(e) => handleCategoryChange(e.target.value as "all" | "professional" | "personal")}
-              className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+              onChange={(e) =>
+                handleCategoryChange(
+                  e.target.value as "all" | "professional" | "personal"
+                )
+              }
+              className={`${getInputClasses(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
+              )}`}
             >
               <option value="all">All Categories</option>
               <option value="professional">Professional</option>
@@ -204,11 +262,14 @@ const ProjectList: React.FC<ProjectListProps> = ({
             </label>
             <select
               value={featuredFilter}
-              onChange={(e) => handleFeaturedChange(e.target.value as "all" | "featured" | "not-featured")}
-              className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+              onChange={(e) =>
+                handleFeaturedChange(
+                  e.target.value as "all" | "featured" | "not-featured"
+                )
+              }
+              className={`${getInputClasses(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
+              )}`}
             >
               <option value="all">All Projects</option>
               <option value="featured">Featured Only</option>
@@ -224,10 +285,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <select
               value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className={`w-full px-3 py-2 border rounded-lg ${isDarkMode
-                ? "bg-gray-700 border-gray-600 text-white"
-                : "bg-white border-gray-300 text-gray-900"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+              className={`${getInputClasses(
+                "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-text"
+              )}`}
             >
               <option value={5}>5 per page</option>
               <option value={10}>10 per page</option>
@@ -266,15 +326,19 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <button
               key={field}
               onClick={() => handleSort(field)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${sortField === field
-                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                }`}
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                sortField === field
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+              }`}
             >
               {label}
-              {sortField === field && (
-                sortOrder === "asc" ? <SortAsc size={14} /> : <SortDesc size={14} />
-              )}
+              {sortField === field &&
+                (sortOrder === "asc" ? (
+                  <SortAsc size={14} />
+                ) : (
+                  <SortDesc size={14} />
+                ))}
             </button>
           ))}
         </div>
@@ -301,11 +365,19 @@ const ProjectList: React.FC<ProjectListProps> = ({
 
       {/* Projects Display */}
       {loading ? (
-        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "grid gap-6"}>
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "grid gap-6"
+          }
+        >
           {Array.from({ length: itemsPerPage }).map((_, i) => (
             <div
               key={i}
-              className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg animate-pulse`}
+              className={`${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              } rounded-lg p-6 shadow-lg animate-pulse`}
             >
               {viewMode === "grid" ? (
                 <div className="space-y-4">
@@ -328,8 +400,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
         </div>
       ) : error ? (
         <div className="text-center py-12">
-          <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>⚠️</div>
-          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-4`}>
+          <div
+            className={`text-6xl mb-4 ${
+              isDarkMode ? "text-gray-700" : "text-gray-300"
+            }`}
+          >
+            ⚠️
+          </div>
+          <p
+            className={`text-xl ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            } mb-4`}
+          >
             Failed to load projects. Please try again.
           </p>
           <button
@@ -344,15 +426,17 @@ const ProjectList: React.FC<ProjectListProps> = ({
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow ${project.is_featured ? "ring-2 ring-yellow-500" : ""
-                }`}
+              className={`${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow ${
+                project.is_featured ? "ring-2 ring-yellow-500" : ""
+              }`}
             >
               <div className="relative mb-4">
                 <Image
                   src={
                     project.cover_image_url &&
-                      project.cover_image_url.trim() !== ""
+                    project.cover_image_url.trim() !== ""
                       ? project.cover_image_url
                       : "/project-images/placeholder.png"
                   }
@@ -391,10 +475,13 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${project.category === "professional"
-                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                    : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    }`}>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      project.category === "professional"
+                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    }`}
+                  >
                     {project.category}
                   </span>
                   {project.is_featured && (
@@ -405,14 +492,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-1">
-                  {project.tech_stack.slice(0, 3).map((tech: string, index: number) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+                  {project.tech_stack
+                    .slice(0, 3)
+                    .map((tech: string, index: number) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
+                      >
+                        {tech}
+                      </span>
+                    ))}
                   {project.tech_stack.length > 3 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded text-xs">
                       +{project.tech_stack.length - 3} more
@@ -442,16 +531,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-                } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow ${project.is_featured ? "ring-2 ring-yellow-500" : ""
-                }`}
+              className={`${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow ${
+                project.is_featured ? "ring-2 ring-yellow-500" : ""
+              }`}
             >
               <div className="flex gap-6">
                 <div className="relative flex-shrink-0">
                   <Image
                     src={
                       project.cover_image_url &&
-                        project.cover_image_url.trim() !== ""
+                      project.cover_image_url.trim() !== ""
                         ? project.cover_image_url
                         : "/project-images/placeholder.png"
                     }
@@ -471,16 +562,21 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="text-xl font-bold truncate">{project.name}</h3>
+                        <h3 className="text-xl font-bold truncate">
+                          {project.name}
+                        </h3>
                         {project.is_featured && (
                           <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-semibold">
                             FEATURED
                           </span>
                         )}
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${project.category === "professional"
-                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                          : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          }`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            project.category === "professional"
+                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          }`}
+                        >
                           {project.category}
                         </span>
                       </div>
@@ -491,14 +587,16 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         }}
                       />
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {project.tech_stack.map((tech: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                        {project.tech_stack.map(
+                          (tech: string, index: number) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"
+                            >
+                              {tech}
+                            </span>
+                          )
+                        )}
                       </div>
                       <div className="flex gap-4 text-sm flex-wrap">
                         <a
@@ -513,7 +611,10 @@ const ProjectList: React.FC<ProjectListProps> = ({
                           Slug: {project.slug || "N/A"}
                         </span>
                         <span className="text-gray-400">
-                          Created: {new Date(project.created_at || "").toLocaleDateString()}
+                          Created:{" "}
+                          {new Date(
+                            project.created_at || ""
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -545,19 +646,20 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {projects.length === 0 && !loading && !error ? (
         <div className="text-center py-12">
           <div
-            className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"
-              }`}
+            className={`text-6xl mb-4 ${
+              isDarkMode ? "text-gray-700" : "text-gray-300"
+            }`}
           >
             {hasActiveFilters ? "🔍" : "📁"}
           </div>
           <p
-            className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"
-              } mb-4`}
+            className={`text-xl ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            } mb-4`}
           >
             {hasActiveFilters
               ? "No projects match your search criteria."
-              : "No projects found. Create your first project!"
-            }
+              : "No projects found. Create your first project!"}
           </p>
           {hasActiveFilters && (
             <button

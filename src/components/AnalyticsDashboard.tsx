@@ -612,11 +612,9 @@ export default function AnalyticsDashboard() {
                         selectedCountries: values,
                       }));
                     }}
-                    className={`w-full p-2 rounded-lg border ${
-                      isDarkMode
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    } focus:ring-2 focus:ring-blue-500`}
+                    className={`${getInputClasses(
+                      "w-full p-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                    )}`}
                     size={3}
                   >
                     {filterOptions.countries.map((country) => (
@@ -649,11 +647,9 @@ export default function AnalyticsDashboard() {
                         selectedDevices: values,
                       }));
                     }}
-                    className={`w-full p-2 rounded-lg border ${
-                      isDarkMode
-                        ? "bg-gray-800 border-gray-700 text-white"
-                        : "bg-white border-gray-300 text-gray-900"
-                    } focus:ring-2 focus:ring-blue-500`}
+                    className={`${getInputClasses(
+                      "w-full p-2 rounded-lg border focus:ring-2 focus:ring-blue-500"
+                    )}`}
                     size={3}
                   >
                     {filterOptions.devices.map((device) => (
