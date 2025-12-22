@@ -12,8 +12,8 @@ import {
   SortDesc,
   Filter,
   X,
-  Tag,
 } from "lucide-react";
+import { Tag } from "@/components/ui/Tag";
 import {
   AnimatedSection,
   StaggeredContainer,
@@ -152,7 +152,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
         <AnimatedSection animation="fadeIn" className="text-center mb-16">
           <div className="flex items-center justify-center gap-3 mb-4">
             <BookOpen size={40} className="text-purple-500" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
               Blog
             </h1>
           </div>
@@ -332,7 +332,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"></div>
                     </div>
                   )}
                   <div className="p-6">
@@ -378,17 +378,9 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                     {blog.tags && blog.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {blog.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
-                              isDarkMode
-                                ? "bg-purple-900/50 text-purple-200"
-                                : "bg-purple-100 text-purple-800"
-                            }`}
-                          >
-                            <Tag size={10} />
+                          <Tag key={index} variant="blog" size="sm">
                             {tag}
-                          </span>
+                          </Tag>
                         ))}
                         {blog.tags.length > 3 && (
                           <span

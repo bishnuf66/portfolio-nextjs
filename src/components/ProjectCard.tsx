@@ -5,6 +5,7 @@ import useStore from "@/store/store";
 import Link from "next/link";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
+import { Tag } from "@/components/ui/Tag";
 import { ExternalLink, Code, Star } from "lucide-react";
 import Image from "next/image";
 import { getSafeImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
@@ -113,16 +114,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <CardItem translateZ="50" className="w-full mt-4">
           <div className="min-h-16 h-16 flex flex-wrap gap-2 overflow-hidden relative">
             {techStack.split(",").map((tech: string, index: number) => (
-              <span
-                key={index}
-                className={`px-3 py-1 rounded-full text-xs font-medium h-fit ${
-                  isDarkMode
-                    ? "bg-linear-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
-                    : "bg-linear-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
-                }`}
-              >
+              <Tag key={index} variant="blog" size="sm">
                 {tech.trim()}
-              </span>
+              </Tag>
             ))}
             {/* Fade out effect for overflow */}
             <div

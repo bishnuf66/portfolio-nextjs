@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import { Select } from "@/components/ui/Select";
+import { Tag } from "@/components/ui/Tag";
 import { getInputClasses } from "@/utils/colorUtils";
 
 type SortField = "title" | "created_at" | "updated_at" | "published" | "author";
@@ -139,7 +140,8 @@ export default function BlogManager() {
   const handleDelete = async (id: string) => {
     const ok = await confirm({
       title: "Delete blog post",
-      message: "Are you sure you want to delete this blog post? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this blog post? This action cannot be undone.",
       confirmText: "Delete",
       confirmVariant: "danger",
     });
@@ -303,7 +305,9 @@ export default function BlogManager() {
             <Select
               value={itemsPerPage.toString()}
               onChange={(e) =>
-                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+                handleItemsPerPageChange(
+                  Number((e.target as HTMLSelectElement).value)
+                )
               }
               options={[
                 { value: "5", label: "5 per page" },
@@ -440,13 +444,13 @@ export default function BlogManager() {
             >
               {viewMode === "grid" ? (
                 <div className="space-y-4">
-                  <div className="w-full h-48 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                  <div className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700"></div>
                   <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
                   <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
                 </div>
               ) : (
                 <div className="flex gap-6">
-                  <div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-lg flex-shrink-0"></div>
+                  <div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-lg shrink-0"></div>
                   <div className="flex-1 space-y-2">
                     <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
                     <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
@@ -475,7 +479,7 @@ export default function BlogManager() {
           </p>
           <button
             onClick={handleRefresh}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
           >
             Retry
           </button>
@@ -541,12 +545,9 @@ export default function BlogManager() {
 
                 <div className="flex flex-wrap gap-1">
                   {blog.tags.slice(0, 3).map((tag: string, index: number) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
-                    >
+                    <Tag key={index} variant="blog" size="sm">
                       {tag}
-                    </span>
+                    </Tag>
                   ))}
                   {blog.tags.length > 3 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded text-xs">
@@ -605,12 +606,9 @@ export default function BlogManager() {
                       </p>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {blog.tags.map((tag: string, index: number) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
-                          >
+                          <Tag key={index} variant="blog" size="sm">
                             {tag}
-                          </span>
+                          </Tag>
                         ))}
                       </div>
                       <div className="text-sm text-gray-500">
@@ -672,7 +670,7 @@ export default function BlogManager() {
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
             >
               Clear All Filters
             </button>

@@ -1,7 +1,34 @@
 import { getSupabase } from "./supabase";
 
 // Batch analytics data
-let analyticsQueue: any[] = [];
+interface AnalyticsData {
+    session_id?: string;
+    visitor_id?: string;
+    source?: string;
+    interaction_type?: string;
+    metadata?: Record<string, unknown>;
+    page_path?: string;
+    page_title?: string;
+    referrer?: string;
+    device_type?: string;
+    browser?: string;
+    os?: string;
+    user_agent?: string;
+    screen_width?: number;
+    screen_height?: number;
+    viewport_width?: number;
+    viewport_height?: number;
+    language?: string;
+    timezone?: string;
+    country?: string;
+    city?: string;
+    region?: string;
+    latitude?: number;
+    longitude?: number;
+    ip_address?: string;
+}
+
+let analyticsQueue: AnalyticsData[] = [];
 let batchTimeout: NodeJS.Timeout | null = null;
 
 const BATCH_SIZE = 10;
@@ -20,7 +47,14 @@ const flushAnalytics = async () => {
             .insert(batch);
 
         if (error) {
-            console.error("Analytics batch insert failed:", error);
+            // Silently fail if table doesn't exist yet
+            if (
+                !error.message?.includes("relation") &&
+                !error.message?.includes("does not exist") &&
+                !error.code?.includes("PGRST116")
+            ) {
+                console.error("Analytics batch insert failed:", error);
+            }
             // Re-queue failed items
             analyticsQueue.unshift(...batch);
         }
@@ -32,7 +66,7 @@ const flushAnalytics = async () => {
 };
 
 // Queue analytics data
-const queueAnalytics = (data: any) => {
+const queueAnalytics = (data: AnalyticsData) => {
     analyticsQueue.push(data);
 
     // Flush immediately if batch is full
@@ -183,7 +217,7 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
             ...locationInfo,
         };
 
-        const { data, error } = await getSupabase().from("analytics").insert(
+        const { error } = await getSupabase().from("analytics").insert(
             analyticsData,
         );
 
@@ -231,7 +265,7 @@ export const trackProjectView = async (projectId: string) => {
         if (error) {
             // Silently fail if table doesn't exist
         }
-    } catch (error) {
+    } catch {
         // Silently fail
     }
 };
@@ -244,7 +278,7 @@ const THROTTLE_DURATION = 5000; // 5 seconds
 export const trackSectionInteraction = async (
     sectionName: string,
     interactionType: "view" | "click" | "scroll",
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
 ) => {
     // Check consent before tracking
     if (typeof window !== "undefined") {
@@ -289,8 +323,55 @@ export const trackSectionInteraction = async (
         if (error) {
             // Silently fail if table doesn't exist
         }
-    } catch (error) {
+    } catch {
         // Silently fail
+    }
+};
+
+// Track project interaction (clicks, views, etc.)
+export const trackProjectInteraction = async (
+    source: string,
+    interactionType: "click" | "view" | "hover",
+    metadata: {
+        projectId: string;
+        projectName: string;
+        action: string;
+        [key: string]: unknown;
+    },
+) => {
+    // Check consent before tracking
+    if (typeof window !== "undefined") {
+        const cookieConsent = localStorage.getItem("cookie-consent");
+        if (cookieConsent !== "accepted") {
+            return; // Don't track if cookies not accepted
+        }
+    }
+
+    // Don't track interactions on dashboard pages
+    if (
+        typeof window !== "undefined" &&
+        window.location.pathname.startsWith("/dashboard")
+    ) {
+        return;
+    }
+
+    try {
+        const sessionId = getSessionId();
+        const visitorId = getVisitorId();
+        const deviceInfo = getDeviceInfo();
+
+        const analyticsData = {
+            session_id: sessionId,
+            visitor_id: visitorId,
+            source,
+            interaction_type: interactionType,
+            metadata,
+            ...deviceInfo,
+        };
+
+        queueAnalytics(analyticsData);
+    } catch (error) {
+        console.error("Project interaction tracking error:", error);
     }
 };
 

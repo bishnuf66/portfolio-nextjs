@@ -7,11 +7,12 @@ import { Tabs } from "@/components/ui/AnimatedTabs";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { MovingBorder } from "@/components/ui/MovingBorder";
 import { Button } from "@/components/ui/Button";
+import { Tag } from "@/components/ui/Tag";
 import {
   ArrowLeft,
   ExternalLink,
   Calendar,
-  Tag,
+  Tag as TagIcon,
   Code2,
   Sparkles,
 } from "lucide-react";
@@ -39,6 +40,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [slug, setSlug] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const getParams = async () => {
@@ -75,6 +81,19 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       fetchProject();
     }
   }, [slug]);
+
+  if (!mounted) {
+    return (
+      <div className={getPageClasses()}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -204,7 +223,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             <BackgroundGradient className="rounded-[22px] p-1">
               <div
                 className={`p-6 rounded-[20px] ${
-                  isDarkMode ? "bg-black" : "bg-white"
+                  isDarkMode ? "bg-gray-900" : "bg-white"
                 }`}
               >
                 <div className="flex items-center gap-3 mb-3">
@@ -229,11 +248,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             <BackgroundGradient className="rounded-[22px] p-1">
               <div
                 className={`p-6 rounded-[20px] ${
-                  isDarkMode ? "bg-black" : "bg-white"
+                  isDarkMode ? "bg-gray-900" : "bg-white"
                 }`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <Tag className="w-5 h-5 text-purple-500" />
+                  <TagIcon className="w-5 h-5 text-purple-500" />
                   <h4
                     className={`font-semibold ${
                       isDarkMode ? "text-white" : "text-gray-900"
@@ -425,14 +444,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               staggerDelay={0.1}
             >
               {project.tech_stack.map((tech, index) => (
-                <span
-                  key={index}
-                  className={`px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border ${
-                    isDarkMode ? "border-blue-500/30" : "border-blue-400/50"
-                  }`}
-                >
+                <Tag key={index} variant="blog" size="md">
                   {tech}
-                </span>
+                </Tag>
               ))}
             </StaggeredContainer>
           </div>
@@ -475,21 +489,15 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 project
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Link
-                  href="/#projects"
-                  className="px-6 py-3 rounded-full font-semibold transition-all bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  View All Projects
+                <Link href="/#projects">
+                  <Button variant="primary" size="md">
+                    View All Projects
+                  </Button>
                 </Link>
-                <Link
-                  href="/#contact"
-                  className={`px-6 py-3 rounded-full font-semibold border-2 transition-all ${
-                    isDarkMode
-                      ? "border-gray-700 text-white hover:bg-gray-800"
-                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  Contact Me
+                <Link href="/#contact">
+                  <Button variant="outline" size="md">
+                    Contact Me
+                  </Button>
                 </Link>
               </div>
             </div>

@@ -17,7 +17,7 @@ import { Project } from "@/lib/supabase";
 import Pagination from "@/components/ui/Pagination";
 import { useProjectsFiltered } from "@/hooks/useProjects";
 import { Select } from "@/components/ui/Select";
-import { getInputClasses } from "@/utils/colorUtils";
+import { Tag } from "@/components/ui/Tag";
 
 interface ProjectListProps {
   isDarkMode: boolean;
@@ -289,7 +289,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <Select
               value={itemsPerPage.toString()}
               onChange={(e) =>
-                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+                handleItemsPerPageChange(
+                  Number((e.target as HTMLSelectElement).value)
+                )
               }
               options={[
                 { value: "5", label: "5 per page" },
@@ -391,7 +393,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </div>
               ) : (
                 <div className="flex gap-6">
-                  <div className="w-24 h-24 bg-gray-300 dark:bg-gray-600 rounded-lg flex-shrink-0"></div>
+                  <div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-lg shrink-0"></div>
                   <div className="flex-1 space-y-2">
                     <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
                     <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
@@ -479,15 +481,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      project.category === "professional"
-                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                        : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                    }`}
-                  >
+                  <Tag variant="category" size="sm">
                     {project.category}
-                  </span>
+                  </Tag>
                   {project.is_featured && (
                     <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-medium">
                       FEATURED
@@ -499,12 +495,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   {project.tech_stack
                     .slice(0, 3)
                     .map((tech: string, index: number) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
-                      >
+                      <Tag key={index} variant="blog" size="sm">
                         {tech}
-                      </span>
+                      </Tag>
                     ))}
                   {project.tech_stack.length > 3 && (
                     <span className="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 rounded text-xs">
