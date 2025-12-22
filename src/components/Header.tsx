@@ -11,8 +11,23 @@ const Header = () => {
   const { isDarkMode, toggleDarkMode } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  const themeIsDark = mounted ? isDarkMode : false;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const rafId = window.requestAnimationFrame(() => {
+      setMounted(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   // Track scroll locally for header glass/blur effect
   useEffect(() => {
@@ -81,14 +96,14 @@ const Header = () => {
             <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
               <motion.h1
                 className={`font-display text-2xl font-bold ${
-                  isDarkMode ? "text-white" : "text-black"
+                  themeIsDark ? "text-white" : "text-black"
                 }`}
               >
                 Bishnu Bk
               </motion.h1>
               <motion.p
                 className={`text-sm font-medium ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                  themeIsDark ? "text-gray-300" : "text-gray-600"
                 }`}
               >
                 Full Stack Developer
@@ -110,7 +125,7 @@ const Header = () => {
                     item.name === "Contact" ? handleContactClick : undefined
                   }
                   className={`${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                    themeIsDark ? "text-gray-300" : "text-gray-600"
                   } hover:text-primary transition-colors relative group`}
                 >
                   {item.name}
@@ -125,7 +140,7 @@ const Header = () => {
 
           <div className="flex items-center space-x-4">
             {/* Cursor Toggle */}
-            <CursorToggle />
+            {mounted && <CursorToggle />}
 
             {/* Theme Toggle */}
             <motion.button
@@ -133,10 +148,10 @@ const Header = () => {
               whileTap={{ scale: 0.95 }}
               onClick={toggleDarkMode}
               className={`p-2 rounded-full ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                themeIsDark ? "bg-gray-700" : "bg-gray-200"
               }`}
             >
-              {isDarkMode ? (
+              {themeIsDark ? (
                 <FiSun className="text-yellow-400" size={20} />
               ) : (
                 <FiMoon className="text-gray-600" size={20} />
@@ -152,12 +167,12 @@ const Header = () => {
             >
               {isMenuOpen ? (
                 <FiX
-                  className={isDarkMode ? "text-white" : "text-black"}
+                  className={themeIsDark ? "text-white" : "text-black"}
                   size={24}
                 />
               ) : (
                 <FiMenu
-                  className={isDarkMode ? "text-white" : "text-black"}
+                  className={themeIsDark ? "text-white" : "text-black"}
                   size={24}
                 />
               )}
@@ -174,7 +189,7 @@ const Header = () => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
               className={`md:hidden mt-4 ${
-                isDarkMode ? "bg-dark/95" : "bg-white/95"
+                themeIsDark ? "bg-dark/95" : "bg-white/95"
               } backdrop-blur-md rounded-lg`}
             >
               <div className="flex flex-col space-y-4 p-4">
@@ -183,7 +198,7 @@ const Header = () => {
                     <Link
                       href={item.href}
                       className={`${
-                        isDarkMode ? "text-gray-300" : "text-gray-600"
+                        themeIsDark ? "text-gray-300" : "text-gray-600"
                       } hover:text-primary transition-colors`}
                       onClick={
                         item.name === "Contact"
