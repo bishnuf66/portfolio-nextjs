@@ -11,6 +11,7 @@ import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
+import { Analytics } from '@vercel/analytics/next';
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 
 const geistSans = Geist({
@@ -395,6 +396,8 @@ export default function RootLayout({
             </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
+
         {/* </SmoothScrollProvider> */}
       </body>
     </html>
