@@ -9,21 +9,15 @@ import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { MovingBorder } from "@/components/ui/MovingBorder";
 import { colorScheme } from "@/utils/colorUtils";
+import { useSectionViewTracking } from "@/hooks/useSectionViewTracking";
 
 const Home = () => {
   const { isDarkMode } = useStore();
   const [scrollY, setScrollY] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  // Track section views
-  React.useEffect(() => {
-    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
-      trackSectionInteraction("hero-section", "view", {
-        hasSplineScene: true,
-        isDarkMode,
-      });
-    });
-  }, [isDarkMode]);
+  const heroRef = useSectionViewTracking("hero-section");
+  const parallaxRef = useSectionViewTracking("parallax-mountain-section");
+  const ctaRef = useSectionViewTracking("cta-section");
 
   useEffect(() => {
     let rafRef: number | null = null;
@@ -78,7 +72,11 @@ const Home = () => {
   return (
     <>
       {/* Hero Section with 3D Spline */}
-      <div id="home" className="relative w-full min-h-screen overflow-hidden">
+      <div
+        id="home"
+        ref={heroRef as React.RefObject<HTMLDivElement>}
+        className="relative w-full min-h-screen overflow-hidden"
+      >
         {/* Background with Spotlight */}
         <div className={`absolute inset-0 ${colorScheme.background.secondary}`}>
           <Spotlight
@@ -140,6 +138,15 @@ const Home = () => {
                   <Link
                     href="#projects"
                     className="px-8 py-3 bg-linear-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
+                    onClick={() => {
+                      import("@/lib/analytics").then(
+                        ({ trackSectionInteraction }) => {
+                          trackSectionInteraction("hero-section", "click", {
+                            action: "view-my-work",
+                          });
+                        }
+                      );
+                    }}
                   >
                     View My Work
                   </Link>
@@ -151,6 +158,15 @@ const Home = () => {
                         ? "border-neutral-500 text-neutral-300 hover:border-purple-500 hover:text-purple-400"
                         : "border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600"
                     }`}
+                    onClick={() => {
+                      import("@/lib/analytics").then(
+                        ({ trackSectionInteraction }) => {
+                          trackSectionInteraction("hero-section", "click", {
+                            action: "hero-contact",
+                          });
+                        }
+                      );
+                    }}
                   >
                     Get In Touch
                   </Link>
@@ -238,7 +254,10 @@ const Home = () => {
       </div>
 
       {/* Parallax Mountain Section with Gradient Overlays */}
-      <div className="relative w-full h-screen overflow-hidden">
+      <div
+        ref={parallaxRef as React.RefObject<HTMLDivElement>}
+        className="relative w-full h-screen overflow-hidden"
+      >
         {/* Top gradient overlay - blends with hero section above */}
         <div
           className={`absolute top-0 left-0 right-0 h-32 z-20 pointer-events-none ${
@@ -323,7 +342,10 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className={`py-20 ${colorScheme.background.primary}`}>
+      <div
+        ref={ctaRef as React.RefObject<HTMLDivElement>}
+        className={`py-20 ${colorScheme.background.primary}`}
+      >
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
           <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let&apos;s Build Something Amazing
@@ -341,6 +363,13 @@ const Home = () => {
             className="px-8 py-4 rounded-full"
             as={Link}
             href="#contact"
+            onClick={() => {
+              import("@/lib/analytics").then(({ trackSectionInteraction }) => {
+                trackSectionInteraction("cta-section", "click", {
+                  action: "cta-get-in-touch",
+                });
+              });
+            }}
           >
             <span className="text-lg font-semibold">Get In Touch</span>
           </MovingBorder>
