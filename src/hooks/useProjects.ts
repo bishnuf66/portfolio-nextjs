@@ -53,10 +53,10 @@ export function useProjectsFiltered(params: ProjectsQueryParams) {
         queryKey: [
             "projects",
             "filtered",
-            category,
-            search,
-            sortBy,
-            sortOrder,
+            category || "all",
+            search || "",
+            sortBy || "",
+            sortOrder || "",
             page,
             limit,
             featured,
@@ -64,6 +64,7 @@ export function useProjectsFiltered(params: ProjectsQueryParams) {
         queryFn: async () => {
             const queryParams = new URLSearchParams();
 
+            // Always append category for clarity, even if it's "all"
             if (category && category !== "all") {
                 queryParams.append("category", category);
             }
@@ -87,10 +88,10 @@ export function useProjectsFiltered(params: ProjectsQueryParams) {
             );
             return response.data as PaginatedResponse;
         },
-        staleTime: 0,
+        staleTime: 1000, // 1 second
         gcTime: 1000 * 60 * 5,
         refetchOnMount: true,
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
     });
 }
 
@@ -111,11 +112,22 @@ export function useProjectCounts() {
                 api.get("/projects?featured=true"),
             ]);
 
+            // Handle both array and paginated response formats
+            const getLength = (data: any) => {
+                if (Array.isArray(data)) {
+                    return data.length;
+                }
+                if (data?.data && Array.isArray(data.data)) {
+                    return data.data.length;
+                }
+                return 0;
+            };
+
             return {
-                all: (allResponse.data as Project[]).length,
-                professional: (professionalResponse.data as Project[]).length,
-                personal: (personalResponse.data as Project[]).length,
-                featured: (featuredResponse.data as Project[]).length,
+                all: getLength(allResponse.data),
+                professional: getLength(professionalResponse.data),
+                personal: getLength(personalResponse.data),
+                featured: getLength(featuredResponse.data),
             };
         },
         staleTime: 30 * 1000, // Cache for 30 seconds
