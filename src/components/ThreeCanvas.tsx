@@ -7,11 +7,22 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export default function ThreeCanvas() {
+  const [isMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const isMobileViewport = window.innerWidth < 768;
+    const isCoarsePointer = window.matchMedia
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
+    return isMobileViewport || isCoarsePointer;
+  });
+
   return (
     <div className="w-56 h-56 flex items-center justify-center relative">
       {/* 3D Canvas to overlay on top of website */}
       <Canvas
         camera={{ position: [0, 2, 5], fov: 60 }}
+        dpr={isMobile ? [1, 1.25] : [1, 2]}
+        gl={{ powerPreference: "high-performance", antialias: !isMobile }}
         style={{
           width: "100%", // Fill the parent container
           height: "100%", // Fill the parent container
@@ -21,11 +32,11 @@ export default function ThreeCanvas() {
         <ambientLight intensity={0.9} />
         <directionalLight position={[2, 2, 2]} intensity={1} />
         <Suspense fallback={null}>
-          <Robot />
+          <Robot isMobile={isMobile} />
         </Suspense>
         <OrbitControls
           enableZoom={false}
-          enablePan={true}
+          enablePan={!isMobile}
           enableRotate={true}
         />
       </Canvas>
@@ -33,15 +44,15 @@ export default function ThreeCanvas() {
   );
 }
 
-function Robot() {
+function Robot({ isMobile }: { isMobile: boolean }) {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF("/models/robot.glb"); // Load your .glb model
-  const [hovered, setHovered] = useState(false);
 
   // Continuous rotation animation
   useFrame((state, delta) => {
+    const rotationSpeed = isMobile ? 0.25 : 0.5;
     if (group.current) {
-      group.current.rotation.y += delta * 0.5; // Rotate around the Y-axis
+      group.current.rotation.y += delta * rotationSpeed; // Rotate around the Y-axis
     }
   });
 
@@ -51,8 +62,6 @@ function Robot() {
       object={scene}
       scale={0.8}
       position={[0, -1, 0]}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
       onClick={() => {}}
     />
   );

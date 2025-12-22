@@ -15,9 +15,28 @@ const Home = () => {
   const { isDarkMode } = useStore();
   const [scrollY, setScrollY] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useSectionViewTracking("hero-section");
   const parallaxRef = useSectionViewTracking("parallax-mountain-section");
   const ctaRef = useSectionViewTracking("cta-section");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const rafId = window.requestAnimationFrame(() => {
+      setMounted(true);
+      const isMobileViewport = window.innerWidth < 768;
+      const isCoarsePointer = window.matchMedia
+        ? window.matchMedia("(pointer: coarse)").matches
+        : false;
+      setIsMobile(isMobileViewport || isCoarsePointer);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   useEffect(() => {
     let rafRef: number | null = null;
@@ -228,10 +247,12 @@ const Home = () => {
               {/* Right: 3D Spline Scene */}
               <div className="relative h-[400px] md:h-[600px] lg:h-[700px]">
                 <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-purple-500/10 rounded-3xl blur-3xl"></div>
-                <SplineScene
-                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                  className="w-full h-full relative z-10"
-                />
+                {mounted && !isMobile ? (
+                  <SplineScene
+                    scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                    className="w-full h-full relative z-10"
+                  />
+                ) : null}
               </div>
             </div>
           </div>
