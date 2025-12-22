@@ -276,7 +276,7 @@ export default function TechSolarSystem() {
 
   // Use useReducer to manage all localStorage state in one place
   const [explorationState, dispatch] = useReducer(explorationReducer, {
-    clickedPlanets: new Set(),
+    clickedPlanets: new Set<string>(),
     achievements: [],
     discoveredEasterEggs: [],
     earthClicks: 0,
