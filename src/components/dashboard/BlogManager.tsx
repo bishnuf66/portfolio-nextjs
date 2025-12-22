@@ -411,7 +411,7 @@ export default function BlogManager() {
             } shadow-lg border`}
           >
             <div
-              className={`text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+              className={`text-3xl font-bold bg-linear-to-r ${stat.gradient} bg-clip-text text-transparent`}
             >
               {stat.value}
             </div>
@@ -581,7 +581,7 @@ export default function BlogManager() {
                     width={128}
                     height={128}
                     unoptimized
-                    className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                    className="w-32 h-32 object-cover rounded-lg shrink-0"
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -624,7 +624,7 @@ export default function BlogManager() {
                           )}
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => handleEdit(blog)}
                         className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"

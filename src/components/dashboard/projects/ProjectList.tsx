@@ -535,7 +535,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
               }`}
             >
               <div className="flex gap-6">
-                <div className="relative flex-shrink-0">
+                <div className="relative shrink-0">
                   <Image
                     src={
                       project.cover_image_url &&
@@ -615,7 +615,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         </span>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => handleEdit(project)}
                         className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"

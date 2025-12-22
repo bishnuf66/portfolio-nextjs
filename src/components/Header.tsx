@@ -150,13 +150,13 @@ const Header = () => {
               onClick={toggleDarkMode}
               icon={
                 themeIsDark ? (
-                  <FiSun className="text-yellow-400" size={20} />
+                  <FiSun className="text-yellow-400" size={24} />
                 ) : (
-                  <FiMoon className="text-gray-600" size={20} />
+                  <FiMoon className="text-gray-600" size={24} />
                 )
               }
             >
-              {themeIsDark ? "Light Mode" : "Dark Mode"}
+              {""}
             </Button>
 
             {/* Mobile Menu Button */}
@@ -165,9 +165,9 @@ const Header = () => {
               size="sm"
               className="md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              icon={isMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+              icon={isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
             >
-              {isMenuOpen ? "Close Menu" : "Open Menu"}
+              {""}
             </Button>
           </div>
         </div>

@@ -47,7 +47,11 @@ export const Select: React.FC<SelectProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    setHighlightIndex(selectedIndex);
+    // Use a timeout to avoid cascading renders
+    const timeoutId = setTimeout(() => {
+      setHighlightIndex(selectedIndex);
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [open, selectedIndex]);
 
   // Close on outside click
@@ -185,7 +189,7 @@ export const Select: React.FC<SelectProps> = ({
         </span>
         {/* Chevron */}
         <svg
-          className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400"
+          className="h-5 w-5 shrink-0 text-gray-500 dark:text-gray-400"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="none"

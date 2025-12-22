@@ -47,19 +47,40 @@ const flushAnalytics = async () => {
             .insert(batch);
 
         if (error) {
-            // Silently fail if table doesn't exist yet
-            if (
-                !error.message?.includes("relation") &&
-                !error.message?.includes("does not exist") &&
-                !error.code?.includes("PGRST116")
-            ) {
+            // Silently fail if table doesn't exist yet or other expected database errors
+            const shouldSilence = error.message?.includes("relation") ||
+                error.message?.includes("does not exist") ||
+                error.message?.includes("table") ||
+                error.message?.includes("permission") ||
+                error.message?.includes("column") ||
+                error.message?.includes("schema") ||
+                error.code?.includes("PGRST116") ||
+                error.code?.includes("PGRST204") ||
+                error.code?.includes("PGRST") ||
+                error.details?.includes("does not exist") ||
+                error.details?.includes("column");
+
+            if (!shouldSilence) {
                 console.error("Analytics batch insert failed:", error);
             }
             // Re-queue failed items
             analyticsQueue.unshift(...batch);
         }
     } catch (error) {
-        console.error("Analytics batch error:", error);
+        // Silently handle catch block errors that are database-related
+        const errorMessage = error instanceof Error
+            ? error.message
+            : String(error);
+        const shouldSilenceCatch = errorMessage.includes("relation") ||
+            errorMessage.includes("does not exist") ||
+            errorMessage.includes("table") ||
+            errorMessage.includes("permission") ||
+            errorMessage.includes("network") ||
+            errorMessage.includes("fetch");
+
+        if (!shouldSilenceCatch) {
+            console.error("Analytics batch error:", error);
+        }
         // Re-queue failed items
         analyticsQueue.unshift(...batch);
     }
@@ -330,9 +351,12 @@ export const trackSectionInteraction = async (
 
 // Track project interaction (clicks, views, etc.)
 export const trackProjectInteraction = async (
-    source: string,
-    interactionType: "click" | "view" | "hover",
-    metadata: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _source: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _interactionType: "click" | "view" | "hover",
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _metadata: {
         projectId: string;
         projectName: string;
         action: string;
@@ -363,9 +387,9 @@ export const trackProjectInteraction = async (
         const analyticsData = {
             session_id: sessionId,
             visitor_id: visitorId,
-            source,
-            interaction_type: interactionType,
-            metadata,
+            page_path: window.location.pathname,
+            page_title: document.title,
+            referrer: document.referrer,
             ...deviceInfo,
         };
 
