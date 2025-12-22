@@ -101,7 +101,7 @@ export default function AnalyticsDashboard() {
 
   const [showFilters, setShowFilters] = useState(false);
   const [activeView, setActiveView] = useState<
-    "countries" | "pages" | "devices"
+    "countries" | "pages" | "devices" | "sections"
   >("countries");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -766,28 +766,32 @@ export default function AnalyticsDashboard() {
         className="flex gap-4 border-b"
         style={{ borderColor: isDarkMode ? "#374151" : "#e5e7eb" }}
       >
-        {(["countries", "pages", "devices"] as const).map((view) => (
-          <button
-            key={view}
-            onClick={() => {
-              setActiveView(view);
-              setCurrentPage(1);
-            }}
-            className={`px-4 py-2 font-medium text-sm transition-colors capitalize ${
-              activeView === view
-                ? "text-blue-500 border-b-2 border-blue-500"
-                : isDarkMode
-                ? "text-gray-400 hover:text-gray-300"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            {view === "countries"
-              ? "Top Countries"
-              : view === "pages"
-              ? "Top Pages"
-              : "Devices"}
-          </button>
-        ))}
+        {(["countries", "pages", "devices", "sections"] as const).map(
+          (view) => (
+            <button
+              key={view}
+              onClick={() => {
+                setActiveView(view);
+                setCurrentPage(1);
+              }}
+              className={`px-4 py-2 font-medium text-sm transition-colors capitalize ${
+                activeView === view
+                  ? "text-blue-500 border-b-2 border-blue-500"
+                  : isDarkMode
+                  ? "text-gray-400 hover:text-gray-300"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              {view === "countries"
+                ? "Top Countries"
+                : view === "pages"
+                ? "Top Pages"
+                : view === "devices"
+                ? "Devices"
+                : "Sections"}
+            </button>
+          )
+        )}
       </div>
 
       {/* Data Table */}
@@ -821,7 +825,8 @@ export default function AnalyticsDashboard() {
                             handleSort(
                               activeView === "countries"
                                 ? "country"
-                                : activeView === "pages"
+                                : activeView === "pages" ||
+                                  activeView === "sections"
                                 ? "page"
                                 : "device"
                             )
@@ -830,13 +835,15 @@ export default function AnalyticsDashboard() {
                         >
                           {activeView === "countries"
                             ? "Country"
-                            : activeView === "pages"
-                            ? "Page"
+                            : activeView === "pages" ||
+                              activeView === "sections"
+                            ? "Page / Section"
                             : "Device"}
                           {sortConfig.field ===
                             (activeView === "countries"
                               ? "country"
-                              : activeView === "pages"
+                              : activeView === "pages" ||
+                                activeView === "sections"
                               ? "page"
                               : "device") &&
                             (sortConfig.direction === "asc" ? (

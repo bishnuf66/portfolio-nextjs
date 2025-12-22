@@ -20,7 +20,7 @@ interface ProjectView {
 
 interface FilterParams {
     range: "24h" | "7d" | "30d" | "all";
-    view: "countries" | "pages" | "devices";
+    view: "countries" | "pages" | "devices" | "sections";
     searchTerm?: string;
     selectedCountries?: string[];
     selectedDevices?: string[];
@@ -88,7 +88,8 @@ export async function GET(request: Request) {
         const view = (searchParams.get("view") || "countries") as
             | "countries"
             | "pages"
-            | "devices";
+            | "devices"
+            | "sections";
         const searchTerm = searchParams.get("searchTerm") || "";
         const selectedCountries = searchParams.getAll("selectedCountries");
         const selectedDevices = searchParams.getAll("selectedDevices");
@@ -117,7 +118,7 @@ export async function GET(request: Request) {
             dateFilter = new Date(0); // All time
         }
 
-        // Fetch analytics data
+        // Fetch analytics data (used for summary metrics in all views)
         const { data: analyticsData, error: analyticsError } = await supabase
             .from("analytics")
             .select("*")
@@ -171,7 +172,12 @@ export async function GET(request: Request) {
 
         // Process data based on view type
         let items: Array<
-            { country?: string; page?: string; device?: string; count: number }
+            {
+                country?: string;
+                page?: string;
+                device?: string;
+                count: number;
+            }
         > = [];
 
         if (view === "countries") {
@@ -201,6 +207,36 @@ export async function GET(request: Request) {
             });
             items = Object.entries(deviceCount)
                 .map(([device, count]) => ({ device, count }));
+        } else if (view === "sections") {
+            // Sections view: aggregate from section_interactions table
+            const { data: sectionData, error: sectionError } = await supabase
+                .from("section_interactions")
+                .select("section_name, interaction_type, created_at")
+                .gte("created_at", dateFilter.toISOString()) as unknown as {
+                    data:
+                        | { section_name: string; interaction_type: string }[]
+                        | null;
+                    error: Error | null;
+                };
+
+            if (sectionError) {
+                console.error(
+                    "Section interactions fetch error:",
+                    sectionError,
+                );
+            }
+
+            const sectionCount: Record<string, number> = {};
+
+            (sectionData || []).forEach((row) => {
+                const key = `${row.section_name} (${row.interaction_type})`;
+                sectionCount[key] = (sectionCount[key] || 0) + 1;
+            });
+
+            items = Object.entries(sectionCount).map(([label, count]) => ({
+                page: label,
+                count,
+            }));
         }
 
         // Apply filtering
