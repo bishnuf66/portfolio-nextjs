@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import useStore from "@/store/store";
 import {
   ScrollReveal,
@@ -263,11 +264,10 @@ export default function CreativeShowcase() {
                   className="text-2xl md:text-3xl mb-12 opacity-80"
                 />
                 <ScrollReveal direction="up" delay={0.5}>
-                  <Link
-                    href="#contact"
-                    className="inline-block px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white text-xl font-bold rounded-full hover:scale-110 transition-transform duration-300 shadow-2xl"
-                  >
-                    Get In Touch
+                  <Link href="#contact">
+                    <Button variant="gradient" size="xl" className="shadow-2xl">
+                      Get In Touch
+                    </Button>
                   </Link>
                 </ScrollReveal>
               </div>

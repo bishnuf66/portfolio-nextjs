@@ -5,23 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useStore from "@/store/store";
 import { motion } from "framer-motion";
-import { Home, ArrowLeft, Search, Compass } from "lucide-react";
+import { Home, ArrowLeft, Compass } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function NotFound() {
   const { isDarkMode } = useStore();
   const router = useRouter();
   const [countdown, setCountdown] = useState(10);
 
-  // Generate random values once on component mount
+  // Generate deterministic values to prevent hydration mismatch
   const [floatingShapes] = useState(() => {
+    // Use a fixed seed for consistent server/client rendering
+    const seed = 42;
+    const random = (min: number, max: number) => {
+      const x = Math.sin(seed) * 10000;
+      return min + (x - Math.floor(x)) * (max - min);
+    };
+
     return [...Array(20)].map(() => ({
-      width: Math.random() * 300 + 50,
-      height: Math.random() * 300 + 50,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animateX: Math.random() * 100 - 50,
-      animateY: Math.random() * 100 - 50,
-      duration: Math.random() * 10 + 10,
+      width: random(50, 350),
+      height: random(50, 350),
+      left: `${random(0, 100)}%`,
+      top: `${random(0, 100)}%`,
+      animateX: random(-50, 50),
+      animateY: random(-50, 50),
+      duration: random(10, 20),
     }));
   });
 
@@ -29,8 +37,7 @@ export default function NotFound() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          router.push("/");
+          // Don't call router.push here, just return 0
           return 0;
         }
         return prev - 1;
@@ -38,7 +45,14 @@ export default function NotFound() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router]);
+  }, []); // Remove router dependency since it's not used here
+
+  // Separate effect to handle navigation when countdown reaches 0
+  useEffect(() => {
+    if (countdown === 0) {
+      router.push("/");
+    }
+  }, [countdown, router]);
 
   const floatingAnimation = {
     y: [0, -20, 0],
@@ -119,8 +133,8 @@ export default function NotFound() {
           <div
             className={`p-6 rounded-full ${
               isDarkMode
-                ? "bg-gradient-to-br from-blue-600 to-purple-600"
-                : "bg-gradient-to-br from-blue-500 to-purple-500"
+                ? "bg-linear-to-br from-blue-600 to-purple-600"
+                : "bg-linear-to-br from-blue-500 to-purple-500"
             } shadow-2xl`}
           >
             <Compass size={64} className="text-white" />
@@ -198,47 +212,24 @@ export default function NotFound() {
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <Link href="/">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-white shadow-lg transition-all ${
-                isDarkMode
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-blue-500/50"
-                  : "bg-gradient-to-r from-blue-500 to-purple-500 hover:shadow-blue-500/50"
-              }`}
-            >
-              <Home size={20} />
+            <Button variant="gradient" size="lg" icon={<Home size={20} />}>
               Go Home
-            </motion.button>
+            </Button>
           </Link>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
+            variant="secondary"
+            size="lg"
+            icon={<ArrowLeft size={20} />}
             onClick={() => router.back()}
-            className={`flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all ${
-              isDarkMode
-                ? "bg-gray-800 text-white hover:bg-gray-700 border border-gray-700"
-                : "bg-white text-gray-900 hover:bg-gray-100 border border-gray-200"
-            } shadow-lg`}
           >
-            <ArrowLeft size={20} />
             Go Back
-          </motion.button>
+          </Button>
 
           <Link href="/blog">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`flex items-center gap-2 px-8 py-4 rounded-full font-semibold transition-all ${
-                isDarkMode
-                  ? "bg-gray-800 text-white hover:bg-gray-700 border border-gray-700"
-                  : "bg-white text-gray-900 hover:bg-gray-100 border border-gray-200"
-              } shadow-lg`}
-            >
-              <Search size={20} />
-              Browse Blog
-            </motion.button>
+            <Button variant="outline" size="lg" icon={<Compass size={20} />}>
+              Explore Blog
+            </Button>
           </Link>
         </motion.div>
 
@@ -320,8 +311,8 @@ export default function NotFound() {
       <div
         className={`absolute inset-0 pointer-events-none ${
           isDarkMode
-            ? "bg-gradient-to-b from-transparent via-transparent to-gray-900/50"
-            : "bg-gradient-to-b from-transparent via-transparent to-gray-50/50"
+            ? "bg-linear-to-b from-transparent via-transparent to-gray-900/50"
+            : "bg-linear-to-b from-transparent via-transparent to-gray-50/50"
         }`}
       />
     </div>

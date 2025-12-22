@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import useStore from "@/store/store";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Mail, Send, User, MessageSquare } from "lucide-react";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
-import { MovingBorder } from "@/components/ui/MovingBorder";
-import { AnimatedSection, StaggeredContainer } from "@/components/ui/AnimatedSection";
+import {
+  AnimatedSection,
+  StaggeredContainer,
+} from "@/components/ui/AnimatedSection";
+import { Button } from "@/components/ui/Button";
+import useStore from "@/store/store";
 import { colorScheme } from "@/utils/colorUtils";
 
 const Contact = () => {
   const { isDarkMode } = useStore();
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -40,7 +42,7 @@ const Contact = () => {
         hasName: !!formData.name,
         hasEmail: !!formData.email,
         hasMessage: !!formData.message,
-        messageLength: formData.message.length
+        messageLength: formData.message.length,
       });
     });
 
@@ -95,8 +97,9 @@ const Contact = () => {
             Let&apos;s Connect
           </h2>
           <p
-            className={`text-xl md:text-2xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-              }`}
+            className={`text-xl md:text-2xl ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
           >
             Have a project in mind? Let&apos;s make it happen together
           </p>
@@ -106,17 +109,19 @@ const Contact = () => {
         <StaggeredContainer className="space-y-8" staggerDelay={0.2}>
           <div>
             <h3
-              className={`text-3xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                }`}
+              className={`text-3xl font-bold mb-6 ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
             >
               Get in Touch
             </h3>
             <p
-              className={`text-lg mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+              className={`text-lg mb-8 ${
+                isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
             >
-              I&apos;m always open to discussing new projects, creative ideas, or
-              opportunities to be part of your vision.
+              I&apos;m always open to discussing new projects, creative ideas,
+              or opportunities to be part of your vision.
             </p>
           </div>
 
@@ -124,20 +129,27 @@ const Contact = () => {
           <div>
             <BackgroundGradient className="rounded-[22px] p-1">
               <div
-                className={`p-8 rounded-[20px] ${isDarkMode ? "bg-black" : "bg-white"}`}
+                className={`p-8 rounded-[20px] ${
+                  isDarkMode ? "bg-black" : "bg-white"
+                }`}
               >
                 <h3
-                  className={`text-2xl font-bold mb-6 ${isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                  className={`text-2xl font-bold mb-6 ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
                 >
                   Send a Message
                 </h3>
-                <form onSubmit={handleSubmit} className="space-y-6 enhanced-scrollbar">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-6 enhanced-scrollbar"
+                >
                   <div>
                     <label
                       htmlFor="name"
-                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
                       <User className="w-4 h-4" />
                       Name
@@ -146,10 +158,11 @@ const Contact = () => {
                       type="text"
                       id="name"
                       required
-                      className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
-                        ? "bg-gray-900 border-gray-700 text-white focus:border-blue-500"
-                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500"
-                        } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
+                      className={`w-full px-4 py-3 rounded-lg border transition-all ${
+                        isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-blue-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500"
+                      } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
                       placeholder="Your name"
                       value={formData.name}
                       onChange={handleChange}
@@ -159,8 +172,9 @@ const Contact = () => {
                   <div>
                     <label
                       htmlFor="email"
-                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
                       <Mail className="w-4 h-4" />
                       Email
@@ -169,10 +183,11 @@ const Contact = () => {
                       type="email"
                       id="email"
                       required
-                      className={`w-full px-4 py-3 rounded-lg border transition-all ${isDarkMode
-                        ? "bg-gray-900 border-gray-700 text-white focus:border-purple-500"
-                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500"
-                        } focus:ring-2 focus:ring-purple-500/20 focus:outline-none`}
+                      className={`w-full px-4 py-3 rounded-lg border transition-all ${
+                        isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-purple-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-purple-500"
+                      } focus:ring-2 focus:ring-purple-500/20 focus:outline-none`}
                       placeholder="your.email@example.com"
                       value={formData.email}
                       onChange={handleChange}
@@ -182,8 +197,9 @@ const Contact = () => {
                   <div>
                     <label
                       htmlFor="message"
-                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"
-                        }`}
+                      className={`flex text-sm font-medium mb-2 items-center gap-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
                     >
                       <MessageSquare className="w-4 h-4" />
                       Message
@@ -192,35 +208,29 @@ const Contact = () => {
                       id="message"
                       rows={5}
                       required
-                      className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${isDarkMode
-                        ? "bg-gray-900 border-gray-700 text-white focus:border-pink-500"
-                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-pink-500"
-                        } focus:ring-2 focus:ring-pink-500/20 focus:outline-none`}
+                      className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${
+                        isDarkMode
+                          ? "bg-gray-900 border-gray-700 text-white focus:border-pink-500"
+                          : "bg-gray-50 border-gray-300 text-gray-900 focus:border-pink-500"
+                      } focus:ring-2 focus:ring-pink-500/20 focus:outline-none`}
                       placeholder="Tell me about your project..."
                       value={formData.message}
                       onChange={handleChange}
                     ></textarea>
                   </div>
 
-                  <MovingBorder
-                    as="button"
+                  <Button
                     type="submit"
+                    variant="gradient"
+                    size="lg"
+                    loading={isSubmitting}
                     disabled={isSubmitting}
-                    duration={3000}
-                    className="w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2"
+                    icon={<Send className="w-4 h-4" />}
+                    iconPosition="right"
+                    fullWidth
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        Send Message
-                        <Send className="w-4 h-4" />
-                      </>
-                    )}
-                  </MovingBorder>
+                    Send Message
+                  </Button>
                 </form>
               </div>
             </BackgroundGradient>
