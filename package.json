@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "analyze": "cross-env ANALYZE=true next build --webpack",
+    "bundle-size": "node scripts/check-bundle-size.js",
     "migrate": "node scripts/migrate-projects.js",
     "seed:biryani": "node scripts/seed-biryani-adda.js"
   },
@@ -72,6 +73,9 @@
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.7",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "supabase": "^2.67.3",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",

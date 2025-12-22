@@ -2,6 +2,7 @@
 
 import React from "react";
 import useStore from "@/store/store";
+import Link from "next/link";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { ExternalLink, Code, Star } from "lucide-react";
@@ -144,7 +145,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
           <CardItem
             translateZ={20}
-            as="a"
+            as={Link}
             href={`/projects/${slug}`}
             onClick={handleDetailsClick}
             className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode

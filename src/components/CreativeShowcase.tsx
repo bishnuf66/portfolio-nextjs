@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 import useStore from "@/store/store";
 import {
     ScrollReveal,
@@ -222,19 +223,19 @@ export default function CreativeShowcase() {
                             <div className="relative">
                                 <Sparkles size={80} className="mx-auto mb-8 text-purple-500" />
                                 <h2 className="text-6xl md:text-8xl font-bold mb-8 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                                    Let's Create
+                                    Let&apos;s Create
                                 </h2>
                                 <SplitTextReveal
                                     text="Ready to build something amazing together? Let's turn your vision into reality."
                                     className="text-2xl md:text-3xl mb-12 opacity-80"
                                 />
                                 <ScrollReveal direction="up" delay={0.5}>
-                                    <a
+                                    <Link
                                         href="#contact"
                                         className="inline-block px-12 py-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white text-xl font-bold rounded-full hover:scale-110 transition-transform duration-300 shadow-2xl"
                                     >
                                         Get In Touch
-                                    </a>
+                                    </Link>
                                 </ScrollReveal>
                             </div>
                         </div>

@@ -59,25 +59,22 @@ const Header = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? " backdrop-blur-md shadow-lg" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? " backdrop-blur-md shadow-lg" : "bg-transparent"
+        }`}
     >
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link href={"/"}>
             <motion.div whileHover={{ scale: 1.05 }} className="flex flex-col">
               <motion.h1
-                className={`text-2xl font-bold ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
+                className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-black"
+                  }`}
               >
                 Bishnu Bk
               </motion.h1>
               <motion.p
-                className={`text-sm font-medium ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Full Stack Developer
               </motion.p>
@@ -87,24 +84,26 @@ const Header = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <motion.a
+              <motion.div
                 key={item.name}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                href={item.href}
-                onClick={
-                  item.name === "Contact" ? handleContactClick : undefined
-                }
-                className={`${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                } hover:text-primary transition-colors relative group`}
               >
-                {item.name}
-                <motion.span
-                  className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"
-                  initial={false}
-                />
-              </motion.a>
+                <Link
+                  href={item.href}
+                  onClick={
+                    item.name === "Contact" ? handleContactClick : undefined
+                  }
+                  className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
+                    } hover:text-primary transition-colors relative group`}
+                >
+                  {item.name}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"
+                    initial={false}
+                  />
+                </Link>
+              </motion.div>
             ))}
           </div>
 
@@ -117,9 +116,8 @@ const Header = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                }`}
             >
               {isDarkMode ? (
                 <FiSun className="text-yellow-400" size={20} />
@@ -158,27 +156,28 @@ const Header = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className={`md:hidden mt-4 ${
-                isDarkMode ? "bg-dark/95" : "bg-white/95"
-              } backdrop-blur-md rounded-lg`}
+              className={`md:hidden mt-4 ${isDarkMode ? "bg-dark/95" : "bg-white/95"
+                } backdrop-blur-md rounded-lg`}
             >
               <div className="flex flex-col space-y-4 p-4">
                 {navItems.map((item) => (
-                  <motion.a
+                  <motion.div
                     key={item.name}
                     whileHover={{ x: 10 }}
-                    href={item.href}
-                    className={`${
-                      isDarkMode ? "text-gray-300" : "text-gray-600"
-                    } hover:text-primary transition-colors`}
-                    onClick={
-                      item.name === "Contact"
-                        ? handleContactClick
-                        : () => setIsMenuOpen(false)
-                    }
                   >
-                    {item.name}
-                  </motion.a>
+                    <Link
+                      href={item.href}
+                      className={`${isDarkMode ? "text-gray-300" : "text-gray-600"
+                        } hover:text-primary transition-colors`}
+                      onClick={
+                        item.name === "Contact"
+                          ? handleContactClick
+                          : () => setIsMenuOpen(false)
+                      }
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Typewriter } from "react-simple-typewriter";
 import useStore from "@/store/store";
 import Image from "next/image";
+import Link from "next/link";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { MovingBorder } from "@/components/ui/MovingBorder";
@@ -97,7 +98,7 @@ const Home = () => {
                 </h1>
 
                 <p className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "text-neutral-300" : "text-gray-700"}`}>
-                  Nepal's leading{" "}
+                  Nepal&apos;s leading{" "}
                   <span className={`font-semibold ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>
                     fullstack developer
                   </span>{" "}
@@ -109,14 +110,14 @@ const Home = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">
-                  <a
+                  <Link
                     href="#projects"
                     className="px-8 py-3 bg-linear-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                   >
                     View My Work
-                  </a>
+                  </Link>
 
-                  <a
+                  <Link
                     href="/#contact"
                     className={`px-8 py-3 border-2 rounded-full font-semibold transition-all duration-300 ${isDarkMode
                       ? "border-neutral-500 text-neutral-300 hover:border-purple-500 hover:text-purple-400"
@@ -124,7 +125,7 @@ const Home = () => {
                       }`}
                   >
                     Get In Touch
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Stats */}
@@ -234,16 +235,16 @@ const Home = () => {
       <div className={`py-20 ${colorScheme.background.primary}`}>
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
           <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Let's Build Something Amazing
+            Let&apos;s Build Something Amazing
           </h2>
           <p className={`text-xl mb-8 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-            Have a project in mind? Let's collaborate and create something
+            Have a project in mind? Let&apos;s collaborate and create something
             extraordinary together.
           </p>
           <MovingBorder
             duration={3000}
             className="px-8 py-4 rounded-full"
-            as="a"
+            as={Link}
             href="#contact"
           >
             <span className="text-lg font-semibold">Get In Touch</span>
