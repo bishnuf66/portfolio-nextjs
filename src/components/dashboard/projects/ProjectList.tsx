@@ -18,6 +18,7 @@ import Pagination from "@/components/ui/Pagination";
 import { useProjectsFiltered } from "@/hooks/useProjects";
 import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
+import { Button } from "@/components/ui/Button";
 
 interface ProjectListProps {
   isDarkMode: boolean;
@@ -329,23 +330,22 @@ const ProjectList: React.FC<ProjectListProps> = ({
             { field: "category" as SortField, label: "Category" },
             { field: "is_featured" as SortField, label: "Featured" },
           ].map(({ field, label }) => (
-            <button
+            <Button
               key={field}
+              variant={sortField === field ? "primary" : "ghost"}
+              size="sm"
               onClick={() => handleSort(field)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                sortField === field
-                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              {label}
-              {sortField === field &&
+              icon={
+                sortField === field &&
                 (sortOrder === "asc" ? (
                   <SortAsc size={14} />
                 ) : (
                   <SortDesc size={14} />
-                ))}
-            </button>
+                ))
+              }
+            >
+              {label}
+            </Button>
           ))}
         </div>
 

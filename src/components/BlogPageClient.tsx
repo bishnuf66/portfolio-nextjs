@@ -29,6 +29,7 @@ import {
   colorScheme,
 } from "@/utils/colorUtils";
 import { Select } from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
 
 type SortField = "title" | "created_at" | "author";
 type SortOrder = "asc" | "desc";
@@ -219,13 +220,14 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
 
             {/* Clear Filters */}
             {hasActiveFilters && (
-              <button
+              <Button
+                variant="outline"
+                size="md"
                 onClick={clearFilters}
-                className={`flex items-center gap-2 px-4 py-3 transition-colors border rounded-lg ${colorScheme.text.secondary} hover:${colorScheme.text.primary} ${colorScheme.border.primary} hover:${colorScheme.background.tertiary}`}
+                icon={<X size={16} />}
               >
-                <X size={16} />
                 Clear
-              </button>
+              </Button>
             )}
           </div>
 
@@ -248,25 +250,22 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
               { field: "title" as SortField, label: "Title" },
               { field: "author" as SortField, label: "Author" },
             ].map(({ field, label }) => (
-              <button
+              <Button
                 key={field}
+                variant={sortField === field ? "primary" : "ghost"}
+                size="sm"
                 onClick={() => handleSort(field)}
-                className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  sortField === field
-                    ? isDarkMode
-                      ? "bg-purple-900 text-purple-300"
-                      : "bg-purple-100 text-purple-700"
-                    : `${colorScheme.text.secondary} hover:${colorScheme.background.tertiary}`
-                }`}
-              >
-                {label}
-                {sortField === field &&
+                icon={
+                  sortField === field &&
                   (sortOrder === "asc" ? (
                     <SortAsc size={14} />
                   ) : (
                     <SortDesc size={14} />
-                  ))}
-              </button>
+                  ))
+                }
+              >
+                {label}
+              </Button>
             ))}
           </div>
 
@@ -300,12 +299,14 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                 : "No blog posts yet. Check back soon!"}
             </p>
             {hasActiveFilters && (
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                className="mt-4"
               >
                 Clear Filters
-              </button>
+              </Button>
             )}
           </AnimatedSection>
         ) : (
