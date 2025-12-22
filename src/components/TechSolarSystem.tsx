@@ -290,6 +290,13 @@ export default function TechSolarSystem() {
       const savedEasterEggs = localStorage.getItem("discoveredEasterEggs");
       const savedEarthClicks = localStorage.getItem("earthClicks");
 
+      console.log("Loading from localStorage:", {
+        savedExplored,
+        savedAchievements,
+        savedEasterEggs,
+        savedEarthClicks,
+      });
+
       // Single dispatch to load all state at once
       dispatch({
         type: "LOAD_FROM_STORAGE",
@@ -872,77 +879,94 @@ export default function TechSolarSystem() {
           >
             {techCategories
               .filter((category) => {
+                const hasMatchingPlanet = explorationState.clickedPlanets.has(
+                  category.title
+                );
                 console.log(
                   "Filtering:",
                   category.title,
                   "in clicked planets:",
-                  explorationState.clickedPlanets.has(category.title)
+                  hasMatchingPlanet
                 );
-                return explorationState.clickedPlanets.has(category.title);
+                console.log(
+                  "All clicked planets:",
+                  Array.from(explorationState.clickedPlanets)
+                );
+                return (
+                  hasMatchingPlanet && category.title !== "Developer Earth"
+                );
               })
-              .map((category, categoryIndex) => (
-                <div
-                  key={categoryIndex}
-                  className={`${getCardClasses(
-                    "rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300"
-                  )}`}
-                >
-                  <div className="mb-6">
-                    <h3
-                      className={`text-2xl font-bold mb-2 bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
-                    >
-                      {category.title}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span
-                        className={`text-sm ${
-                          isDarkMode ? "text-green-400" : "text-green-600"
-                        }`}
+              .map((category, categoryIndex) => {
+                console.log(
+                  "Rendering card for:",
+                  category.title,
+                  "index:",
+                  categoryIndex
+                );
+                return (
+                  <div
+                    key={categoryIndex}
+                    className={`${getCardClasses(
+                      "rounded-2xl p-8 border hover:shadow-2xl transition-all duration-300"
+                    )}`}
+                  >
+                    <div className="mb-6">
+                      <h3
+                        className={`text-2xl font-bold mb-2 bg-linear-to-r ${category.gradient} bg-clip-text text-transparent`}
                       >
-                        Explored
-                      </span>
+                        {category.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span
+                          className={`text-sm ${
+                            isDarkMode ? "text-green-400" : "text-green-600"
+                          }`}
+                        >
+                          Explored
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {category.technologies.map((tech, techIndex) => {
+                        const Icon = tech.icon;
+                        return (
+                          <div
+                            key={techIndex}
+                            className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <div
+                                className="p-2 rounded-lg"
+                                style={{ backgroundColor: `${tech.color}20` }}
+                              >
+                                <Icon size={20} style={{ color: tech.color }} />
+                              </div>
+                              <div>
+                                <h4
+                                  className={`font-semibold ${
+                                    isDarkMode ? "text-white" : "text-gray-900"
+                                  }`}
+                                >
+                                  {tech.name}
+                                </h4>
+                              </div>
+                            </div>
+                            <p
+                              className={`text-sm ${
+                                isDarkMode ? "text-gray-400" : "text-gray-600"
+                              }`}
+                            >
+                              {tech.description}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {category.technologies.map((tech, techIndex) => {
-                      const Icon = tech.icon;
-                      return (
-                        <div
-                          key={techIndex}
-                          className={`p-4 rounded-xl ${colorScheme.background.tertiary} hover:scale-105 transition-all duration-300 group cursor-pointer`}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div
-                              className="p-2 rounded-lg"
-                              style={{ backgroundColor: `${tech.color}20` }}
-                            >
-                              <Icon size={20} style={{ color: tech.color }} />
-                            </div>
-                            <div>
-                              <h4
-                                className={`font-semibold ${
-                                  isDarkMode ? "text-white" : "text-gray-900"
-                                }`}
-                              >
-                                {tech.name}
-                              </h4>
-                            </div>
-                          </div>
-                          <p
-                            className={`text-sm ${
-                              isDarkMode ? "text-gray-400" : "text-gray-600"
-                            }`}
-                          >
-                            {tech.description}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
           </StaggeredContainer>
         )}
       </div>
