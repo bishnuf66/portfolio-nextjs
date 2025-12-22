@@ -6,6 +6,7 @@ import { FiSun, FiMoon, FiMenu, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import CursorToggle from "@/components/CursorToggle";
+import { Button } from "@/components/ui/Button";
 
 const Header = () => {
   const { isDarkMode, toggleDarkMode } = useStore();
@@ -143,40 +144,31 @@ const Header = () => {
             {mounted && <CursorToggle />}
 
             {/* Theme Toggle */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                themeIsDark ? "bg-gray-700" : "bg-gray-200"
-              }`}
+              icon={
+                themeIsDark ? (
+                  <FiSun className="text-yellow-400" size={20} />
+                ) : (
+                  <FiMoon className="text-gray-600" size={20} />
+                )
+              }
             >
-              {themeIsDark ? (
-                <FiSun className="text-yellow-400" size={20} />
-              ) : (
-                <FiMoon className="text-gray-600" size={20} />
-              )}
-            </motion.button>
+              {themeIsDark ? "Light Mode" : "Dark Mode"}
+            </Button>
 
             {/* Mobile Menu Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="md:hidden p-2 rounded-full"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              icon={isMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             >
-              {isMenuOpen ? (
-                <FiX
-                  className={themeIsDark ? "text-white" : "text-black"}
-                  size={24}
-                />
-              ) : (
-                <FiMenu
-                  className={themeIsDark ? "text-white" : "text-black"}
-                  size={24}
-                />
-              )}
-            </motion.button>
+              {isMenuOpen ? "Close Menu" : "Open Menu"}
+            </Button>
           </div>
         </div>
 

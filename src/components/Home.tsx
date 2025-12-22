@@ -7,9 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
-import { MovingBorder } from "@/components/ui/MovingBorder";
 import { colorScheme } from "@/utils/colorUtils";
 import { useSectionViewTracking } from "@/hooks/useSectionViewTracking";
+import { Button } from "@/components/ui/Button";
 
 const Home = () => {
   const { isDarkMode } = useStore();
@@ -156,40 +156,40 @@ const Home = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">
-                  <Link
-                    href="#projects"
-                    className="px-8 py-3 bg-linear-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
-                    onClick={() => {
-                      import("@/lib/analytics").then(
-                        ({ trackSectionInteraction }) => {
-                          trackSectionInteraction("hero-section", "click", {
-                            action: "view-my-work",
-                          });
-                        }
-                      );
-                    }}
-                  >
-                    View My Work
+                  <Link href="#projects">
+                    <Button
+                      variant="gradient"
+                      size="lg"
+                      onClick={() => {
+                        import("@/lib/analytics").then(
+                          ({ trackSectionInteraction }) => {
+                            trackSectionInteraction("hero-section", "click", {
+                              action: "view-my-work",
+                            });
+                          }
+                        );
+                      }}
+                    >
+                      View My Work
+                    </Button>
                   </Link>
 
-                  <Link
-                    href="/#contact"
-                    className={`px-8 py-3 border-2 rounded-full font-semibold transition-all duration-300 ${
-                      isDarkMode
-                        ? "border-neutral-500 text-neutral-300 hover:border-purple-500 hover:text-purple-400"
-                        : "border-gray-300 text-gray-700 hover:border-purple-500 hover:text-purple-600"
-                    }`}
-                    onClick={() => {
-                      import("@/lib/analytics").then(
-                        ({ trackSectionInteraction }) => {
-                          trackSectionInteraction("hero-section", "click", {
-                            action: "hero-contact",
-                          });
-                        }
-                      );
-                    }}
-                  >
-                    Get In Touch
+                  <Link href="/#contact">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        import("@/lib/analytics").then(
+                          ({ trackSectionInteraction }) => {
+                            trackSectionInteraction("hero-section", "click", {
+                              action: "hero-contact",
+                            });
+                          }
+                        );
+                      }}
+                    >
+                      Get In Touch
+                    </Button>
                   </Link>
                 </div>
 
@@ -381,21 +381,23 @@ const Home = () => {
             Have a project in mind? Let&apos;s collaborate and create something
             extraordinary together.
           </p>
-          <MovingBorder
-            duration={3000}
-            className="px-8 py-4 rounded-full"
-            as={Link}
-            href="#contact"
-            onClick={() => {
-              import("@/lib/analytics").then(({ trackSectionInteraction }) => {
-                trackSectionInteraction("cta-section", "click", {
-                  action: "cta-get-in-touch",
-                });
-              });
-            }}
-          >
-            <span className="text-lg font-semibold">Get In Touch</span>
-          </MovingBorder>
+          <Link href="#contact">
+            <Button
+              variant="gradient"
+              size="xl"
+              onClick={() => {
+                import("@/lib/analytics").then(
+                  ({ trackSectionInteraction }) => {
+                    trackSectionInteraction("cta-section", "click", {
+                      action: "cta-get-in-touch",
+                    });
+                  }
+                );
+              }}
+            >
+              Get In Touch
+            </Button>
+          </Link>
         </div>
       </div>
     </>

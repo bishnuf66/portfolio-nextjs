@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Trophy, RotateCcw, Play, Pause } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { colorScheme } from "@/utils/colorUtils";
+import { Button } from "@/components/ui/Button";
 
 interface GameObject {
   id: number;
@@ -697,32 +698,28 @@ export default function SpaceShooterGame() {
 
               <div className={`flex ${isMobile ? "w-full" : "gap-2"}`}>
                 {isPlaying && !gameOver && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <Button
+                    variant="secondary"
+                    size="md"
                     onClick={togglePause}
-                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 ${
-                      isDarkMode
-                        ? "bg-gray-800 text-white hover:bg-gray-700"
-                        : "bg-white text-gray-900 hover:bg-gray-100"
-                    } shadow-lg ${isMobile ? "flex-1 justify-center" : ""}`}
+                    icon={isPaused ? <Play size={20} /> : <Pause size={20} />}
+                    iconPosition="left"
+                    className={isMobile ? "flex-1 justify-center" : ""}
                   >
-                    {isPaused ? <Play size={20} /> : <Pause size={20} />}
                     {isMobile ? "" : isPaused ? "Resume" : "Pause"}
-                  </motion.button>
+                  </Button>
                 )}
                 {!isPlaying && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <Button
+                    variant="gradient"
+                    size="md"
                     onClick={startGame}
-                    className={`px-4 py-2 rounded-lg font-semibold flex items-center gap-2 bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg ${
-                      isMobile ? "flex-1 justify-center" : ""
-                    }`}
+                    icon={<Play size={20} />}
+                    iconPosition="left"
+                    className={isMobile ? "flex-1 justify-center" : ""}
                   >
-                    <Play size={20} />
                     {gameOver ? "Play Again" : "Start Game"}
-                  </motion.button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -879,14 +876,14 @@ export default function SpaceShooterGame() {
                           <span>Hitting asteroids loses a life!</span>
                         </p>
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                      <Button
+                        variant="gradient"
+                        size="lg"
                         onClick={() => setShowInstructions(false)}
-                        className="mt-8 px-8 py-3 bg-linear-to-r from-blue-600 to-purple-600 rounded-lg font-bold text-lg"
+                        className="mt-8"
                       >
                         Got it!
-                      </motion.button>
+                      </Button>
                     </div>
                   </motion.div>
                 )}
@@ -924,15 +921,15 @@ export default function SpaceShooterGame() {
                           New High Score!
                         </p>
                       )}
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                      <Button
+                        variant="gradient"
+                        size="lg"
                         onClick={resetGame}
-                        className="px-8 py-3 bg-linear-to-r from-blue-600 to-purple-600 rounded-lg font-bold text-lg flex items-center gap-2 mx-auto"
+                        icon={<RotateCcw size={20} />}
+                        className="mx-auto"
                       >
-                        <RotateCcw size={20} />
                         Play Again
-                      </motion.button>
+                      </Button>
                     </div>
                   </motion.div>
                 )}

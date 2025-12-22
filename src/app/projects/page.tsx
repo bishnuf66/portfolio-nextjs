@@ -9,6 +9,7 @@ import {
 } from "@/utils/colorUtils";
 import { Select } from "@/components/ui/Select";
 import useStore from "@/store/store";
+import { Button } from "@/components/ui/Button";
 import {
   Briefcase,
   Code,
@@ -138,7 +139,7 @@ export default function ProjectsPage() {
         <AnimatedSection animation="fadeIn" className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <WorkflowIcon size={40} className="text-purple-500" />
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold bg-linear-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
               Projects
             </h1>
           </div>
@@ -196,13 +197,14 @@ export default function ProjectsPage() {
 
             {/* Clear Filters */}
             {hasActiveFilters && (
-              <button
+              <Button
+                variant="outline"
+                size="md"
                 onClick={clearFilters}
-                className={`flex items-center gap-2 px-4 py-3 ${colorScheme.text.secondary} hover:${colorScheme.text.primary} ${colorScheme.border.primary} rounded-lg hover:${colorScheme.background.tertiary} transition-colors`}
+                icon={<X size={16} />}
               >
-                <X size={16} />
                 Clear
-              </button>
+              </Button>
             )}
           </div>
 
@@ -219,23 +221,22 @@ export default function ProjectsPage() {
               { field: "name" as SortField, label: "Name" },
               { field: "is_featured" as SortField, label: "Featured" },
             ].map(({ field, label }) => (
-              <button
+              <Button
                 key={field}
+                variant={sortField === field ? "primary" : "ghost"}
+                size="sm"
                 onClick={() => handleSort(field)}
-                className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  sortField === field
-                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                    : `${colorScheme.text.secondary} hover:${colorScheme.background.tertiary}`
-                }`}
-              >
-                {label}
-                {sortField === field &&
+                icon={
+                  sortField === field &&
                   (sortOrder === "asc" ? (
                     <SortAsc size={14} />
                   ) : (
                     <SortDesc size={14} />
-                  ))}
-              </button>
+                  ))
+                }
+              >
+                {label}
+              </Button>
             ))}
           </div>
 
@@ -261,16 +262,15 @@ export default function ProjectsPage() {
             const isActive = activeTab === tab.id;
 
             return (
-              <button
+              <Button
                 key={tab.id}
+                variant={isActive ? "gradient" : "outline"}
+                size="lg"
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  isActive
-                    ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg`
-                    : `${colorScheme.background.secondary} ${colorScheme.text.secondary} hover:${colorScheme.background.tertiary} ${colorScheme.border.primary} border`
-                }`}
+                icon={<Icon size={20} />}
+                iconPosition="left"
+                className="transform hover:scale-105"
               >
-                <Icon size={20} />
                 <span>{tab.label}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-xs font-bold ${
@@ -279,7 +279,7 @@ export default function ProjectsPage() {
                 >
                   {tab.count}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </StaggeredContainer>
@@ -322,7 +322,7 @@ export default function ProjectsPage() {
                   <stat.icon size={18} className="text-yellow-500" />
                 )}
                 <div
-                  className={`text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+                  className={`text-3xl font-bold bg-linear-to-r ${stat.gradient} bg-clip-text text-transparent`}
                 >
                   {stat.value}
                 </div>
@@ -350,12 +350,13 @@ export default function ProjectsPage() {
             <p className={`text-xl ${colorScheme.text.secondary} mb-4`}>
               Failed to load projects. Please try again.
             </p>
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Retry
-            </button>
+            </Button>
           </AnimatedSection>
         ) : projects.length === 0 ? (
           <AnimatedSection animation="fadeIn" className="text-center py-20">
@@ -368,12 +369,14 @@ export default function ProjectsPage() {
                 : `No projects found in "${activeTab}" category.`}
             </p>
             {hasActiveFilters && (
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={clearFilters}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4"
               >
                 Clear Filters
-              </button>
+              </Button>
             )}
           </AnimatedSection>
         ) : (

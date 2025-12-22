@@ -12,6 +12,7 @@ import {
 } from "@/hooks/useTestimonials";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
+import { Button } from "@/components/ui/Button";
 import {
   Edit2,
   Trash2,
@@ -22,6 +23,7 @@ import {
   SortDesc,
   Filter,
   X,
+  RotateCcw,
   RefreshCw,
   Grid,
   List,
@@ -144,7 +146,8 @@ export default function TestimonialManager() {
   const handleDelete = async (id: string) => {
     const ok = await confirm({
       title: "Delete testimonial",
-      message: "Are you sure you want to delete this testimonial? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this testimonial? This action cannot be undone.",
       confirmText: "Delete",
       confirmVariant: "danger",
     });
@@ -164,13 +167,14 @@ export default function TestimonialManager() {
     <>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold">Testimonials</h2>
-        <button
+        <Button
+          variant="primary"
+          size="md"
           onClick={() => router.push("/dashboard/testimonials/add")}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          icon={<Plus size={20} />}
         >
-          <Plus size={20} />
           Add Testimonial
-        </button>
+        </Button>
       </div>
 
       {/* Search and Filter Controls */}
@@ -197,66 +201,54 @@ export default function TestimonialManager() {
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors`}
+                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-linear-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700`}
               />
               {searchTerm && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  icon={<X size={16} />}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
                 >
-                  <X size={16} />
-                </button>
+                  Clear
+                </Button>
               )}
             </div>
           </div>
 
           {/* View Mode Toggle */}
           <div className="flex border rounded-lg overflow-hidden">
-            <button
+            <Button
+              variant={viewMode === "list" ? "primary" : "ghost"}
+              size="sm"
               onClick={() => setViewMode("list")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
-                viewMode === "list"
-                  ? "bg-blue-500 text-white"
-                  : `${
-                      isDarkMode
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`
-              }`}
+              icon={<List size={16} />}
+              className="rounded-none border-0"
             >
-              <List size={16} />
               List
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={viewMode === "grid" ? "primary" : "ghost"}
+              size="sm"
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
-                viewMode === "grid"
-                  ? "bg-blue-500 text-white"
-                  : `${
-                      isDarkMode
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`
-              }`}
+              icon={<Grid size={16} />}
+              className="rounded-none border-0"
             >
-              <Grid size={16} />
               Grid
-            </button>
+            </Button>
           </div>
 
           {/* Refresh Button */}
-          <button
+          <Button
+            variant="outline"
+            size="md"
             onClick={handleRefresh}
             disabled={loading}
-            className={`px-4 py-2 flex items-center gap-2 border rounded-lg transition-colors ${
-              isDarkMode
-                ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            icon={<RotateCcw size={16} />}
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             Refresh
-          </button>
+          </Button>
         </div>
 
         {/* Second Row - Filters */}
@@ -317,7 +309,9 @@ export default function TestimonialManager() {
             <Select
               value={itemsPerPage.toString()}
               onChange={(e) =>
-                handleItemsPerPageChange(Number((e.target as HTMLSelectElement).value))
+                handleItemsPerPageChange(
+                  Number((e.target as HTMLSelectElement).value)
+                )
               }
               options={[
                 { value: "5", label: "5 per page" },
@@ -331,13 +325,14 @@ export default function TestimonialManager() {
           {/* Clear Filters */}
           {hasActiveFilters && (
             <div className="flex items-end">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={clearFilters}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                icon={<X size={16} />}
               >
-                <X size={16} />
                 Clear All
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -355,23 +350,22 @@ export default function TestimonialManager() {
             { field: "rating" as SortField, label: "Rating" },
             { field: "published" as SortField, label: "Status" },
           ].map(({ field, label }) => (
-            <button
+            <Button
               key={field}
+              variant={sortField === field ? "primary" : "ghost"}
+              size="sm"
               onClick={() => handleSort(field)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                sortField === field
-                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              {label}
-              {sortField === field &&
+              icon={
+                sortField === field &&
                 (sortOrder === "asc" ? (
                   <SortAsc size={14} />
                 ) : (
                   <SortDesc size={14} />
-                ))}
-            </button>
+                ))
+              }
+            >
+              {label}
+            </Button>
           ))}
         </div>
 
@@ -427,7 +421,7 @@ export default function TestimonialManager() {
             } shadow-lg border`}
           >
             <div
-              className={`text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+              className={`text-3xl font-bold bg-linear-to-r ${stat.gradient} bg-clip-text text-transparent`}
             >
               {stat.value}
             </div>
@@ -466,7 +460,7 @@ export default function TestimonialManager() {
                 </div>
               ) : (
                 <div className="flex gap-6">
-                  <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full flex-shrink-0"></div>
+                  <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full shrink-0"></div>
                   <div className="flex-1 space-y-2">
                     <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
                     <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
@@ -534,20 +528,26 @@ export default function TestimonialManager() {
                     {testimonial.name}
                   </h3>
                   <div className="flex gap-1">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleEdit(testimonial)}
-                      className="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                      icon={<Edit2 size={14} />}
+                      className="p-1.5"
                       title="Edit testimonial"
                     >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(testimonial.id)}
-                      className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                      icon={<Trash2 size={14} />}
+                      className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
                       title="Delete testimonial"
                     >
-                      <Trash2 size={14} />
-                    </button>
+                      Delete
+                    </Button>
                   </div>
                 </div>
 
@@ -608,13 +608,13 @@ export default function TestimonialManager() {
                     width={80}
                     height={80}
                     unoptimized
-                    className="w-20 h-20 object-cover rounded-full flex-shrink-0"
+                    className="w-20 h-20 object-cover rounded-full shrink-0"
                   />
                 ) : (
                   <div
                     className={`w-20 h-20 rounded-full ${
                       isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                    } flex items-center justify-center text-2xl font-bold flex-shrink-0`}
+                    } flex items-center justify-center text-2xl font-bold shrink-0`}
                   >
                     {testimonial.name.charAt(0)}
                   </div>
@@ -673,21 +673,27 @@ export default function TestimonialManager() {
                           )}
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <button
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleEdit(testimonial)}
-                        className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                        icon={<Edit2 size={16} />}
+                        className="p-2"
                         title="Edit testimonial"
                       >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleDelete(testimonial.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                        icon={<Trash2 size={16} />}
+                        className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
                         title="Delete testimonial"
                       >
-                        <Trash2 size={16} />
-                      </button>
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -717,12 +723,9 @@ export default function TestimonialManager() {
               : "No testimonials found. Add your first testimonial!"}
           </p>
           {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
+            <Button variant="primary" size="md" onClick={clearFilters}>
               Clear All Filters
-            </button>
+            </Button>
           )}
         </div>
       ) : null}

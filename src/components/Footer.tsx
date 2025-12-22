@@ -9,6 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { scrollToTop } from "@/utils/scrollUtils";
 import DownloadCVButton from "./DownloadCVButton";
 import { colorScheme } from "@/utils/colorUtils";
+import { Button } from "@/components/ui/Button";
 
 const Footer = () => {
   const { isDarkMode } = useStore();
@@ -306,10 +307,10 @@ const Footer = () => {
               href="https://github.com/bishnuf66/portfolio-nextjs"
               target="_blank"
               rel="noopener noreferrer"
-              className={`text-sm flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+              className={`text-sm flex items-center gap-2 px-4 py-2 rounded-lg transition-all border ${
                 isDarkMode
-                  ? "bg-gray-800 text-gray-300 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white"
+                  ? "bg-gray-800 text-gray-300 border-gray-600 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white hover:border-transparent"
+                  : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-linear-to-r hover:from-purple-600 hover:to-pink-600 hover:text-white hover:border-transparent"
               }`}
             >
               <Code2 className="w-4 h-4" />
@@ -317,18 +318,16 @@ const Footer = () => {
             </a>
           </div>
 
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={scrollToTop}
-            className={`p-2 rounded-lg transition-all ${
-              isDarkMode
-                ? "bg-gray-800 hover:bg-blue-600"
-                : "bg-gray-100 hover:bg-blue-500 hover:text-white"
-            }`}
+            icon={<ArrowUp className="w-5 h-5" />}
             aria-label="Scroll to top"
             title="Scroll to top"
           >
-            <ArrowUp className="w-5 h-5" />
-          </button>
+            Scroll to top
+          </Button>
         </div>
       </div>
     </footer>

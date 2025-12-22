@@ -6,6 +6,7 @@ import { ImageCarousel } from "@/components/ui/ImageCarousel";
 import { Tabs } from "@/components/ui/AnimatedTabs";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { MovingBorder } from "@/components/ui/MovingBorder";
+import { Button } from "@/components/ui/Button";
 import {
   ArrowLeft,
   ExternalLink,
@@ -368,12 +369,15 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {/* Back Button */}
           <AnimatedSection animation="slideRight">
             <nav aria-label="Breadcrumb">
-              <Link
-                href="/projects"
-                className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${colorScheme.text.secondary} hover:${colorScheme.text.primary} hover:${colorScheme.background.tertiary}`}
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Projects
+              <Link href="/projects">
+                <Button
+                  variant="outline"
+                  size="md"
+                  icon={<ArrowLeft className="w-5 h-5" />}
+                  className="mb-8"
+                >
+                  Back to Projects
+                </Button>
               </Link>
             </nav>
           </AnimatedSection>

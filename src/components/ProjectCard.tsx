@@ -8,6 +8,7 @@ import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { ExternalLink, Code, Star } from "lucide-react";
 import Image from "next/image";
 import { getSafeImageUrl, createImageErrorHandler } from "@/utils/imageUtils";
+import { Button } from "@/components/ui/Button";
 
 interface ProjectCardProps {
   id: string;
@@ -31,37 +32,38 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   isFeatured = false,
 }) => {
   const { isDarkMode } = useStore();
+
   const safeImageUrl = getSafeImageUrl(image);
   const handleImageError = createImageErrorHandler();
 
   const handleProjectClick = () => {
-    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
-      trackSectionInteraction("project-card", "click", {
+    import("@/lib/analytics").then(({ trackProjectInteraction }) => {
+      trackProjectInteraction("project-card", "click", {
         projectId: id,
         projectName: name,
-        projectUrl: link,
-        source: "external-link"
+        action: "view-live-project",
       });
     });
   };
 
   const handleDetailsClick = () => {
-    import("@/lib/analytics").then(({ trackSectionInteraction }) => {
-      trackSectionInteraction("project-card", "click", {
+    import("@/lib/analytics").then(({ trackProjectInteraction }) => {
+      trackProjectInteraction("project-card", "click", {
         projectId: id,
         projectName: name,
-        source: "details-page"
+        action: "view-project-details",
       });
     });
   };
 
   return (
-    <CardContainer className="inter-var w-full">
+    <CardContainer className="inter-var max-w-120">
       <CardBody
-        className={`relative group/card w-full max-w-[30rem] mx-auto h-auto rounded-xl p-6 border ${isDarkMode
-          ? "bg-black border-white/20 hover:shadow-2xl hover:shadow-emerald-500/10"
-          : "bg-gray-50 border-black/10 hover:shadow-2xl hover:shadow-blue-500/10"
-          }`}
+        className={`relative group/card w-full max-w-120 mx-auto h-auto rounded-xl p-6 border ${
+          isDarkMode
+            ? "bg-black border-white/20 hover:shadow-2xl hover:shadow-emerald-500/10"
+            : "bg-gray-50 border-black/10 hover:shadow-2xl hover:shadow-blue-500/10"
+        }`}
       >
         {/* Project Title */}
         <CardItem
@@ -70,7 +72,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         >
           {name}
           {isFeatured && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-semibold rounded-full">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-linear-to-r from-yellow-500 to-orange-500 text-white text-xs font-semibold rounded-full">
               <Star size={12} fill="currentColor" />
               Featured
             </span>
@@ -81,8 +83,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <CardItem
           as="div"
           translateZ="60"
-          className={`text-sm max-w-sm mt-2 line-clamp-1 ${isDarkMode ? "text-neutral-300" : "text-neutral-500"
-            } prose prose-sm max-w-none`}
+          className={`text-sm max-w-sm mt-2 line-clamp-1 ${
+            isDarkMode ? "text-neutral-300" : "text-neutral-500"
+          } prose prose-sm max-w-none`}
           dangerouslySetInnerHTML={{ __html: description }}
         />
 
@@ -112,48 +115,49 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {techStack.split(",").map((tech: string, index: number) => (
               <span
                 key={index}
-                className={`px-3 py-1 rounded-full text-xs font-medium h-fit ${isDarkMode
-                  ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
-                  : "bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
-                  }`}
+                className={`px-3 py-1 rounded-full text-xs font-medium h-fit ${
+                  isDarkMode
+                    ? "bg-linear-to-r from-blue-500/20 to-purple-500/20 text-blue-300 border border-blue-500/30"
+                    : "bg-linear-to-r from-blue-100 to-purple-100 text-blue-700 border border-blue-200"
+                }`}
               >
                 {tech.trim()}
               </span>
             ))}
             {/* Fade out effect for overflow */}
-            <div className={`absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-l ${isDarkMode ? "from-gray-800" : "from-gray-50"} to-transparent pointer-events-none`}></div>
+            <div
+              className={`absolute bottom-0 right-0 w-8 h-8 bg-linear-to-l ${
+                isDarkMode ? "from-gray-800" : "from-gray-50"
+              } to-transparent pointer-events-none`}
+            ></div>
           </div>
         </CardItem>
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center mt-6">
-          <CardItem
-            translateZ={20}
-            as="a"
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleProjectClick}
-            className={`px-6 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 ${isDarkMode
-              ? "bg-white text-black hover:bg-gray-100"
-              : "bg-black text-white hover:bg-gray-800"
-              } transition-colors duration-200`}
-          >
-            View Project
-            <ExternalLink className="w-4 h-4" />
+          <CardItem translateZ={20}>
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleProjectClick}
+            >
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<ExternalLink className="w-4 h-4" />}
+              >
+                View Project
+              </Button>
+            </a>
           </CardItem>
 
-          <CardItem
-            translateZ={20}
-            as={Link}
-            href={`/projects/${slug}`}
-            onClick={handleDetailsClick}
-            className={`px-6 py-2 rounded-xl text-sm font-normal border ${isDarkMode
-              ? "border-white/20 text-white hover:bg-white/10"
-              : "border-black/10 text-black hover:bg-black/5"
-              } transition-colors duration-200 cursor-pointer`}
-          >
-            Details →
+          <CardItem translateZ={20}>
+            <Link href={`/projects/${slug}`} onClick={handleDetailsClick}>
+              <Button variant="outline" size="sm">
+                Details →
+              </Button>
+            </Link>
           </CardItem>
         </div>
       </CardBody>
