@@ -357,106 +357,259 @@ export default function TestimonialManager() {
         ))}
       </div>
 
-      <div className="grid gap-6">
-        {paginatedData.map((testimonial) => (
-          <div
-            key={testimonial.id}
-            className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg p-6 shadow-lg`}
-          >
-            <div className="flex gap-6">
-              {testimonial.avatar_url ? (
-                <Image
-                  src={testimonial.avatar_url}
-                  alt={testimonial.name}
-                  width={80}
-                  height={80}
-                  unoptimized
-                  className="w-20 h-20 object-cover rounded-full"
-                />
+      {/* Testimonials Display */}
+      {loading ? (
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "grid gap-6"}>
+          {Array.from({ length: itemsPerPage }).map((_, i) => (
+            <div
+              key={i}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"} rounded-lg p-6 shadow-lg animate-pulse`}
+            >
+              {viewMode === "grid" ? (
+                <div className="space-y-4">
+                  <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto"></div>
+                  <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                </div>
               ) : (
-                <div
-                  className={`w-20 h-20 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"
-                    } flex items-center justify-center text-2xl font-bold`}
-                >
-                  {testimonial.name.charAt(0)}
+                <div className="flex gap-6">
+                  <div className="w-20 h-20 bg-gray-300 dark:bg-gray-600 rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
+                  </div>
                 </div>
               )}
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xl font-bold">{testimonial.name}</h3>
-                      <span
-                        className={`px-2 py-1 text-xs rounded ${testimonial.published
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                          }`}
-                      >
-                        {testimonial.published ? "Published" : "Draft"}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      {testimonial.role}
-                      {testimonial.company && ` at ${testimonial.company}`}
-                    </p>
-                    {testimonial.rating && (
-                      <div className="flex gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={16}
-                            className={
-                              i < testimonial.rating!
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-400"
-                            }
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      {testimonial.content}
-                    </p>
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>⚠️</div>
+          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-4`}>
+            Failed to load testimonials. Please try again.
+          </p>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      ) : viewMode === "grid" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial: Testimonial) => (
+            <div
+              key={testimonial.id}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow`}
+            >
+              <div className="text-center space-y-4">
+                {testimonial.avatar_url ? (
+                  <Image
+                    src={testimonial.avatar_url}
+                    alt={testimonial.name}
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="w-20 h-20 object-cover rounded-full mx-auto"
+                  />
+                ) : (
+                  <div
+                    className={`w-20 h-20 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                      } flex items-center justify-center text-2xl font-bold mx-auto`}
+                  >
+                    {testimonial.name.charAt(0)}
                   </div>
-                  <div className="flex gap-2">
+                )}
+
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold truncate">{testimonial.name}</h3>
+                  <div className="flex gap-1">
                     <button
                       onClick={() => handleEdit(testimonial)}
-                      className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded"
+                      className="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                      title="Edit testimonial"
                     >
-                      <Edit2 size={16} />
+                      <Edit2 size={14} />
                     </button>
                     <button
                       onClick={() => handleDelete(testimonial.id)}
-                      className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded"
+                      className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                      title="Delete testimonial"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm justify-center">
+                  <span
+                    className={`px-2 py-1 text-xs rounded ${testimonial.published
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      }`}
+                  >
+                    {testimonial.published ? "Published" : "Draft"}
+                  </span>
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {testimonial.role}
+                  {testimonial.company && ` at ${testimonial.company}`}
+                </p>
+
+                {testimonial.rating && (
+                  <div className="flex gap-1 justify-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={16}
+                        className={
+                          i < testimonial.rating!
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-400"
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                  {testimonial.content}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {testimonials.map((testimonial: Testimonial) => (
+            <div
+              key={testimonial.id}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow`}
+            >
+              <div className="flex gap-6">
+                {testimonial.avatar_url ? (
+                  <Image
+                    src={testimonial.avatar_url}
+                    alt={testimonial.name}
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="w-20 h-20 object-cover rounded-full flex-shrink-0"
+                  />
+                ) : (
+                  <div
+                    className={`w-20 h-20 rounded-full ${isDarkMode ? "bg-gray-700" : "bg-gray-200"
+                      } flex items-center justify-center text-2xl font-bold flex-shrink-0`}
+                  >
+                    {testimonial.name.charAt(0)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className="text-xl font-bold truncate">{testimonial.name}</h3>
+                        <span
+                          className={`px-2 py-1 text-xs rounded ${testimonial.published
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            }`}
+                        >
+                          {testimonial.published ? "Published" : "Draft"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {testimonial.role}
+                        {testimonial.company && ` at ${testimonial.company}`}
+                      </p>
+                      {testimonial.rating && (
+                        <div className="flex gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={16}
+                              className={
+                                i < testimonial.rating!
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-400"
+                              }
+                            />
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                        {testimonial.content}
+                      </p>
+                      <div className="text-sm text-gray-500 mt-2">
+                        Created: {new Date(testimonial.created_at).toLocaleDateString()}
+                        {testimonial.updated_at && testimonial.updated_at !== testimonial.created_at && (
+                          <span> • Updated: {new Date(testimonial.updated_at).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleEdit(testimonial)}
+                        className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                        title="Edit testimonial"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(testimonial.id)}
+                        className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                        title="Delete testimonial"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {testimonials.length === 0 ? (
+      {/* Empty State */}
+      {testimonials.length === 0 && !loading && !error ? (
         <div className="text-center py-12">
           <div className={`text-6xl mb-4 ${isDarkMode ? "text-gray-700" : "text-gray-300"}`}>
-            💬
+            {hasActiveFilters ? "🔍" : "💬"}
           </div>
-          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-            No testimonials found. Add your first testimonial!
+          <p className={`text-xl ${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-4`}>
+            {hasActiveFilters
+              ? "No testimonials match your search criteria."
+              : "No testimonials found. Add your first testimonial!"
+            }
           </p>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Clear All Filters
+            </button>
+          )}
         </div>
-      ) : (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={goToPage}
-          itemsPerPage={5}
-          totalItems={testimonials.length}
-        />
+      ) : null}
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={setCurrentPage}
+            itemsPerPage={pagination.pageSize}
+            totalItems={pagination.totalItems}
+          />
+        </div>
       )}
     </>
   );

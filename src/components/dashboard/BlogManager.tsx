@@ -406,7 +406,7 @@ export default function BlogManager() {
                   />
                 </div>
               )}
-
+              
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold truncate">{blog.title}</h3>
@@ -427,7 +427,7 @@ export default function BlogManager() {
                     </button>
                   </div>
                 </div>
-
+                
                 <div className="flex items-center gap-2 text-sm">
                   <span
                     className={`px-2 py-1 text-xs rounded ${blog.published
@@ -438,11 +438,11 @@ export default function BlogManager() {
                     {blog.published ? "Published" : "Draft"}
                   </span>
                 </div>
-
+                
                 <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
                   {blog.excerpt}
                 </p>
-
+                
                 <div className="flex flex-wrap gap-1">
                   {blog.tags.slice(0, 3).map((tag: string, index: number) => (
                     <span
@@ -458,7 +458,7 @@ export default function BlogManager() {
                     </span>
                   )}
                 </div>
-
+                
                 <div className="text-sm text-gray-500">
                   By {blog.author} • {new Date(blog.created_at).toLocaleDateString()}
                 </div>
