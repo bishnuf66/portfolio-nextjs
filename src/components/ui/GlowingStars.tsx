@@ -10,17 +10,22 @@ export const GlowingStarsBackgroundCard = ({
   children?: React.ReactNode;
   glowingStarsCount?: number;
 }) => {
-  // Default to hovered state on mobile/touch devices
-  const [mouseEnter, setMouseEnter] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth < 768 || "ontouchstart" in window;
-    }
-    return false;
-  });
+  const [mouseEnter, setMouseEnter] = useState(false);
 
   // Handle both mouse and touch events
   const handleEnter = () => setMouseEnter(true);
   const handleLeave = () => setMouseEnter(false);
+
+  useEffect(() => {
+    // Defer state updates to avoid cascading renders
+    requestAnimationFrame(() => {
+      // Default to hovered state on mobile/touch devices
+      if (typeof window !== "undefined") {
+        const isMobile = window.innerWidth < 768 || "ontouchstart" in window;
+        setMouseEnter(isMobile);
+      }
+    });
+  }, []);
 
   return (
     <div
