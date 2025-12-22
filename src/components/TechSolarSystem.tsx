@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, Suspense, useState, useMemo, useEffect } from "react";
+import React, { useRef, Suspense, useState, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -195,6 +195,15 @@ export default function TechSolarSystem() {
   const { isDarkMode } = useStore();
   const [activePlanet, setActivePlanet] = useState<string | null>(null);
 
+  const [isMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const isMobileViewport = window.innerWidth < 768;
+    const isCoarsePointer = window.matchMedia
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
+    return isMobileViewport || isCoarsePointer;
+  });
+
   const planets = [
     {
       name: "React",
@@ -333,11 +342,20 @@ export default function TechSolarSystem() {
         } backdrop-blur-sm border ${
           isDarkMode ? "border-gray-800" : "border-gray-700"
         }`}
-        style={{ height: "600px" }}
+        style={{ height: isMobile ? "420px" : "600px" }}
       >
-        <Canvas camera={{ position: [0, 5, 15], fov: 60 }}>
+        <Canvas
+          camera={{ position: [0, 5, 15], fov: isMobile ? 65 : 60 }}
+          dpr={isMobile ? [1, 1.25] : [1, 2]}
+          gl={{ powerPreference: "high-performance", antialias: !isMobile }}
+        >
           <Suspense fallback={null}>
-            <Stars radius={100} depth={50} count={5000} factor={4} />
+            <Stars
+              radius={100}
+              depth={50}
+              count={isMobile ? 1500 : 5000}
+              factor={isMobile ? 2 : 4}
+            />
             <color attach="background" args={["#000011"]} />
 
             <ambientLight intensity={0.2} />
@@ -354,25 +372,27 @@ export default function TechSolarSystem() {
             ))}
 
             <OrbitControls
-              enablePan={true}
-              enableZoom={true}
-              zoomSpeed={0.6}
+              enablePan={!isMobile}
+              enableZoom={!isMobile}
+              zoomSpeed={isMobile ? 0.4 : 0.6}
               rotateSpeed={0.5}
               maxDistance={30}
               minDistance={5}
               autoRotate
-              autoRotateSpeed={0.5}
+              autoRotateSpeed={isMobile ? 0.35 : 0.5}
             />
 
-            <EffectComposer>
-              <Bloom
-                luminanceThreshold={0.2}
-                luminanceSmoothing={0.9}
-                intensity={0.8}
-              />
-              <Vignette eskil={false} offset={0.1} darkness={0.5} />
-              <Noise opacity={0.02} />
-            </EffectComposer>
+            {!isMobile && (
+              <EffectComposer>
+                <Bloom
+                  luminanceThreshold={0.2}
+                  luminanceSmoothing={0.9}
+                  intensity={0.8}
+                />
+                <Vignette eskil={false} offset={0.1} darkness={0.5} />
+                <Noise opacity={0.02} />
+              </EffectComposer>
+            )}
           </Suspense>
         </Canvas>
 
