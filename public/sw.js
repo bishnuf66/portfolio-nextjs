@@ -99,10 +99,13 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => {
-          // Return offline page for navigation requests
+          // Always return a valid Response in error cases
           if (request.mode === "navigate") {
-            return caches.match("/");
+            return caches.match("/").then((fallback) => fallback || Response.error());
           }
+
+          // Generic offline fallback for non-navigation requests
+          return new Response("Offline", { status: 503, statusText: "Offline" });
         });
     })
   );

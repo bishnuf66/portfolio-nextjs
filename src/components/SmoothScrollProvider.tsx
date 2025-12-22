@@ -11,6 +11,17 @@ export default function SmoothScrollProvider({
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isMobileViewport = window.innerWidth < 768;
+    const isCoarsePointer = window.matchMedia
+      ? window.matchMedia("(pointer: coarse)").matches
+      : false;
+
+    if (isMobileViewport || isCoarsePointer) {
+      return;
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
