@@ -201,7 +201,7 @@ export default function TestimonialManager() {
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors bg-linear-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700`}
+                } focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors bg-linear-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700`}
               />
               {searchTerm && (
                 <Button

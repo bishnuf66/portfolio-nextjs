@@ -456,8 +456,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                 onChange={handleNameChange}
                 className={`w-full px-3 py-2 border rounded-lg ${
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    ? "bg-gray-700 border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
+                    : "bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 } focus:outline-none focus:ring-1`}
               />
             </div>
@@ -494,8 +494,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    ? "bg-gray-700 border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
+                    : "bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 } focus:outline-none focus:ring-1`}
                 placeholder="https://example.com"
               />
@@ -538,8 +538,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                 }
                 className={`w-full px-3 py-2 border rounded-lg ${
                   isDarkMode
-                    ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                    : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    ? "bg-gray-700 border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
+                    : "bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 } focus:outline-none focus:ring-1`}
               />
             </div>
@@ -745,8 +745,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                               placeholder="Enter a title for this image..."
                               className={`w-full px-3 py-2 border rounded-lg ${
                                 isDarkMode
-                                  ? "bg-gray-600 border-gray-500 focus:border-blue-500 focus:ring-blue-500"
-                                  : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                  ? "bg-gray-600 border-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
+                                  : "bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                               } focus:outline-none focus:ring-1`}
                             />
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -814,8 +814,8 @@ const ProjectFormPage: React.FC<ProjectFormPageProps> = ({
                                   placeholder="Enter a title for this image..."
                                   className={`w-full px-3 py-2 border rounded-lg ${
                                     isDarkMode
-                                      ? "bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
-                                      : "bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                      ? "bg-gray-700 border-gray-600 focus:border-indigo-500 focus:ring-indigo-500"
+                                      : "bg-white border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                                   } focus:outline-none focus:ring-1`}
                                 />
                               </div>

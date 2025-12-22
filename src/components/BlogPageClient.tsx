@@ -337,7 +337,7 @@ export function BlogPageClient({ blogs }: BlogPageClientProps) {
                   )}
                   <div className="p-6">
                     <h2
-                      className={`text-2xl font-bold mb-3 group-hover:text-purple-500 transition-colors ${
+                      className={`text-2xl font-bold mb-3 group-hover:text-indigo-500 transition-colors ${
                         isDarkMode ? "text-white" : "text-gray-900"
                       }`}
                     >

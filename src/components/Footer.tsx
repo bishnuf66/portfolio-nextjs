@@ -80,8 +80,8 @@ const Footer = () => {
                   href="/#home"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("home")}
                 >
@@ -93,8 +93,8 @@ const Footer = () => {
                   href="/#projects"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("projects")}
                 >
@@ -106,8 +106,8 @@ const Footer = () => {
                   href="/projects"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                 >
                   All Projects
@@ -118,8 +118,8 @@ const Footer = () => {
                   href="/#blog"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("blog")}
                 >
@@ -131,8 +131,8 @@ const Footer = () => {
                   href="/blog"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                 >
                   All Articles
@@ -143,8 +143,8 @@ const Footer = () => {
                   href="/#contact"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("contact")}
                 >
@@ -169,8 +169,8 @@ const Footer = () => {
                   href="/#tech-stack"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("tech-stack")}
                 >
@@ -182,8 +182,8 @@ const Footer = () => {
                   href="/#testimonials"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("testimonials")}
                 >
@@ -195,8 +195,8 @@ const Footer = () => {
                   href="/#game"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                   onClick={handleSectionClick("game")}
                 >
@@ -208,8 +208,8 @@ const Footer = () => {
                   href="/dashboard"
                   className={`text-sm transition-colors hover:underline ${
                     isDarkMode
-                      ? "text-gray-400 hover:text-blue-400"
-                      : "text-gray-600 hover:text-blue-600"
+                      ? "text-gray-400 hover:text-indigo-400"
+                      : "text-gray-600 hover:text-indigo-600"
                   }`}
                 >
                   Dashboard

@@ -35,7 +35,11 @@ export const Select: React.FC<SelectProps> = ({
   }, [value, defaultValue, options]);
 
   const selectedIndex = useMemo(
-    () => Math.max(0, options.findIndex((o) => o.value === currentValue)),
+    () =>
+      Math.max(
+        0,
+        options.findIndex((o) => o.value === currentValue)
+      ),
     [options, currentValue]
   );
 
@@ -49,7 +53,10 @@ export const Select: React.FC<SelectProps> = ({
   // Close on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -97,7 +104,9 @@ export const Select: React.FC<SelectProps> = ({
       }
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setHighlightIndex((i) => Math.min(options.length - 1, (i < 0 ? selectedIndex : i) + 1));
+        setHighlightIndex((i) =>
+          Math.min(options.length - 1, (i < 0 ? selectedIndex : i) + 1)
+        );
         listRef.current?.scrollTo({
           top: Math.max(0, (highlightIndex + 1) * 36 - 144),
           behavior: "smooth",
@@ -126,10 +135,12 @@ export const Select: React.FC<SelectProps> = ({
 
   // Styling
   const buttonBase =
-    "w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-2";
+    "w-full px-3 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-2";
   const colorFixes =
     "text-light-text dark:text-dark-text bg-light-primary dark:bg-dark-tertiary placeholder-light-text-muted dark:placeholder-dark-text-muted border-light-border dark:border-dark-border";
-  const buttonClasses = `${getSelectClasses(`${buttonBase} ${colorFixes} ${className}`)}`;
+  const buttonClasses = `${getSelectClasses(
+    `${buttonBase} ${colorFixes} ${className}`
+  )}`;
 
   const listClasses =
     "absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-lg shadow-lg border border-light-border dark:border-dark-border bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100";
@@ -169,7 +180,9 @@ export const Select: React.FC<SelectProps> = ({
         onKeyDown={onKeyDown}
         disabled={disabled}
       >
-        <span className="truncate text-left">{selectedOption?.label ?? "Select..."}</span>
+        <span className="truncate text-left">
+          {selectedOption?.label ?? "Select..."}
+        </span>
         {/* Chevron */}
         <svg
           className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400"
@@ -207,9 +220,7 @@ export const Select: React.FC<SelectProps> = ({
               highlighted
                 ? "bg-gray-100 dark:bg-neutral-800"
                 : "bg-transparent",
-              selected
-                ? "text-blue-700 dark:text-blue-300"
-                : "text-inherit",
+              selected ? "text-blue-700 dark:text-blue-300" : "text-inherit",
             ].join(" ");
             return (
               <li
