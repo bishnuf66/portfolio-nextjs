@@ -17,7 +17,8 @@ import {
   Globe,
   Layers,
   Terminal,
-  Zap,
+  Smartphone,
+  AppWindow,
 } from "lucide-react";
 import ThreeCanvas from "./ThreeCanvas";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
@@ -51,8 +52,7 @@ export default function UnifiedShowcase() {
   return (
     <div
       ref={containerRef}
-      className={`relative ${colorScheme.page
-        } overflow-x-hidden max-w-[100vw]`}
+      className={`relative ${colorScheme.page} overflow-x-hidden max-w-[100vw]`}
     >
       {/* Hero Section with Solar System */}
       <section
@@ -74,8 +74,9 @@ export default function UnifiedShowcase() {
               </ParallaxText>
               <SplitTextReveal
                 text="Building digital experiences that blend creativity with functionality. Every pixel matters. Every interaction counts."
-                className={`text-xl md:text-2xl leading-relaxed ${isDarkMode ? "opacity-80" : "text-gray-700"
-                  }`}
+                className={`text-xl md:text-2xl leading-relaxed ${
+                  isDarkMode ? "opacity-80" : "text-gray-700"
+                }`}
               />
             </div>
           </ScrollReveal>
@@ -119,6 +120,19 @@ export default function UnifiedShowcase() {
 
             <ScrollReveal direction="up" delay={0.2}>
               <BentoGridItem
+                title="Mobile Development"
+                description="Cross-platform mobile apps with React Native and Flutter for iOS and Android"
+                header={
+                  <div className="flex items-center justify-center h-full bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                    <Smartphone className="w-16 h-16 text-white" />
+                  </div>
+                }
+                icon={<AppWindow className="w-6 h-6 text-indigo-500" />}
+              />
+            </ScrollReveal>
+
+            <ScrollReveal direction="up" delay={0.3}>
+              <BentoGridItem
                 title="Backend Architecture"
                 description="Scalable server-side solutions with Node.js, Express, and databases"
                 header={
@@ -132,14 +146,14 @@ export default function UnifiedShowcase() {
 
             <ScrollReveal direction="up" delay={0.3}>
               <BentoGridItem
-                title="Full Stack Magic"
-                description="End-to-end application development from concept to deployment"
+                title="Mobile Development"
+                description="Cross-platform mobile apps with React Native and Flutter for iOS and Android"
                 header={
-                  <div className="flex items-center justify-center h-full bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
-                    <Rocket className="w-16 h-16 text-white" />
+                  <div className="flex items-center justify-center h-full bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                    <Smartphone className="w-16 h-16 text-white" />
                   </div>
                 }
-                icon={<Zap className="w-6 h-6 text-orange-500" />}
+                icon={<AppWindow className="w-6 h-6 text-indigo-500" />}
               />
             </ScrollReveal>
 
@@ -179,8 +193,9 @@ export default function UnifiedShowcase() {
                 />
               </div>
               <p
-                className={`text-xl ${isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
+                className={`text-xl ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
               >
                 Explore my technology universe - Interactive 3D solar system
               </p>
@@ -221,6 +236,34 @@ export default function UnifiedShowcase() {
                 <GlowingStarsBackgroundCard>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
                     <h3 className="text-2xl font-bold text-white mb-4">
+                      Mobile
+                    </h3>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {[
+                        "React Native",
+                        "Flutter",
+                        "iOS",
+                        "Android",
+                        "Expo",
+                      ].map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </GlowingStarsBackgroundCard>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal direction="up" delay={0.3}>
+              <div className="h-full">
+                <GlowingStarsBackgroundCard>
+                  <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
+                    <h3 className="text-2xl font-bold text-white mb-4">
                       Backend
                     </h3>
                     <div className="flex flex-wrap gap-2 justify-center">
@@ -243,8 +286,10 @@ export default function UnifiedShowcase() {
                 </GlowingStarsBackgroundCard>
               </div>
             </ScrollReveal>
+          </div>
 
-            <ScrollReveal direction="up" delay={0.3}>
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <ScrollReveal direction="up" delay={0.4}>
               <div className="h-full">
                 <GlowingStarsBackgroundCard>
                   <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
@@ -262,6 +307,34 @@ export default function UnifiedShowcase() {
                           </span>
                         )
                       )}
+                    </div>
+                  </div>
+                </GlowingStarsBackgroundCard>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal direction="up" delay={0.5}>
+              <div className="h-full">
+                <GlowingStarsBackgroundCard>
+                  <div className="text-center h-full flex flex-col justify-between min-h-[200px] py-6">
+                    <h3 className="text-2xl font-bold text-white mb-4">
+                      DevOps
+                    </h3>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {[
+                        "CI/CD",
+                        "Kubernetes",
+                        "Jenkins",
+                        "Terraform",
+                        "GitHub Actions",
+                      ].map((tech) => (
+                        <span
+                          key={tech}
+                          className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full text-sm"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </GlowingStarsBackgroundCard>
