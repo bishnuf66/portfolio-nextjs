@@ -16,7 +16,9 @@ const SimpleCursor = () => {
   const [cursorType, setCursorType] = useState("default");
   const [isVisible, setIsVisible] = useState(false);
   const [trail, setTrail] = useState<TrailPoint[]>([]);
-  const [clickRipples, setClickRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [clickRipples, setClickRipples] = useState<
+    Array<{ id: number; x: number; y: number }>
+  >([]);
   const [mounted, setMounted] = useState(false);
   const [supportsHover, setSupportsHover] = useState(false);
   const [cursorEnabled, setCursorEnabled] = useState(true);
@@ -27,17 +29,27 @@ const SimpleCursor = () => {
 
   // Initialize on mount
   useEffect(() => {
-    setMounted(true);
+    const rafId = requestAnimationFrame(() => {
+      setMounted(true);
 
-    // Check device capabilities
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const hasHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    setSupportsHover(!isMobile && hasHover);
+      // Check device capabilities - disable cursor entirely on mobile
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const hasHover = window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      ).matches;
+      const canUseCustomCursor = !isMobile && hasHover;
+      setSupportsHover(canUseCustomCursor);
 
-    // Check initial cursor state from localStorage
-    const stored = localStorage.getItem("customCursorEnabled");
-    const initialEnabled = stored !== null ? JSON.parse(stored) : true;
-    setCursorEnabled(initialEnabled);
+      // Check initial cursor state from localStorage
+      const stored = localStorage.getItem("customCursorEnabled");
+      const initialEnabled = stored !== null ? JSON.parse(stored) : true;
+      setCursorEnabled(initialEnabled && canUseCustomCursor);
+    });
+
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   // Setup event listeners
@@ -46,15 +58,28 @@ const SimpleCursor = () => {
 
     // Listen for cursor toggle events
     const handleCursorToggle = (e: CustomEvent) => {
-      setCursorEnabled(e.detail.enabled);
-      if (!e.detail.enabled) {
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const hasHover = window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      ).matches;
+      const canUseCustomCursor = !isMobile && hasHover;
+
+      const newEnabled = e.detail.enabled && canUseCustomCursor;
+      setCursorEnabled(newEnabled);
+      if (!newEnabled) {
         setIsVisible(false);
       }
     };
 
     // Listen for media query changes
     const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
 
     const handleChange = (e: MediaQueryListEvent) => {
       setSupportsHover(!isMobile && e.matches);
@@ -63,11 +88,17 @@ const SimpleCursor = () => {
       }
     };
 
-    window.addEventListener('cursorToggle', handleCursorToggle as EventListener);
+    window.addEventListener(
+      "cursorToggle",
+      handleCursorToggle as EventListener
+    );
     mediaQuery.addEventListener("change", handleChange);
 
     return () => {
-      window.removeEventListener('cursorToggle', handleCursorToggle as EventListener);
+      window.removeEventListener(
+        "cursorToggle",
+        handleCursorToggle as EventListener
+      );
       mediaQuery.removeEventListener("change", handleChange);
     };
   }, [mounted]);
@@ -123,7 +154,7 @@ const SimpleCursor = () => {
     return () => clearInterval(intervalId);
   }, [position, mounted, supportsHover, cursorEnabled]);
 
-  // Mouse event handlers
+  // Mouse event handlers and style management
   useEffect(() => {
     if (!mounted || !supportsHover || !cursorEnabled) return;
 
@@ -169,7 +200,9 @@ const SimpleCursor = () => {
       setClickRipples((prev) => [...prev, newRipple]);
 
       setTimeout(() => {
-        setClickRipples((prev) => prev.filter((ripple) => ripple.id !== rippleId));
+        setClickRipples((prev) =>
+          prev.filter((ripple) => ripple.id !== rippleId)
+        );
       }, 800);
     };
 
@@ -186,7 +219,7 @@ const SimpleCursor = () => {
       setIsVisible(true);
     };
 
-    // Apply custom cursor styles
+    // Apply custom cursor styles only when cursor is enabled
     const style = document.createElement("style");
     style.id = "custom-cursor-style";
     style.textContent = `
@@ -205,8 +238,12 @@ const SimpleCursor = () => {
     document.addEventListener("mousemove", updatePosition, { passive: true });
     document.addEventListener("mousedown", handleMouseDown, { passive: true });
     document.addEventListener("mouseup", handleMouseUp, { passive: true });
-    document.addEventListener("mouseleave", handleMouseLeave, { passive: true });
-    document.addEventListener("mouseenter", handleMouseEnter, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeave, {
+      passive: true,
+    });
+    document.addEventListener("mouseenter", handleMouseEnter, {
+      passive: true,
+    });
 
     return () => {
       isActive = false;
@@ -226,7 +263,27 @@ const SimpleCursor = () => {
     };
   }, [mounted, supportsHover, cursorEnabled]);
 
-  if (!mounted || !supportsHover || !isVisible || !cursorEnabled) return null;
+  // Clean up styles when cursor is disabled
+  useEffect(() => {
+    if (!cursorEnabled) {
+      const existingStyle = document.getElementById("custom-cursor-style");
+      if (existingStyle) {
+        document.head.removeChild(existingStyle);
+      }
+    }
+  }, [cursorEnabled]);
+
+  // Early return for mobile devices - never render cursor on mobile
+  if (!mounted) return null;
+
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  const hasHover = window.matchMedia(
+    "(hover: hover) and (pointer: fine)"
+  ).matches;
+  if (isMobile || !hasHover || !isVisible || !cursorEnabled) return null;
 
   const getCursorSize = () => {
     switch (cursorType) {
@@ -265,7 +322,11 @@ const SimpleCursor = () => {
               top: point.y - 3,
               width: 6,
               height: 6,
-              background: `radial-gradient(circle, ${getCursorColor()}${Math.floor(opacity * 100).toString().padStart(2, '0')} 0%, transparent 70%)`,
+              background: `radial-gradient(circle, ${getCursorColor()}${Math.floor(
+                opacity * 100
+              )
+                .toString()
+                .padStart(2, "0")} 0%, transparent 70%)`,
               transform: `scale(${scale})`,
               opacity: opacity,
             }}
@@ -312,7 +373,9 @@ const SimpleCursor = () => {
         style={{
           left: position.x - getCursorSize() / 2,
           top: position.y - getCursorSize() / 2,
-          transform: `scale(${isClicking ? 0.85 : 1}) rotate(${isHovering ? 45 : 0}deg)`,
+          transform: `scale(${isClicking ? 0.85 : 1}) rotate(${
+            isHovering ? 45 : 0
+          }deg)`,
         }}
       >
         {/* Outer glow */}

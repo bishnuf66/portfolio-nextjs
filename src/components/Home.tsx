@@ -111,22 +111,24 @@ const Home = () => {
               {/* Left: Text Content */}
               <div className="space-y-6 pt-20 lg:pt-0">
                 <h1 className="font-display text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500">
-                  <Typewriter
-                    words={[
-                      "Bishnu BK",
-                      "Top Fullstack Developer Nepal",
-                      "Best Frontend Developer Nepal",
-                      "Expert Backend Developer Nepal",
-                      "React.js Expert Nepal",
-                      "Next.js Developer Nepal",
-                    ]}
-                    loop={0}
-                    cursor
-                    cursorStyle="|"
-                    typeSpeed={100}
-                    deleteSpeed={80}
-                    delaySpeed={2000}
-                  />
+                  <div className="min-h-[3.6em] md:min-h-[3.3em] flex items-start">
+                    <Typewriter
+                      words={[
+                        "Bishnu BK",
+                        "Top Fullstack Developer Nepal",
+                        "Best Frontend Developer Nepal",
+                        "Expert Backend Developer Nepal",
+                        "React.js Expert Nepal",
+                        "Next.js Developer Nepal",
+                      ]}
+                      loop={0}
+                      cursor
+                      cursorStyle="|"
+                      typeSpeed={100}
+                      deleteSpeed={80}
+                      delaySpeed={2000}
+                    />
+                  </div>
                 </h1>
 
                 <p
