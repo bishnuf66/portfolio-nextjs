@@ -11,11 +11,11 @@ import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ConsentManager from "@/components/ConsentManager";
 import CustomCursor from "@/components/CustomCursor";
 import ScrollProgressBar from "@/components/ui/ScrollProgressBar";
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
-
+import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +41,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bishnubk.com.np"),
   title: {
-    default: "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
+    default:
+      "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
     template: "%s | Bishnu BK - Nepal's Leading Web Developer",
   },
   description:
@@ -155,9 +156,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-    ],
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
   },
   verification: {
     google:
@@ -210,22 +209,22 @@ export default function RootLayout({
       "MERN Stack Development",
       "UI/UX Design",
       "API Development",
-      "Database Design"
+      "Database Design",
     ],
     sameAs: [
       "https://github.com/bishnuf66",
       "https://linkedin.com/in/bishnubk",
-      "https://twitter.com/bishnubk"
+      "https://twitter.com/bishnubk",
     ],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Kathmandu",
-      addressCountry: "Nepal"
+      addressCountry: "Nepal",
     },
     worksFor: {
       "@type": "Organization",
-      name: "Top Web Development Services Nepal"
-    }
+      name: "Top Web Development Services Nepal",
+    },
   };
 
   const websiteSchema = {
@@ -243,14 +242,15 @@ export default function RootLayout({
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://www.bishnubk.com.np/search?q={search_term_string}"
+        urlTemplate:
+          "https://www.bishnubk.com.np/search?q={search_term_string}",
       },
-      "query-input": "required name=search_term_string"
+      "query-input": "required name=search_term_string",
     },
     mainEntity: {
       "@type": "Person",
-      name: "Bishnu BK"
-    }
+      name: "Bishnu BK",
+    },
   };
 
   const organizationSchema = {
@@ -259,20 +259,21 @@ export default function RootLayout({
     name: "Bishnu BK - Top Web Development Services Nepal",
     url: "https://www.bishnubk.com.np",
     logo: "https://www.bishnubk.com.np/logo.png",
-    description: "Top professional web development services in Nepal specializing in modern technologies. Best Fullstack, Frontend, and Backend development services in Kathmandu, Nepal.",
+    description:
+      "Top professional web development services in Nepal specializing in modern technologies. Best Fullstack, Frontend, and Backend development services in Kathmandu, Nepal.",
     founder: {
       "@type": "Person",
-      name: "Bishnu BK"
+      name: "Bishnu BK",
     },
     serviceType: "Web Development Services Nepal",
     areaServed: {
       "@type": "Country",
-      name: "Nepal"
+      name: "Nepal",
     },
     address: {
       "@type": "PostalAddress",
       addressLocality: "Kathmandu",
-      addressCountry: "Nepal"
+      addressCountry: "Nepal",
     },
     hasOfferCatalog: {
       "@type": "OfferCatalog",
@@ -283,35 +284,38 @@ export default function RootLayout({
           itemOffered: {
             "@type": "Service",
             name: "Top Fullstack Development Nepal",
-            description: "Complete fullstack web development services using React, Next.js, Node.js"
-          }
+            description:
+              "Complete fullstack web development services using React, Next.js, Node.js",
+          },
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
             name: "Best Frontend Development Nepal",
-            description: "Modern frontend development with React, Next.js, TypeScript"
-          }
+            description:
+              "Modern frontend development with React, Next.js, TypeScript",
+          },
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
             name: "Expert Backend Development Nepal",
-            description: "Robust backend development with Node.js, MongoDB, PostgreSQL"
-          }
+            description:
+              "Robust backend development with Node.js, MongoDB, PostgreSQL",
+          },
         },
         {
           "@type": "Offer",
           itemOffered: {
             "@type": "Service",
             name: "MERN Stack Development Nepal",
-            description: "Complete MERN stack development services"
-          }
-        }
-      ]
-    }
+            description: "Complete MERN stack development services",
+          },
+        },
+      ],
+    },
   };
 
   return (
@@ -319,7 +323,11 @@ export default function RootLayout({
       <head>
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         {/* DNS prefetch for external resources */}
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
@@ -335,7 +343,9 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
         />
 
         {/* Additional meta tags for better SEO */}
@@ -362,50 +372,49 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* <SmoothScrollProvider> */}
-        <QueryProvider>
-          <AuthProvider>
-            <ThemeProvider>
-              <AnalyticsProvider>
-                <ServiceWorkerProvider />
-                <ConfirmDialogProvider>
-                  <ScrollProgressBar />
-                  <Header />
-                  <main id="main-content" role="main">
-                    {children}
-                  </main>
-                  <Footer />
-                  <ConsentManager />
-                  <CustomCursor />
-                  <ToastContainer
-                  position="top-right"
-                  autoClose={3000}
-                  hideProgressBar
-                  newestOnTop
-                  closeButton={false}
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                  toastStyle={{
-                    backgroundColor: "#333",
-                    color: "#fff",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    padding: "12px 20px",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                    maxWidth: "400px",
-                  }}
-                />
-                </ConfirmDialogProvider>
-              </AnalyticsProvider>
-            </ThemeProvider>
-          </AuthProvider>
-        </QueryProvider>
-        <SpeedInsights />
-        <Analytics />
-
-        {/* </SmoothScrollProvider> */}
+        <SmoothScrollProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <AnalyticsProvider>
+                  <ServiceWorkerProvider />
+                  <ConfirmDialogProvider>
+                    <ScrollProgressBar />
+                    <Header />
+                    <main id="main-content" role="main">
+                      {children}
+                    </main>
+                    <Footer />
+                    <ConsentManager />
+                    <CustomCursor />
+                    <ToastContainer
+                      position="top-right"
+                      autoClose={3000}
+                      hideProgressBar
+                      newestOnTop
+                      closeButton={false}
+                      rtl={false}
+                      pauseOnFocusLoss
+                      draggable
+                      pauseOnHover
+                      toastStyle={{
+                        backgroundColor: "#333",
+                        color: "#fff",
+                        borderRadius: "8px",
+                        fontSize: "16px",
+                        padding: "12px 20px",
+                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                        maxWidth: "400px",
+                      }}
+                    />
+                  </ConfirmDialogProvider>
+                </AnalyticsProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </QueryProvider>
+          <SpeedInsights />
+          <Analytics />
+        </SmoothScrollProvider>
       </body>
     </html>
   );
