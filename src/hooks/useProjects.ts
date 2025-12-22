@@ -10,6 +10,8 @@ export function useProjects() {
             const response = await api.get("/projects");
             return response.data as Project[];
         },
+        staleTime: 0, // Always consider data stale to force fresh fetches
+        gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
     });
 }
 
@@ -21,6 +23,8 @@ export function useFeaturedProjects() {
             const response = await api.get("/projects?featured=true&limit=6");
             return response.data as Project[];
         },
+        staleTime: 0, // Always consider data stale to force fresh fetches
+        gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
     });
 }
 
@@ -63,7 +67,7 @@ export function useUpdateProject() {
                 updatedProject,
             );
 
-            // Update the specific project in cache immediately
+            // Update the specific project in both caches immediately
             queryClient.setQueryData(
                 ["projects"],
                 (oldData: Project[] | undefined) => {
@@ -76,11 +80,46 @@ export function useUpdateProject() {
                 },
             );
 
-            // Also invalidate to ensure fresh data for both regular and featured projects
+            // Also update the featured projects cache if this project is featured
+            queryClient.setQueryData(
+                ["projects", "featured"],
+                (oldData: Project[] | undefined) => {
+                    if (!oldData) return oldData;
+
+                    // If the updated project is featured, add/update it in featured cache
+                    if (updatedProject.is_featured) {
+                        const existingIndex = oldData.findIndex((p) =>
+                            p.id === updatedProject.id
+                        );
+                        if (existingIndex >= 0) {
+                            // Update existing featured project
+                            return oldData.map((project) =>
+                                project.id === updatedProject.id
+                                    ? updatedProject
+                                    : project
+                            );
+                        } else {
+                            // Add new featured project (limit to 6)
+                            return [updatedProject, ...oldData].slice(0, 6);
+                        }
+                    } else {
+                        // Remove from featured cache if no longer featured
+                        return oldData.filter((p) =>
+                            p.id !== updatedProject.id
+                        );
+                    }
+                },
+            );
+
+            // Force invalidate and refetch to ensure consistency
             queryClient.invalidateQueries({ queryKey: ["projects"] });
             queryClient.invalidateQueries({
                 queryKey: ["projects", "featured"],
             });
+
+            // Force refetch immediately
+            queryClient.refetchQueries({ queryKey: ["projects"] });
+            queryClient.refetchQueries({ queryKey: ["projects", "featured"] });
         },
         onError: (error: unknown) => {
             console.error("Project update failed:", error);

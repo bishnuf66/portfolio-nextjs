@@ -102,6 +102,8 @@ export async function PUT(
         }
 
         const body = await request.json();
+        console.log("PUT request received for project:", slug);
+        console.log("Update data received:", body);
 
         // Validate input data
         const validation = validateProjectData(body);
@@ -125,27 +127,38 @@ export async function PUT(
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
                 .test(slug);
 
+        console.log("Is UUID:", isUUID);
+        console.log("Updating project with data:", body);
+
         let updateQuery = authenticatedSupabase
             .from("projects")
             .update<ProjectUpdateData>(body);
 
         if (isUUID) {
             updateQuery = updateQuery.eq("id", slug);
+            console.log("Updating by ID:", slug);
         } else {
             updateQuery = updateQuery.eq("slug", slug);
+            console.log("Updating by slug:", slug);
         }
 
         const { data, error } = await updateQuery.select();
 
+        console.log("Update result:", { data, error });
+
         if (error) {
+            console.error("Update error:", error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
         if (!data || data.length === 0) {
+            console.log("No data returned from update");
             return NextResponse.json({ error: "Project not found" }, {
                 status: 404,
             });
         }
+
+        console.log("Update successful, returning:", data[0]);
 
         // Revalidate pages after updating project
         revalidatePath("/");
