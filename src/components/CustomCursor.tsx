@@ -20,7 +20,7 @@ interface RippleEffect {
 
 // Move mobile detection to a custom hook
 const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null); // Start with null to indicate loading
 
   useEffect(() => {
     const checkMobile = () => {
@@ -40,17 +40,11 @@ const useIsMobile = () => {
       return isMobileViewport || isCoarsePointer || isTouchDevice || isMobileUA;
     };
 
-    // Defer initial state update to avoid cascading renders
-    requestAnimationFrame(() => {
-      setIsMobile(checkMobile());
-    });
+    setIsMobile(checkMobile());
 
     // Optional: handle resize for responsive design
     const handleResize = () => {
-      // Defer state update to avoid cascading renders
-      requestAnimationFrame(() => {
-        setIsMobile(checkMobile());
-      });
+      setIsMobile(checkMobile());
     };
 
     window.addEventListener("resize", handleResize);
@@ -70,20 +64,11 @@ const CustomCursor = () => {
   const rippleContainerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
-  // Check if mobile FIRST
+  // Check if mobile FIRST - null means still determining
   const isMobile = useIsMobile();
 
-  const [isEnabled, setIsEnabled] = useState(() => {
-    // Respect user's saved preference, but don't enable on mobile
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("customCursorEnabled");
-      if (stored !== null) {
-        const userPreference = JSON.parse(stored);
-        return userPreference && !isMobile; // Only enable if user wants it AND not mobile
-      }
-    }
-    return !isMobile; // Default: don't enable on mobile
-  });
+  // Don't render anything until we know if we're on mobile
+  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
 
   // Use refs for position to avoid re-renders
   const mousePositionRef = useRef({ x: 0, y: 0 });
@@ -101,12 +86,39 @@ const CustomCursor = () => {
   const trailIdRef = useRef(0);
   const rippleIdRef = useRef(0);
 
+  // Initialize enabled state after we know if we're on mobile
+  useEffect(() => {
+    if (isMobile === null) return; // Still loading
+
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("customCursorEnabled");
+      if (stored !== null) {
+        const userPreference = JSON.parse(stored);
+        setIsEnabled(userPreference && !isMobile);
+      } else {
+        setIsEnabled(!isMobile); // Default: enable on desktop, disable on mobile
+      }
+    } else {
+      setIsEnabled(!isMobile);
+    }
+  }, [isMobile]);
+
   // Listen for cursor toggle events
   useEffect(() => {
-    // Always listen for toggle events, regardless of current state
+    if (isEnabled === null) return; // Still loading
+
     const handleCursorToggle = (e: CustomEvent) => {
       // Only enable if user wants it AND not on mobile
-      setIsEnabled(e.detail.enabled && !isMobile);
+      const shouldEnable = e.detail.enabled && !isMobile;
+      setIsEnabled(shouldEnable);
+
+      // Save preference
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "customCursorEnabled",
+          JSON.stringify(e.detail.enabled)
+        );
+      }
     };
 
     window.addEventListener(
@@ -119,7 +131,7 @@ const CustomCursor = () => {
         handleCursorToggle as EventListener
       );
     };
-  }, [isMobile]);
+  }, [isMobile, isEnabled]);
 
   const updateTrail = useCallback(() => {
     if (isMobile || !isEnabled) return;
@@ -338,8 +350,8 @@ const CustomCursor = () => {
   );
 
   useEffect(() => {
-    // Don't initialize anything if mobile or disabled
-    if (isMobile || !isEnabled) {
+    // Don't initialize anything if still loading, mobile, or disabled
+    if (isMobile === null || isEnabled === null || isMobile || !isEnabled) {
       // Make sure default cursor is restored
       document.body.style.cursor = "auto";
       document.documentElement.style.cursor = "auto";
@@ -423,7 +435,7 @@ const CustomCursor = () => {
     cursorTheme,
     updateTrail,
     isHovering,
-    isMobile, // Add isMobile as dependency
+    isMobile,
   ]);
 
   // Ensure default cursor on mobile/disabled
@@ -434,8 +446,8 @@ const CustomCursor = () => {
     }
   }, [isMobile, isEnabled]);
 
-  // Don't render anything on mobile or when disabled
-  if (isMobile || !isEnabled) {
+  // Don't render anything while loading, on mobile, or when disabled
+  if (isMobile === null || isEnabled === null || isMobile || !isEnabled) {
     return null;
   }
 
@@ -505,13 +517,9 @@ const CustomCursor = () => {
       )}
 
       <style jsx global>{`
-        ${!isMobile && isEnabled
-          ? `
-          * {
-            cursor: none !important;
-          }
-        `
-          : ""}
+        * {
+          cursor: none !important;
+        }
 
         @keyframes ripple-expand {
           0% {
