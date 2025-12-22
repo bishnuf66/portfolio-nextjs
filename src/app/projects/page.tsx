@@ -67,15 +67,6 @@ export default function ProjectsPage() {
     : [];
   const pagination = projectsResponse?.pagination;
 
-  // Debug logging
-  console.log("Projects page debug:", {
-    activeTab,
-    loading,    isRefetching,    projectsLength: projects.length,
-    projectsResponse: projectsResponse ? "has response" : "no response",
-    hasData: !!projectsResponse?.data,
-    isArray: Array.isArray(projectsResponse?.data),
-  });
-
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -376,10 +367,6 @@ export default function ProjectsPage() {
               {hasActiveFilters
                 ? "No projects match your search criteria."
                 : `No projects found in "${activeTab}" category.`}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Debug: loading={loading.toString()}, error={error ? "yes" : "no"},
-              projectsLength={projects.length}
             </p>
             {hasActiveFilters && (
               <button
