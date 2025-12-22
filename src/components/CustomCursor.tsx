@@ -18,6 +18,48 @@ interface RippleEffect {
   timestamp: number;
 }
 
+// Move mobile detection to a custom hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window === "undefined") return true;
+
+      const isMobileViewport = window.innerWidth < 768;
+      const isCoarsePointer = window.matchMedia
+        ? window.matchMedia("(pointer: coarse)").matches
+        : false;
+      const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      const isMobileUA =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+
+      return isMobileViewport || isCoarsePointer || isTouchDevice || isMobileUA;
+    };
+
+    // Defer initial state update to avoid cascading renders
+    requestAnimationFrame(() => {
+      setIsMobile(checkMobile());
+    });
+
+    // Optional: handle resize for responsive design
+    const handleResize = () => {
+      // Defer state update to avoid cascading renders
+      requestAnimationFrame(() => {
+        setIsMobile(checkMobile());
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+};
+
 const CustomCursor = () => {
   const { isDarkMode } = useStore();
   const cursorTheme = useCursorTheme(isDarkMode);
@@ -28,12 +70,19 @@ const CustomCursor = () => {
   const rippleContainerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
+  // Check if mobile FIRST
+  const isMobile = useIsMobile();
+
   const [isEnabled, setIsEnabled] = useState(() => {
+    // Respect user's saved preference, but don't enable on mobile
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("customCursorEnabled");
-      return stored !== null ? JSON.parse(stored) : true;
+      if (stored !== null) {
+        const userPreference = JSON.parse(stored);
+        return userPreference && !isMobile; // Only enable if user wants it AND not mobile
+      }
     }
-    return true;
+    return !isMobile; // Default: don't enable on mobile
   });
 
   // Use refs for position to avoid re-renders
@@ -54,8 +103,10 @@ const CustomCursor = () => {
 
   // Listen for cursor toggle events
   useEffect(() => {
+    // Always listen for toggle events, regardless of current state
     const handleCursorToggle = (e: CustomEvent) => {
-      setIsEnabled(e.detail.enabled);
+      // Only enable if user wants it AND not on mobile
+      setIsEnabled(e.detail.enabled && !isMobile);
     };
 
     window.addEventListener(
@@ -68,9 +119,11 @@ const CustomCursor = () => {
         handleCursorToggle as EventListener
       );
     };
-  }, []);
+  }, [isMobile]);
 
   const updateTrail = useCallback(() => {
+    if (isMobile || !isEnabled) return;
+
     const now = Date.now();
     const newTrail: TrailPoint = {
       x: mousePositionRef.current.x,
@@ -124,10 +177,12 @@ const CustomCursor = () => {
         container.appendChild(trailElement);
       });
     }
-  }, [cursorTheme]);
+  }, [cursorTheme, isMobile, isEnabled]);
 
   const createRipple = useCallback(
     (x: number, y: number) => {
+      if (isMobile || !isEnabled) return;
+
       const ripple: RippleEffect = {
         x,
         y,
@@ -190,16 +245,21 @@ const CustomCursor = () => {
         }, 800);
       }
     },
-    [cursorTheme]
+    [cursorTheme, isMobile, isEnabled]
   );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    mousePositionRef.current.x = e.clientX;
-    mousePositionRef.current.y = e.clientY;
-  }, []);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (isMobile || !isEnabled) return;
+      mousePositionRef.current.x = e.clientX;
+      mousePositionRef.current.y = e.clientY;
+    },
+    [isMobile, isEnabled]
+  );
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
+      if (isMobile || !isEnabled) return;
       isClickingRef.current = true;
       createRipple(e.clientX, e.clientY);
 
@@ -207,19 +267,22 @@ const CustomCursor = () => {
         cursorRef.current.style.transform += " scale(0.8)";
       }
     },
-    [createRipple]
+    [createRipple, isMobile, isEnabled]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (isMobile || !isEnabled) return;
     isClickingRef.current = false;
     if (cursorRef.current) {
       cursorRef.current.style.transform =
         cursorRef.current.style.transform.replace(" scale(0.8)", "");
     }
-  }, []);
+  }, [isMobile, isEnabled]);
 
   const handleMouseOver = useCallback(
     (e: MouseEvent) => {
+      if (isMobile || !isEnabled) return;
+
       const target = e.target as HTMLElement;
       let newVariant = "default";
       let hovering = false;
@@ -271,28 +334,13 @@ const CustomCursor = () => {
         }
       }
     },
-    [cursorTheme, isHovering]
+    [cursorTheme, isHovering, isMobile, isEnabled]
   );
 
   useEffect(() => {
-    const isMobileEnv = () => {
-      if (typeof window === "undefined") return false;
-      const isMobileViewport = window.innerWidth < 768;
-      const isCoarsePointer = window.matchMedia
-        ? window.matchMedia("(pointer: coarse)").matches
-        : false;
-      const isTouchDevice =
-        "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      const isMobileUA =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
-      return isMobileViewport || isCoarsePointer || isTouchDevice || isMobileUA;
-    };
-
-    // Check if mobile or cursor is disabled
-    if (isMobileEnv() || !isEnabled) {
-      // Restore default cursor
+    // Don't initialize anything if mobile or disabled
+    if (isMobile || !isEnabled) {
+      // Make sure default cursor is restored
       document.body.style.cursor = "auto";
       document.documentElement.style.cursor = "auto";
       return;
@@ -375,19 +423,21 @@ const CustomCursor = () => {
     cursorTheme,
     updateTrail,
     isHovering,
+    isMobile, // Add isMobile as dependency
   ]);
 
-  // Don't render on mobile or when disabled
-  const isMobileEnv =
-    typeof window !== "undefined" &&
-    (window.innerWidth < 768 ||
-      (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) ||
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0);
-  if (isMobileEnv || !isEnabled) return null;
+  // Ensure default cursor on mobile/disabled
+  useEffect(() => {
+    if (isMobile || !isEnabled) {
+      document.body.style.cursor = "auto";
+      document.documentElement.style.cursor = "auto";
+    }
+  }, [isMobile, isEnabled]);
+
+  // Don't render anything on mobile or when disabled
+  if (isMobile || !isEnabled) {
+    return null;
+  }
 
   const currentStyles = getCursorVariantStyles(cursorVariant, cursorTheme);
 
@@ -455,15 +505,13 @@ const CustomCursor = () => {
       )}
 
       <style jsx global>{`
-        * {
-          cursor: none !important;
-        }
-
-        @media (max-width: 768px) {
+        ${!isMobile && isEnabled
+          ? `
           * {
-            cursor: auto !important;
+            cursor: none !important;
           }
-        }
+        `
+          : ""}
 
         @keyframes ripple-expand {
           0% {
