@@ -61,17 +61,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
     ? null
     : projectsResponse?.pagination;
 
-  // Debug logging
-  console.log("Frontend Debug:", {
-    featuredFilter,
-    featuredParam,
-    isArray: Array.isArray(projectsResponse),
-    responseKeys: projectsResponse ? Object.keys(projectsResponse) : 'no response',
-    projectsResponse,
-    extractedProjects: projects,
-    projectsLength: projects.length
-  });
-
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -416,7 +405,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                 </div>
 
                 <div className="flex flex-wrap gap-1">
-                  {project.tech_stack.slice(0, 3).map((tech, index) => (
+                  {project.tech_stack.slice(0, 3).map((tech: string, index: number) => (
                     <span
                       key={index}
                       className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-xs"
@@ -502,7 +491,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
                         }}
                       />
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {project.tech_stack.map((tech, index) => (
+                        {project.tech_stack.map((tech: string, index: number) => (
                           <span
                             key={index}
                             className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded text-sm"

@@ -1,58 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Upload, FileText, Trash2, Download, Eye, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import useStore from "@/store/store";
 import { toast } from "react-toastify";
-
-interface CVDocument {
-    id: string;
-    filename: string;
-    original_filename: string;
-    file_url: string;
-    file_size: number;
-    mime_type: string;
-    is_active: boolean;
-    uploaded_at: string;
-    updated_at: string;
-}
+import { useCVDocuments, useUploadCV, useSetActiveCV, useDeleteCV, CVDocument } from "@/hooks/useCV";
 
 const CVManager: React.FC = () => {
     const { isDarkMode } = useStore();
-    const [cvDocuments, setCvDocuments] = useState<CVDocument[]>([]);
-    const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
-    useEffect(() => {
-        fetchCVDocuments();
-    }, []);
-
-    const fetchCVDocuments = async () => {
-        try {
-            const { getSupabase } = await import("@/lib/supabase");
-            const {
-                data: { session },
-            } = await getSupabase().auth.getSession();
-
-            const headers: HeadersInit = {};
-            if (session?.access_token) {
-                headers["Authorization"] = `Bearer ${session.access_token}`;
-            }
-
-            const response = await fetch("/api/cv", { headers });
-            if (response.ok) {
-                const data = await response.json();
-                setCvDocuments(data);
-            } else {
-                console.error("Failed to fetch CV documents");
-            }
-        } catch (error) {
-            console.error("Error fetching CV documents:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Use React Query hooks
+    const { data: cvDocuments = [], isLoading: loading, error } = useCVDocuments();
+    const uploadCVMutation = useUploadCV();
+    const setActiveCVMutation = useSetActiveCV();
+    const deleteCVMutation = useDeleteCV();
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -74,39 +37,13 @@ const CVManager: React.FC = () => {
         setUploadProgress(0);
 
         try {
-            const { getSupabase } = await import("@/lib/supabase");
-            const {
-                data: { session },
-            } = await getSupabase().auth.getSession();
-
-            const headers: HeadersInit = {};
-            if (session?.access_token) {
-                headers["Authorization"] = `Bearer ${session.access_token}`;
-            }
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const response = await fetch("/api/cv/upload", {
-                method: "POST",
-                headers,
-                body: formData,
-            });
-
-            if (response.ok) {
-                const newCV = await response.json();
-                setCvDocuments((prev) => [newCV, ...prev]);
-                toast.success("CV uploaded successfully!");
-
-                // Reset file input
-                event.target.value = "";
-            } else {
-                const error = await response.json();
-                toast.error(error.message || "Failed to upload CV");
-            }
-        } catch (error) {
+            await uploadCVMutation.mutateAsync(file);
+            toast.success("CV uploaded successfully!");
+            // Reset file input
+            event.target.value = "";
+        } catch (error: any) {
             console.error("Error uploading CV:", error);
-            toast.error("Failed to upload CV");
+            toast.error(error.response?.data?.error || "Failed to upload CV");
         } finally {
             setUploading(false);
             setUploadProgress(0);
@@ -115,36 +52,11 @@ const CVManager: React.FC = () => {
 
     const handleSetActive = async (id: string) => {
         try {
-            const { getSupabase } = await import("@/lib/supabase");
-            const {
-                data: { session },
-            } = await getSupabase().auth.getSession();
-
-            const headers: HeadersInit = {};
-            if (session?.access_token) {
-                headers["Authorization"] = `Bearer ${session.access_token}`;
-            }
-
-            const response = await fetch(`/api/cv/${id}/activate`, {
-                method: "PATCH",
-                headers,
-            });
-
-            if (response.ok) {
-                const updatedCV = await response.json();
-                setCvDocuments((prev) =>
-                    prev.map((cv) => ({
-                        ...cv,
-                        is_active: cv.id === id,
-                    }))
-                );
-                toast.success("CV set as active successfully!");
-            } else {
-                toast.error("Failed to set CV as active");
-            }
-        } catch (error) {
+            await setActiveCVMutation.mutateAsync(id);
+            toast.success("CV set as active successfully!");
+        } catch (error: any) {
             console.error("Error setting CV as active:", error);
-            toast.error("Failed to set CV as active");
+            toast.error(error.response?.data?.error || "Failed to set CV as active");
         }
     };
 
@@ -152,30 +64,11 @@ const CVManager: React.FC = () => {
         if (!confirm("Are you sure you want to delete this CV?")) return;
 
         try {
-            const { getSupabase } = await import("@/lib/supabase");
-            const {
-                data: { session },
-            } = await getSupabase().auth.getSession();
-
-            const headers: HeadersInit = {};
-            if (session?.access_token) {
-                headers["Authorization"] = `Bearer ${session.access_token}`;
-            }
-
-            const response = await fetch(`/api/cv/${id}`, {
-                method: "DELETE",
-                headers,
-            });
-
-            if (response.ok) {
-                setCvDocuments((prev) => prev.filter((cv) => cv.id !== id));
-                toast.success("CV deleted successfully!");
-            } else {
-                toast.error("Failed to delete CV");
-            }
-        } catch (error) {
+            await deleteCVMutation.mutateAsync(id);
+            toast.success("CV deleted successfully!");
+        } catch (error: any) {
             console.error("Error deleting CV:", error);
-            toast.error("Failed to delete CV");
+            toast.error(error.response?.data?.error || "Failed to delete CV");
         }
     };
 
@@ -197,11 +90,20 @@ const CVManager: React.FC = () => {
         });
     };
 
-    if (loading) {
+    if (loading || error) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin" />
-                <span className="ml-2">Loading CV documents...</span>
+                {loading ? (
+                    <>
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                        <span className="ml-2">Loading CV documents...</span>
+                    </>
+                ) : (
+                    <>
+                        <AlertCircle className="w-8 h-8 text-red-500" />
+                        <span className="ml-2 text-red-500">Failed to load CV documents</span>
+                    </>
+                )}
             </div>
         );
     }

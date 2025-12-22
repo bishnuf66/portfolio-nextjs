@@ -1,34 +1,108 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useStore from "@/store/store";
 import { Blog } from "@/types/blog";
 import {
-  useBlogs,
   useDeleteBlog,
+  useBlogsFiltered,
+  useBlogCounts,
 } from "@/hooks/useBlogs";
 import { DashboardSkeleton } from "@/components/LoadingSkeleton";
-import { Edit2, Trash2, Plus } from "lucide-react";
-import { usePagination } from "@/hooks/usePagination";
+import { Edit2, Trash2, Plus, Search, SortAsc, SortDesc, Filter, X, RefreshCw, Grid, List } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
+
+type SortField = "title" | "created_at" | "updated_at" | "published" | "author";
+type SortOrder = "asc" | "desc";
+type ViewMode = "grid" | "list";
 
 export default function BlogManager() {
   const router = useRouter();
   const { isDarkMode } = useStore();
-  const { data: blogs = [], isLoading } = useBlogs(false);
   const deleteBlog = useDeleteBlog();
 
-  const {
-    currentPage,
-    totalPages,
-    paginatedData,
-    goToPage,
-  } = usePagination({
-    data: blogs,
-    itemsPerPage: 5,
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [publishedFilter, setPublishedFilter] = useState<"all" | "published" | "draft">("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [authorFilter, setAuthorFilter] = useState("");
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Use backend filtering
+  const { data: blogsResponse, isLoading: loading, error, refetch } = useBlogsFiltered({
+    published: publishedFilter,
+    search: debouncedSearchTerm || undefined,
+    sortBy: sortField,
+    sortOrder: sortOrder,
+    page: currentPage,
+    limit: itemsPerPage,
+    author: authorFilter || undefined,
   });
+
+  const { data: counts, isLoading: countsLoading } = useBlogCounts();
+
+  // Handle both array and object response formats
+  const blogs = Array.isArray(blogsResponse)
+    ? blogsResponse
+    : (blogsResponse?.data || []);
+  const pagination = Array.isArray(blogsResponse)
+    ? null
+    : blogsResponse?.pagination;
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    setCurrentPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
+    setPublishedFilter("all");
+    setAuthorFilter("");
+    setSortField("created_at");
+    setSortOrder("desc");
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+  };
+
+  const handlePublishedChange = (value: "all" | "published" | "draft") => {
+    setPublishedFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  };
+
+  const handleRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const hasActiveFilters = searchTerm || publishedFilter !== "all" || authorFilter || sortField !== "created_at" || sortOrder !== "desc";
 
   const handleEdit = (blog: Blog) => {
     router.push(`/dashboard/blogs/edit/${blog.id}`);
@@ -44,7 +118,7 @@ export default function BlogManager() {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     return <DashboardSkeleton />;
   }
 

@@ -1,6 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSupabase } from "@/lib/supabase";
+import { api } from "@/lib/axios";
 import { Blog } from "@/types/blog";
+
+interface PaginatedResponse {
+    data: Blog[];
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        pageSize: number;
+        totalItems: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}
+
+interface BlogsQueryParams {
+    published?: "all" | "published" | "draft";
+    search?: string;
+    sortBy?: "title" | "created_at" | "updated_at" | "published" | "author";
+    sortOrder?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+    author?: string;
+}
 
 export const useBlogs = (publishedOnly = true) => {
     return useQuery({
@@ -21,6 +44,105 @@ export const useBlogs = (publishedOnly = true) => {
         },
     });
 };
+
+// Hook for fetching blogs with filters and pagination
+export function useBlogsFiltered(params: BlogsQueryParams) {
+    const {
+        published,
+        search,
+        sortBy,
+        sortOrder,
+        page = 1,
+        limit = 10,
+        author,
+    } = params;
+
+    return useQuery({
+        queryKey: [
+            "blogs",
+            "filtered",
+            published,
+            search,
+            sortBy,
+            sortOrder,
+            page,
+            limit,
+            author,
+        ],
+        queryFn: async () => {
+            const queryParams = new URLSearchParams();
+
+            if (published && published !== "all") {
+                queryParams.append(
+                    "published",
+                    published === "published" ? "true" : "false",
+                );
+            }
+            if (search) {
+                queryParams.append("search", search);
+            }
+            if (sortBy) {
+                queryParams.append("sortBy", sortBy);
+            }
+            if (sortOrder) {
+                queryParams.append("sortOrder", sortOrder);
+            }
+            if (author) {
+                queryParams.append("author", author);
+            }
+            queryParams.append("page", page.toString());
+            queryParams.append("limit", limit.toString());
+
+            const response = await api.get(`/blogs?${queryParams.toString()}`);
+
+            // Handle both array and object response formats
+            return Array.isArray(response.data)
+                ? { data: response.data, pagination: null }
+                : response.data as PaginatedResponse;
+        },
+        staleTime: 0,
+        gcTime: 1000 * 60 * 5,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+    });
+}
+
+// Hook for getting blog counts by status
+export function useBlogCounts() {
+    return useQuery({
+        queryKey: ["blogs", "counts"],
+        queryFn: async () => {
+            const [
+                allResponse,
+                publishedResponse,
+                draftResponse,
+            ] = await Promise.all([
+                api.get("/blogs"),
+                api.get("/blogs?published=true"),
+                api.get("/blogs?published=false"),
+            ]);
+
+            const allData = Array.isArray(allResponse.data)
+                ? allResponse.data
+                : allResponse.data.data;
+            const publishedData = Array.isArray(publishedResponse.data)
+                ? publishedResponse.data
+                : publishedResponse.data.data;
+            const draftData = Array.isArray(draftResponse.data)
+                ? draftResponse.data
+                : draftResponse.data.data;
+
+            return {
+                all: allData.length,
+                published: publishedData.length,
+                draft: draftData.length,
+            };
+        },
+        staleTime: 30 * 1000, // Cache for 30 seconds
+        gcTime: 1000 * 60 * 5,
+    });
+}
+
 
 export const useBlog = (slug: string) => {
     return useQuery({
@@ -58,6 +180,8 @@ export const useCreateBlog = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };
@@ -85,6 +209,8 @@ export const useUpdateBlog = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };
@@ -102,6 +228,8 @@ export const useDeleteBlog = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "filtered"] });
+            queryClient.invalidateQueries({ queryKey: ["blogs", "counts"] });
         },
     });
 };

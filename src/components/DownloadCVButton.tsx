@@ -1,49 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Download, Eye, FileText, Loader2 } from "lucide-react";
 import useStore from "@/store/store";
-
-interface CVDocument {
-  id: string;
-  filename: string;
-  original_filename: string;
-  file_url: string;
-  file_size: number;
-  mime_type: string;
-  is_active: boolean;
-  uploaded_at: string;
-}
+import { useActiveCV } from "@/hooks/useCV";
 
 const DownloadCVButton = () => {
   const { isDarkMode } = useStore();
-  const [activeCV, setActiveCV] = useState<CVDocument | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchActiveCV();
-  }, []);
-
-  const fetchActiveCV = async () => {
-    try {
-      const response = await fetch("/api/cv/active");
-      if (response.ok) {
-        const cv = await response.json();
-        setActiveCV(cv);
-        setError(null);
-      } else if (response.status === 404) {
-        setError("No CV available");
-      } else {
-        setError("Failed to load CV");
-      }
-    } catch (error) {
-      console.error("Error fetching active CV:", error);
-      setError("Failed to load CV");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: activeCV, isLoading: loading, error } = useActiveCV();
 
   if (loading) {
     return (

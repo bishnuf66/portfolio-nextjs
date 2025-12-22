@@ -14,23 +14,23 @@ export async function GET(request: Request) {
         const search = searchParams.get("search");
         const sortBy = searchParams.get("sortBy") || "created_at";
         const sortOrder = searchParams.get("sortOrder") || "desc";
-        const author = searchParams.get("author");
+        const rating = searchParams.get("rating");
         const pageSize = parseInt(limit || "10");
         const currentPage = parseInt(page || "1");
         const offset = (currentPage - 1) * pageSize;
 
-        console.log("Blog API Debug - Request params:", {
+        console.log("Testimonial API Debug - Request params:", {
             published,
             page,
             limit,
             search,
             sortBy,
             sortOrder,
-            author,
+            rating,
         });
 
         let query = supabasePublic()
-            .from("blogs")
+            .from("testimonials")
             .select("*", { count: "exact" });
 
         // Filter by published status
@@ -40,15 +40,18 @@ export async function GET(request: Request) {
             query = query.eq("published", false);
         }
 
-        // Filter by author
-        if (author) {
-            query = query.ilike("author", `%${author}%`);
+        // Filter by rating
+        if (rating) {
+            const ratingNum = parseInt(rating);
+            if (ratingNum >= 1 && ratingNum <= 5) {
+                query = query.eq("rating", ratingNum);
+            }
         }
 
         // Search filter
         if (search) {
             query = query.or(
-                `title.ilike.%${search}%,excerpt.ilike.%${search}%,content.ilike.%${search}%,tags.cs.{${search}}`,
+                `name.ilike.%${search}%,role.ilike.%${search}%,company.ilike.%${search}%,content.ilike.%${search}%`,
             );
         }
 
@@ -56,6 +59,9 @@ export async function GET(request: Request) {
         const ascending = sortOrder === "asc";
         if (sortBy === "published") {
             query = query.order("published", { ascending });
+            query = query.order("created_at", { ascending: false }); // Secondary sort
+        } else if (sortBy === "rating") {
+            query = query.order("rating", { ascending });
             query = query.order("created_at", { ascending: false }); // Secondary sort
         } else {
             query = query.order(sortBy, { ascending });
@@ -77,7 +83,7 @@ export async function GET(request: Request) {
 
         // If this is a paginated request, return pagination metadata
         if (page) {
-            console.log("Blog API Debug - Taking paginated path");
+            console.log("Testimonial API Debug - Taking paginated path");
             const totalPages = Math.ceil((count || 0) / pageSize);
             return NextResponse.json({
                 data,
@@ -92,12 +98,12 @@ export async function GET(request: Request) {
             });
         }
 
-        console.log("Blog API Debug - Taking direct array path");
+        console.log("Testimonial API Debug - Taking direct array path");
         return NextResponse.json(data);
     } catch (error) {
         console.error("API error:", error);
         return NextResponse.json(
-            { error: "Failed to fetch blogs" },
+            { error: "Failed to fetch testimonials" },
             { status: 500 },
         );
     }
@@ -130,8 +136,8 @@ export async function POST(request: Request) {
             });
         }
 
-        // Rate limiting: 10 blog creations per minute per user
-        const rateLimitResult = rateLimit(`create-blog:${user.id}`, {
+        // Rate limiting: 10 testimonial creations per minute per user
+        const rateLimitResult = rateLimit(`create-testimonial:${user.id}`, {
             interval: 60000,
             maxRequests: 10,
         });
@@ -152,7 +158,7 @@ export async function POST(request: Request) {
         const authenticatedSupabase = createAuthenticatedClient(token);
 
         const { data, error } = await (authenticatedSupabase as any)
-            .from("blogs")
+            .from("testimonials")
             .insert([body])
             .select();
 
@@ -160,14 +166,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Revalidate pages after creating blog
+        // Revalidate pages after creating testimonial
         revalidatePath("/");
-        revalidatePath("/blog");
 
         return NextResponse.json(data[0], { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Failed to create blog" },
+            { error: "Failed to create testimonial" },
             { status: 500 },
         );
     }

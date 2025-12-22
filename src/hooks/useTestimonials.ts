@@ -1,6 +1,135 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSupabase } from "@/lib/supabase";
+import { api } from "@/lib/axios";
 import { Testimonial } from "@/types/blog";
+
+interface PaginatedResponse {
+    data: Testimonial[];
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        pageSize: number;
+        totalItems: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}
+
+interface TestimonialsQueryParams {
+    published?: "all" | "published" | "draft";
+    search?: string;
+    sortBy?: "name" | "created_at" | "updated_at" | "published" | "rating";
+    sortOrder?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+    rating?: number;
+}
+
+// Hook for fetching testimonials with filters and pagination
+export function useTestimonialsFiltered(params: TestimonialsQueryParams) {
+    const {
+        published,
+        search,
+        sortBy,
+        sortOrder,
+        page = 1,
+        limit = 10,
+        rating,
+    } = params;
+
+    return useQuery({
+        queryKey: [
+            "testimonials",
+            "filtered",
+            published,
+            search,
+            sortBy,
+            sortOrder,
+            page,
+            limit,
+            rating,
+        ],
+        queryFn: async () => {
+            const queryParams = new URLSearchParams();
+
+            if (published && published !== "all") {
+                queryParams.append(
+                    "published",
+                    published === "published" ? "true" : "false",
+                );
+            }
+            if (search) {
+                queryParams.append("search", search);
+            }
+            if (sortBy) {
+                queryParams.append("sortBy", sortBy);
+            }
+            if (sortOrder) {
+                queryParams.append("sortOrder", sortOrder);
+            }
+            if (rating) {
+                queryParams.append("rating", rating.toString());
+            }
+            queryParams.append("page", page.toString());
+            queryParams.append("limit", limit.toString());
+
+            const response = await api.get(
+                `/testimonials?${queryParams.toString()}`,
+            );
+
+            // Handle both array and object response formats
+            return Array.isArray(response.data)
+                ? { data: response.data, pagination: null }
+                : response.data as PaginatedResponse;
+        },
+        staleTime: 0,
+        gcTime: 1000 * 60 * 5,
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+    });
+}
+
+// Hook for getting testimonial counts by status and rating
+export function useTestimonialCounts() {
+    return useQuery({
+        queryKey: ["testimonials", "counts"],
+        queryFn: async () => {
+            const [
+                allResponse,
+                publishedResponse,
+                draftResponse,
+                fiveStarResponse,
+            ] = await Promise.all([
+                api.get("/testimonials"),
+                api.get("/testimonials?published=true"),
+                api.get("/testimonials?published=false"),
+                api.get("/testimonials?rating=5"),
+            ]);
+
+            const allData = Array.isArray(allResponse.data)
+                ? allResponse.data
+                : allResponse.data.data;
+            const publishedData = Array.isArray(publishedResponse.data)
+                ? publishedResponse.data
+                : publishedResponse.data.data;
+            const draftData = Array.isArray(draftResponse.data)
+                ? draftResponse.data
+                : draftResponse.data.data;
+            const fiveStarData = Array.isArray(fiveStarResponse.data)
+                ? fiveStarResponse.data
+                : fiveStarResponse.data.data;
+
+            return {
+                all: allData.length,
+                published: publishedData.length,
+                draft: draftData.length,
+                fiveStar: fiveStarData.length,
+            };
+        },
+        staleTime: 30 * 1000, // Cache for 30 seconds
+        gcTime: 1000 * 60 * 5,
+    });
+}
 
 export const useTestimonials = (publishedOnly = true) => {
     return useQuery({
@@ -43,6 +172,12 @@ export const useCreateTestimonial = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
         },
     });
 };
@@ -73,6 +208,12 @@ export const useUpdateTestimonial = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
         },
     });
 };
@@ -90,6 +231,12 @@ export const useDeleteTestimonial = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["testimonials"] });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "filtered"],
+            });
+            queryClient.invalidateQueries({
+                queryKey: ["testimonials", "counts"],
+            });
         },
     });
 };

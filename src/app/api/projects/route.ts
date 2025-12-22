@@ -66,36 +66,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    console.log("API Debug - Request params:", {
-      featured,
-      page,
-      limit,
-      category,
-      search,
-      sortBy,
-      sortOrder,
-    });
-
-    // If this is a paginated request, return pagination metadata
-    if (page && !featured) {
-      console.log("API Debug - Taking paginated path (no featured)");
-      const totalPages = Math.ceil((count || 0) / pageSize);
-      return NextResponse.json({
-        data,
-        pagination: {
-          currentPage,
-          totalPages,
-          pageSize,
-          totalItems: count,
-          hasNextPage: currentPage < totalPages,
-          hasPreviousPage: currentPage > 1,
-        },
-      });
-    }
-
-    // For featured requests or non-paginated requests, still return consistent format
+    // Always return consistent format for paginated requests
     if (page) {
-      console.log("API Debug - Taking paginated path (with featured or other)");
       const totalPages = Math.ceil((count || 0) / pageSize);
       return NextResponse.json({
         data,
@@ -110,7 +82,7 @@ export async function GET(request: Request) {
       });
     }
 
-    console.log("API Debug - Taking direct array path");
+    // For non-paginated requests, return direct array
     return NextResponse.json(data);
   } catch (error) {
     console.error("API error:", error);
