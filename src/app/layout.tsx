@@ -48,9 +48,6 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bishnubk.com.np"),
-  verification: {
-    google: "LaZJMY1BBCPeM3yGgqIjn5_I9fPSC12D_KflGnBXxZk",
-  },
   title: {
     default:
       "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
@@ -170,8 +167,7 @@ export const metadata: Metadata = {
     icon: [{ url: "/favicon.ico", sizes: "any" }],
   },
   verification: {
-    google:
-      "google-site-verification=4fLQ3r82bIt2QQeYAGicv9sAG2rTL7zCRzXWBxVS_Og",
+    google: "LaZJMY1BBCPeM3yGgqIjn5_I9fPSC12D_KflGnBXxZk",
     yandex: "verification_token_here",
     yahoo: "verification_token_here",
   },
