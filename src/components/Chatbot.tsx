@@ -20,18 +20,11 @@ import { Button } from "@/components/ui/Button";
 import useStore from "@/store/store";
 
 // Type declarations for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
-  }
-}
-
-interface SpeechRecognition {
+interface MySpeechRecognition {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
-  onresult: (event: SpeechRecognitionEvent) => void;
+  onresult: (event: any) => void;
   onerror: (event: any) => void;
   onend: () => void;
   start(): void;
@@ -39,21 +32,21 @@ interface SpeechRecognition {
 }
 
 interface SpeechRecognitionEvent {
-  results: SpeechRecognitionResultList;
+  results: any;
   resultIndex: number;
 }
 
 interface SpeechRecognitionResultList {
   length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
+  item(index: number): any;
+  [index: number]: any;
 }
 
 interface SpeechRecognitionResult {
   isFinal: boolean;
   length: number;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
+  item(index: number): any;
+  [index: number]: any;
 }
 
 interface SpeechRecognitionAlternative {
@@ -342,7 +335,7 @@ const Chatbot: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<MySpeechRecognition | null>(null);
   const messageIdCounter = useRef(1);
   const voiceTranscriptRef = useRef("");
 
@@ -692,41 +685,44 @@ const Chatbot: React.FC = () => {
       ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
     ) {
       const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = navigator.language || "en-US";
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
+        recognitionRef.current.lang = navigator.language || "en-US";
 
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        voiceTranscriptRef.current = transcript; // Store the transcript
-        setInputText(transcript);
-        // We'll handle sending in onend
-      };
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          voiceTranscriptRef.current = transcript; // Store the transcript
+          setInputText(transcript);
+          // We'll handle sending in onend
+        };
 
-      recognitionRef.current.onerror = (event: any) => {
-        console.error("Speech recognition error:", event);
-        setIsListening(false);
-        // Send message if we have transcript
-        if (voiceTranscriptRef.current.trim()) {
-          setTimeout(() => {
-            handleSendMessage();
-            voiceTranscriptRef.current = "";
-          }, 300);
-        }
-      };
+        recognitionRef.current.onerror = (event: any) => {
+          console.error("Speech recognition error:", event);
+          setIsListening(false);
+          // Send message if we have transcript
+          if (voiceTranscriptRef.current.trim()) {
+            setTimeout(() => {
+              handleSendMessage();
+              voiceTranscriptRef.current = "";
+            }, 300);
+          }
+        };
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-        // Send message if we have transcript
-        if (voiceTranscriptRef.current.trim()) {
-          setTimeout(() => {
-            handleSendMessage();
-            voiceTranscriptRef.current = "";
-          }, 300);
-        }
-      };
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+          // Send message if we have transcript
+          if (voiceTranscriptRef.current.trim()) {
+            setTimeout(() => {
+              handleSendMessage();
+              voiceTranscriptRef.current = "";
+            }, 300);
+          }
+        };
+      }
     }
 
     // Load chat history from localStorage
@@ -972,14 +968,18 @@ const Chatbot: React.FC = () => {
                   onClick={copyChatToClipboard}
                   icon={<FiCopy size={14} />}
                   title="Copy chat"
-                />
+                >
+                  {""}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearChatHistory}
                   icon={<FiTrash2 size={14} />}
                   title="Clear chat"
-                />
+                >
+                  {""}
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

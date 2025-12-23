@@ -1,14 +1,6 @@
 // Custom hook for speech recognition
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SpeechRecognition } from "@/types/chatbot";
-
-// Type declarations for Web Speech API
-declare global {
-    interface Window {
-        SpeechRecognition: new () => SpeechRecognition;
-        webkitSpeechRecognition: new () => SpeechRecognition;
-    }
-}
+import { SpeechRecognition, SpeechRecognitionEvent } from "@/types/chatbot";
 
 export const useSpeechRecognition = () => {
     const [isListening, setIsListening] = useState(false);
@@ -16,14 +8,17 @@ export const useSpeechRecognition = () => {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            const SpeechRecognition = window.SpeechRecognition ||
-                window.webkitSpeechRecognition;
+            const SpeechRecognitionConstructor =
+                (window as any).SpeechRecognition ||
+                (window as any).webkitSpeechRecognition;
 
-            if (SpeechRecognition) {
-                recognitionRef.current = new SpeechRecognition();
-                recognitionRef.current.continuous = false;
-                recognitionRef.current.interimResults = false;
-                recognitionRef.current.lang = navigator.language || "en-US";
+            if (SpeechRecognitionConstructor) {
+                recognitionRef.current = new SpeechRecognitionConstructor();
+                if (recognitionRef.current) {
+                    recognitionRef.current.continuous = false;
+                    recognitionRef.current.interimResults = false;
+                    recognitionRef.current.lang = navigator.language || "en-US";
+                }
             }
         }
     }, []);
