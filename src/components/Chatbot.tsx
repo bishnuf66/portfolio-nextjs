@@ -344,10 +344,11 @@ const Chatbot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const messageIdCounter = useRef(1);
+  const voiceTranscriptRef = useRef("");
 
   const generateId = useCallback(() => {
     messageIdCounter.current += 1;
-    return messageIdCounter.current.toString();
+    return `msg-${messageIdCounter.current}-${Date.now()}`;
   }, []);
 
   const getRandomDelay = useCallback(() => {
@@ -470,7 +471,7 @@ const Chatbot: React.FC = () => {
     (question: string): { answer: string; followUp?: string[] } => {
       const normalizedQuestion = question.toLowerCase().trim();
 
-      // Update conversation history immediately
+      // Update conversation history
       setConversationHistory((prev) => [...prev.slice(-5), normalizedQuestion]);
 
       // Try to get exact match first
@@ -484,7 +485,6 @@ const Chatbot: React.FC = () => {
 
       // Check for keyword matches with priority
       let bestMatch = { key: "", similarity: 0 };
-      let keywordMatch = null;
 
       Object.entries(qaData).forEach(([key, data]) => {
         // Check direct keyword matches with higher priority
@@ -630,30 +630,53 @@ const Chatbot: React.FC = () => {
     // Simulate bot typing delay
     setTimeout(() => {
       const response = findBestAnswer(inputText);
+
+      // Create bot message with follow-up options included
       const botMessage: Message = {
         id: generateId(),
         text: response.answer,
         sender: "bot",
         timestamp: new Date(),
+        followUpOptions: response.followUp,
       };
+
       setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
-
-      // Add follow-up questions
-      if (response.followUp && response.followUp.length > 0) {
-        setTimeout(() => {
-          const followUpMessage: Message = {
-            id: generateId(),
-            text: "Would you like to know more about any of these?",
-            sender: "bot",
-            timestamp: new Date(),
-            followUpOptions: response.followUp,
-          };
-          setMessages((prev) => [...prev, followUpMessage]);
-        }, 500);
-      }
-    }, getRandomDelay()); // Variable typing speed
+    }, getRandomDelay());
   }, [inputText, generateId, findBestAnswer, getRandomDelay]);
+
+  const handleQuickReply = useCallback(
+    (reply: string) => {
+      const userMessage: Message = {
+        id: generateId(),
+        text: reply,
+        sender: "user",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+      setIsTyping(true);
+      setShowSuggestions(false);
+
+      // Simulate bot typing delay
+      setTimeout(() => {
+        const response = findBestAnswer(reply);
+
+        // Create bot message with follow-up options included
+        const botMessage: Message = {
+          id: generateId(),
+          text: response.answer,
+          sender: "bot",
+          timestamp: new Date(),
+          followUpOptions: response.followUp,
+        };
+
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+      }, getRandomDelay());
+    },
+    [generateId, findBestAnswer, getRandomDelay]
+  );
 
   useEffect(() => {
     const checkMobile = () => {
@@ -677,24 +700,31 @@ const Chatbot: React.FC = () => {
 
       recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
+        voiceTranscriptRef.current = transcript; // Store the transcript
         setInputText(transcript);
-        setIsListening(false);
-        // Auto-send message after speech recognition completes
-        if (transcript.trim()) {
-          setTimeout(() => handleSendMessage(), 500);
-        }
+        // We'll handle sending in onend
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error("Speech recognition error:", event);
         setIsListening(false);
+        // Send message if we have transcript
+        if (voiceTranscriptRef.current.trim()) {
+          setTimeout(() => {
+            handleSendMessage();
+            voiceTranscriptRef.current = "";
+          }, 300);
+        }
       };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
-        // Only auto-send if we have text
-        if (inputText.trim()) {
-          setTimeout(() => handleSendMessage(), 300);
+        // Send message if we have transcript
+        if (voiceTranscriptRef.current.trim()) {
+          setTimeout(() => {
+            handleSendMessage();
+            voiceTranscriptRef.current = "";
+          }, 300);
         }
       };
     }
@@ -720,10 +750,14 @@ const Chatbot: React.FC = () => {
     return () => {
       window.removeEventListener("resize", checkMobile);
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Ignore errors when stopping
+        }
       }
     };
-  }, []); // Remove handleSendMessage dependency to avoid infinite loop
+  }, []);
 
   // Save messages to localStorage
   useEffect(() => {
@@ -751,53 +785,24 @@ const Chatbot: React.FC = () => {
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
+      // If we have text from voice, send it immediately
+      if (voiceTranscriptRef.current.trim()) {
+        setTimeout(() => {
+          handleSendMessage();
+          voiceTranscriptRef.current = "";
+        }, 300);
+      }
     } else {
-      setInputText(""); // Clear input before starting voice
-      recognitionRef.current.start();
-      setIsListening(true);
+      voiceTranscriptRef.current = ""; // Reset transcript
+      setInputText(""); // Clear input field
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        console.error("Failed to start speech recognition:", error);
+        setIsListening(false);
+      }
     }
-  };
-
-  const handleQuickReply = (reply: string) => {
-    setInputText(reply);
-    setTimeout(() => {
-      const userMessage: Message = {
-        id: generateId(),
-        text: reply,
-        sender: "user",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-      setIsTyping(true);
-      setShowSuggestions(false);
-
-      // Simulate bot response
-      setTimeout(() => {
-        const response = findBestAnswer(reply);
-        const botMessage: Message = {
-          id: generateId(),
-          text: response.answer,
-          sender: "bot",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-        setIsTyping(false);
-
-        if (response.followUp && response.followUp.length > 0) {
-          setTimeout(() => {
-            const followUpMessage: Message = {
-              id: generateId(),
-              text: "Would you like to know more about any of these?",
-              sender: "bot",
-              timestamp: new Date(),
-              followUpOptions: response.followUp,
-            };
-            setMessages((prev) => [...prev, followUpMessage]);
-          }, 500);
-        }
-      }, getRandomDelay());
-    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -997,136 +1002,130 @@ const Chatbot: React.FC = () => {
             >
               <div className="space-y-3">
                 {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`flex ${
-                      message.sender === "user"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`flex items-start space-x-2 ${
-                        isMobile ? "max-w-[90%]" : "max-w-[80%]"
-                      } ${
+                  <React.Fragment key={message.id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`flex ${
                         message.sender === "user"
-                          ? "flex-row-reverse space-x-reverse"
-                          : ""
+                          ? "justify-end"
+                          : "justify-start"
                       }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                        className={`flex items-start space-x-2 ${
+                          isMobile ? "max-w-[90%]" : "max-w-[80%]"
+                        } ${
                           message.sender === "user"
-                            ? "bg-blue-500"
-                            : "bg-linear-to-r from-blue-500 to-purple-600"
+                            ? "flex-row-reverse space-x-reverse"
+                            : ""
                         }`}
                       >
-                        {message.sender === "user" ? (
-                          <FiUser className="text-white" size={14} />
-                        ) : (
-                          <FiCpu className="text-white" size={14} />
-                        )}
-                      </div>
-                      <div className="flex flex-col">
                         <div
-                          className={`px-3 py-2 rounded-lg ${
+                          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                             message.sender === "user"
-                              ? isDarkMode
-                                ? "bg-blue-600 text-white"
-                                : "bg-blue-500 text-white"
-                              : isDarkMode
-                              ? "bg-slate-700 text-slate-200"
-                              : "bg-slate-100 text-slate-800"
+                              ? "bg-blue-500"
+                              : "bg-linear-to-r from-blue-500 to-purple-600"
                           }`}
                         >
-                          <p className="text-sm">{message.text}</p>
+                          {message.sender === "user" ? (
+                            <FiUser className="text-white" size={14} />
+                          ) : (
+                            <FiCpu className="text-white" size={14} />
+                          )}
                         </div>
-                        {/* Message timestamp */}
-                        <span
-                          className={`text-xs mt-1 px-2 ${
-                            isDarkMode ? "text-slate-500" : "text-slate-500"
-                          } ${message.sender === "user" ? "text-right" : ""}`}
-                        >
-                          {message.timestamp.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                        {/* Feedback buttons for bot messages */}
-                        {message.sender === "bot" && (
-                          <div className="flex space-x-1 mt-1">
-                            <button
-                              onClick={() =>
-                                handleMessageFeedback(message.id, true)
-                              }
-                              className={`p-1 rounded ${
-                                message.liked === true
-                                  ? "text-green-500"
-                                  : isDarkMode
-                                  ? "text-slate-500 hover:text-green-400"
-                                  : "text-slate-400 hover:text-green-600"
-                              }`}
-                            >
-                              <FiThumbsUp size={12} />
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleMessageFeedback(message.id, false)
-                              }
-                              className={`p-1 rounded ${
-                                message.liked === false
-                                  ? "text-red-500"
-                                  : isDarkMode
-                                  ? "text-slate-500 hover:text-red-400"
-                                  : "text-slate-400 hover:text-red-600"
-                              }`}
-                            >
-                              <FiThumbsDown size={12} />
-                            </button>
+                        <div className="flex flex-col">
+                          <div
+                            className={`px-3 py-2 rounded-lg ${
+                              message.sender === "user"
+                                ? isDarkMode
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-blue-500 text-white"
+                                : isDarkMode
+                                ? "bg-slate-700 text-slate-200"
+                                : "bg-slate-100 text-slate-800"
+                            }`}
+                          >
+                            <p className="text-sm">{message.text}</p>
                           </div>
-                        )}
-                        {/* Follow-up options */}
-                        {message.followUpOptions &&
-                          message.followUpOptions.length > 0 && (
-                            <div className="mt-3 space-y-2">
-                              <p
-                                className={`text-xs font-medium ${
-                                  isDarkMode
-                                    ? "text-slate-400"
-                                    : "text-slate-600"
+                          {/* Message timestamp */}
+                          <span
+                            className={`text-xs mt-1 px-2 ${
+                              isDarkMode ? "text-slate-500" : "text-slate-500"
+                            } ${message.sender === "user" ? "text-right" : ""}`}
+                          >
+                            {message.timestamp.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          {/* Feedback buttons for bot messages */}
+                          {message.sender === "bot" && (
+                            <div className="flex space-x-1 mt-1">
+                              <button
+                                onClick={() =>
+                                  handleMessageFeedback(message.id, true)
+                                }
+                                className={`p-1 rounded ${
+                                  message.liked === true
+                                    ? "text-green-500"
+                                    : isDarkMode
+                                    ? "text-slate-500 hover:text-green-400"
+                                    : "text-slate-400 hover:text-green-600"
                                 }`}
                               >
-                                Suggested questions:
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {message.followUpOptions.map(
-                                  (option, index) => (
-                                    <button
-                                      key={index}
-                                      onClick={() => handleQuickReply(option)}
-                                      className={`px-3 py-1.5 rounded-full text-xs border transition-colors flex items-center ${
-                                        isDarkMode
-                                          ? "border-slate-600 text-slate-300 hover:bg-slate-700"
-                                          : "border-slate-300 text-slate-700 hover:bg-slate-100"
-                                      }`}
-                                    >
-                                      {option}
-                                      <FiChevronRight
-                                        className="ml-1"
-                                        size={10}
-                                      />
-                                    </button>
-                                  )
-                                )}
-                              </div>
+                                <FiThumbsUp size={12} />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleMessageFeedback(message.id, false)
+                                }
+                                className={`p-1 rounded ${
+                                  message.liked === false
+                                    ? "text-red-500"
+                                    : isDarkMode
+                                    ? "text-slate-500 hover:text-red-400"
+                                    : "text-slate-400 hover:text-red-600"
+                                }`}
+                              >
+                                <FiThumbsDown size={12} />
+                              </button>
                             </div>
                           )}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+
+                    {/* Show follow-up options directly below bot message */}
+                    {message.sender === "bot" &&
+                      message.followUpOptions &&
+                      message.followUpOptions.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="ml-10 mt-2"
+                        >
+                          <div className="flex flex-wrap gap-2">
+                            {message.followUpOptions.map((option, index) => (
+                              <button
+                                key={`${message.id}-followup-${index}`}
+                                onClick={() => handleQuickReply(option)}
+                                className={`px-3 py-1.5 rounded-full text-xs border transition-colors flex items-center ${
+                                  isDarkMode
+                                    ? "border-slate-600 text-slate-300 hover:bg-slate-700"
+                                    : "border-slate-300 text-slate-700 hover:bg-slate-100"
+                                }`}
+                              >
+                                {option}
+                                <FiChevronRight className="ml-1" size={10} />
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                  </React.Fragment>
                 ))}
 
                 {isTyping && (
@@ -1179,7 +1178,7 @@ const Chatbot: React.FC = () => {
                     <div className="flex flex-wrap gap-2">
                       {quickReplies.slice(0, 4).map((reply, index) => (
                         <button
-                          key={index}
+                          key={`quick-${index}`}
                           onClick={() => handleQuickReply(reply)}
                           className={`px-3 py-1.5 rounded-full text-xs border transition-colors flex items-center ${
                             isDarkMode
@@ -1213,7 +1212,7 @@ const Chatbot: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2">
                       {suggestedQuestions.map((item, index) => (
                         <button
-                          key={index}
+                          key={`suggested-${index}`}
                           onClick={() => handleQuickReply(item.question)}
                           className={`p-3 rounded-lg text-left transition-all hover:scale-[1.02] ${
                             isDarkMode
@@ -1265,6 +1264,7 @@ const Chatbot: React.FC = () => {
                   } border ${
                     isDarkMode ? "border-slate-700" : "border-slate-300"
                   }`}
+                  title={isListening ? "Stop listening" : "Start voice input"}
                 >
                   {isListening ? <FiMicOff size={16} /> : <FiMic size={16} />}
                 </button>
@@ -1298,7 +1298,9 @@ const Chatbot: React.FC = () => {
                     isDarkMode ? "text-slate-500" : "text-slate-500"
                   }`}
                 >
-                  Press Enter to send • Voice input available
+                  {isListening
+                    ? "Listening... Speak now"
+                    : "Press Enter to send • Voice input available"}
                 </p>
                 <span
                   className={`text-xs px-2 py-1 rounded ${
