@@ -17,6 +17,7 @@ import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import Chatbot from "@/components/Chatbot";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -368,9 +369,10 @@ export default function RootLayout({
         {/* Security headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
+        <GoogleAnalytics />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased relative`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col`}
         suppressHydrationWarning={true}
       >
         {/* Skip navigation for accessibility */}
