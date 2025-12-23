@@ -726,6 +726,21 @@ const Chatbot: React.FC = () => {
                 ? "bg-slate-800 border border-slate-700"
                 : "bg-white border border-slate-200"
             }`}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+              const container = e.currentTarget;
+              const { scrollHeight, clientHeight } = container;
+
+              // Prevent background scroll when chat can scroll
+              if (scrollHeight > clientHeight) {
+                e.preventDefault();
+              }
+            }}
+            style={{
+              touchAction: "none",
+              overscrollBehavior: "contain",
+            }}
           >
             {/* Header */}
             <div
@@ -791,20 +806,7 @@ const Chatbot: React.FC = () => {
               className={`flex-1 overflow-y-auto p-4 ${
                 isMobile ? "h-[calc(90vh-140px)]" : "h-[350px]"
               }`}
-              onWheel={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => {
-                e.stopPropagation();
-                const container = e.currentTarget;
-                const { scrollHeight, clientHeight } = container;
-
-                // Prevent background scroll when chat can scroll
-                if (scrollHeight > clientHeight) {
-                  e.preventDefault();
-                }
-              }}
               style={{
-                touchAction: "none",
                 overscrollBehavior: "contain",
               }}
             >
@@ -1092,6 +1094,7 @@ const Chatbot: React.FC = () => {
                       ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
                       : "bg-white border-slate-300 text-slate-900 placeholder-slate-500"
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  style={{ pointerEvents: "auto", userSelect: "text" }}
                 />
                 <Button
                   variant="primary"
