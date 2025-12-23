@@ -47,6 +47,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bishnubk.com.np"),
+  verification: {
+    google: "LaZJMY1BBCPeM3yGgqIjn5_I9fPSC12D_KflGnBXxZk",
+  },
   title: {
     default:
       "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
