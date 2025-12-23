@@ -16,6 +16,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+import Chatbot from "@/components/Chatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -392,6 +393,7 @@ export default function RootLayout({
                     <Footer />
                     <ConsentManager />
                     <CustomCursor />
+                    <Chatbot />
                     <ToastContainer
                       position="top-right"
                       autoClose={3000}
