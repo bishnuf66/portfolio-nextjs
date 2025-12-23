@@ -274,7 +274,6 @@ export function useDeleteProject() {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            console.log("Attempting to delete project:", id);
             try {
                 const response = await api.delete(`/projects/${id}`);
                 console.log("Delete response:", response.status, response.data);

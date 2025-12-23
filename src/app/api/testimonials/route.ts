@@ -19,16 +19,6 @@ export async function GET(request: Request) {
         const currentPage = parseInt(page || "1");
         const offset = (currentPage - 1) * pageSize;
 
-        console.log("Testimonial API Debug - Request params:", {
-            published,
-            page,
-            limit,
-            search,
-            sortBy,
-            sortOrder,
-            rating,
-        });
-
         let query = supabasePublic()
             .from("testimonials")
             .select("*", { count: "exact" });
@@ -83,7 +73,6 @@ export async function GET(request: Request) {
 
         // If this is a paginated request, return pagination metadata
         if (page) {
-            console.log("Testimonial API Debug - Taking paginated path");
             const totalPages = Math.ceil((count || 0) / pageSize);
             return NextResponse.json({
                 data,
@@ -98,7 +87,6 @@ export async function GET(request: Request) {
             });
         }
 
-        console.log("Testimonial API Debug - Taking direct array path");
         return NextResponse.json(data);
     } catch (error) {
         console.error("API error:", error);

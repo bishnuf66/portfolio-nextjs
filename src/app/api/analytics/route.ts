@@ -75,8 +75,6 @@ export async function GET(request: Request) {
             });
         }
 
-        console.log("Analytics API - User authenticated:", user.id);
-
         const { searchParams } = new URL(request.url);
 
         // Parse filter parameters

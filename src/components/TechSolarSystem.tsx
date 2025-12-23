@@ -290,13 +290,6 @@ export default function TechSolarSystem() {
       const savedEasterEggs = localStorage.getItem("discoveredEasterEggs");
       const savedEarthClicks = localStorage.getItem("earthClicks");
 
-      console.log("Loading from localStorage:", {
-        savedExplored,
-        savedAchievements,
-        savedEasterEggs,
-        savedEarthClicks,
-      });
-
       // Single dispatch to load all state at once
       dispatch({
         type: "LOAD_FROM_STORAGE",
@@ -882,27 +875,12 @@ export default function TechSolarSystem() {
                 const hasMatchingPlanet = explorationState.clickedPlanets.has(
                   category.title
                 );
-                console.log(
-                  "Filtering:",
-                  category.title,
-                  "in clicked planets:",
-                  hasMatchingPlanet
-                );
-                console.log(
-                  "All clicked planets:",
-                  Array.from(explorationState.clickedPlanets)
-                );
+
                 return (
                   hasMatchingPlanet && category.title !== "Developer Earth"
                 );
               })
               .map((category, categoryIndex) => {
-                console.log(
-                  "Rendering card for:",
-                  category.title,
-                  "index:",
-                  categoryIndex
-                );
                 return (
                   <div
                     key={categoryIndex}

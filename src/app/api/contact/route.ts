@@ -92,9 +92,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Verify transporter
-    console.log("Verifying SMTP connection...");
     await transporter.verify();
-    console.log("SMTP connection verified successfully");
 
     // Email to you (the website owner)
     const mailOptionsToOwner = {
