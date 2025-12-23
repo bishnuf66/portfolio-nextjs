@@ -758,16 +758,16 @@ export default function TechSolarSystem() {
       >
         <Canvas
           camera={{ position: [0, 2, 12], fov: isMobile ? 75 : 65 }}
-          dpr={isMobile ? [1, 1.25] : [1, 2]}
+          dpr={isMobile ? window.devicePixelRatio : [1, 2]}
           gl={{
             powerPreference: "high-performance",
-            antialias: !isMobile,
+            antialias: true,
             alpha: false,
             stencil: false,
             depth: true,
           }}
-          touch-action={isMobile ? "none" : "auto"}
-          style={{ touchAction: isMobile ? "none" : "auto" }}
+          touch-action="auto"
+          style={{ touchAction: "auto" }}
         >
           <Suspense fallback={null}>
             <Stars
@@ -792,8 +792,8 @@ export default function TechSolarSystem() {
             ))}
 
             <OrbitControls
-              enablePan={!isMobile}
-              enableZoom={!isMobile}
+              enablePan={true}
+              enableZoom={true}
               zoomSpeed={isMobile ? 0.4 : 0.6}
               rotateSpeed={isMobile ? 0.8 : 0.5}
               maxDistance={30}
