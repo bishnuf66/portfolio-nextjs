@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMessageSquare,
@@ -22,9 +22,20 @@ import useStore from "@/store/store";
 // Type declarations for Web Speech API
 declare global {
   interface Window {
-    SpeechRecognition: new () => any;
-    webkitSpeechRecognition: new () => any;
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
   }
+}
+
+interface SpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: () => void;
+  onend: () => void;
+  start(): void;
+  stop(): void;
 }
 
 interface SpeechRecognitionEvent {
@@ -175,7 +186,7 @@ const qaData: QAData = {
   // Contact
   "how can i contact you": {
     answer:
-      "You can contact me via email at contact@bishnubk.com.np or through the contact form on my portfolio website.",
+      "You can contact me via email at bishowkarmabishnu@gmail.com or through the contact form on my portfolio website.",
     keywords: ["contact", "reach", "email", "phone", "connect", "get in touch"],
     category: "contact",
     followUp: [
@@ -186,7 +197,7 @@ const qaData: QAData = {
   },
 
   "what is your email": {
-    answer: "My email address is contact@bishnubk.com.np",
+    answer: "My email address is bishowkarmabishnu@gmail.com",
     keywords: ["email", "address", "mail"],
     category: "contact",
     followUp: ["How can I contact you?", "Do you have a phone number?"],
@@ -300,154 +311,163 @@ const Chatbot: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const messageIdCounter = useRef(1);
 
-  const generateId = () => {
+  const generateId = useCallback(() => {
     messageIdCounter.current += 1;
     return messageIdCounter.current.toString();
-  };
+  }, []);
 
-  const getRandomDelay = () => {
+  const getRandomDelay = useCallback(() => {
     return 800 + Math.random() * 400;
-  };
+  }, []);
 
-  const getRandomFollowUp = (followUpArray: string[]) => {
+  const getRandomFollowUp = useCallback((followUpArray: string[]) => {
     return followUpArray[Math.floor(Math.random() * followUpArray.length)];
-  };
+  }, []);
 
   // Enhanced string similarity algorithm
-  const calculateSimilarity = (str1: string, str2: string): number => {
-    const s1 = str1.toLowerCase();
-    const s2 = str2.toLowerCase();
+  const calculateSimilarity = useCallback(
+    (str1: string, str2: string): number => {
+      const s1 = str1.toLowerCase();
+      const s2 = str2.toLowerCase();
 
-    if (s1 === s2) return 1;
-    if (s1.includes(s2) || s2.includes(s1)) return 0.9;
+      if (s1 === s2) return 1;
+      if (s1.includes(s2) || s2.includes(s1)) return 0.9;
 
-    // Simple word matching
-    const words1 = s1.split(" ");
-    const words2 = s2.split(" ");
-    const matches = words1.filter((word) => words2.includes(word)).length;
-    const maxWords = Math.max(words1.length, words2.length);
+      // Simple word matching
+      const words1 = s1.split(" ");
+      const words2 = s2.split(" ");
+      const matches = words1.filter((word) => words2.includes(word)).length;
+      const maxWords = Math.max(words1.length, words2.length);
 
-    // Add a small value to avoid division by zero
-    return (matches + 0.01) / (maxWords + 0.01);
-  };
+      // Add a small value to avoid division by zero
+      return (matches + 0.01) / (maxWords + 0.01);
+    },
+    []
+  );
 
-  const findBestAnswer = (
-    question: string
-  ): { answer: string; followUp?: string[] } => {
-    const normalizedQuestion = question.toLowerCase().trim();
+  const findBestAnswer = useCallback(
+    (question: string): { answer: string; followUp?: string[] } => {
+      const normalizedQuestion = question.toLowerCase().trim();
 
-    // Update conversation history
-    setConversationHistory((prev) => [...prev.slice(-5), normalizedQuestion]);
+      // Update conversation history
+      setConversationHistory((prev) => [...prev.slice(-5), normalizedQuestion]);
 
-    // Direct match first
-    if (qaData[normalizedQuestion]) {
-      return {
-        answer: qaData[normalizedQuestion].answer,
-        followUp: qaData[normalizedQuestion].followUp,
-      };
-    }
-
-    // Check for keyword matches
-    let bestMatch = { key: "", similarity: 0 };
-
-    Object.entries(qaData).forEach(([key, data]) => {
-      // Check direct keyword matches
-      if (
-        data.keywords.some((keyword) => normalizedQuestion.includes(keyword))
-      ) {
-        bestMatch = { key, similarity: 0.8 };
-        return;
+      // Direct match first
+      if (qaData[normalizedQuestion]) {
+        return {
+          answer: qaData[normalizedQuestion].answer,
+          followUp: qaData[normalizedQuestion].followUp,
+        };
       }
 
-      // Calculate similarity
-      const similarity = calculateSimilarity(normalizedQuestion, key);
-      if (similarity > bestMatch.similarity) {
-        bestMatch = { key, similarity };
-      }
-    });
+      // Check for keyword matches
+      let bestMatch = { key: "", similarity: 0 };
 
-    // Check partial matches
-    if (bestMatch.similarity < 0.3) {
-      for (const key in qaData) {
-        const keyWords = key.split(" ");
-        const questionWords = normalizedQuestion.split(" ");
+      Object.entries(qaData).forEach(([key, data]) => {
+        // Check direct keyword matches
+        if (
+          data.keywords.some((keyword) => normalizedQuestion.includes(keyword))
+        ) {
+          bestMatch = { key, similarity: 0.8 };
+          return;
+        }
 
-        if (keyWords.some((word) => questionWords.includes(word))) {
-          bestMatch = { key, similarity: 0.4 };
-          break;
+        // Calculate similarity
+        const similarity = calculateSimilarity(normalizedQuestion, key);
+        if (similarity > bestMatch.similarity) {
+          bestMatch = { key, similarity };
+        }
+      });
+
+      // Check partial matches
+      if (bestMatch.similarity < 0.3) {
+        for (const key in qaData) {
+          const keyWords = key.split(" ");
+          const questionWords = normalizedQuestion.split(" ");
+
+          if (keyWords.some((word) => questionWords.includes(word))) {
+            bestMatch = { key, similarity: 0.4 };
+            break;
+          }
         }
       }
-    }
 
-    // Context-aware responses based on conversation history
-    const lastQuestion = conversationHistory[conversationHistory.length - 2];
-    if (lastQuestion) {
-      if (
-        normalizedQuestion.includes("more") ||
-        normalizedQuestion.includes("else")
-      ) {
-        // Find a related topic
-        for (const key in qaData) {
-          if (
-            lastQuestion.includes(key) ||
-            qaData[key].keywords.some((k) => lastQuestion.includes(k))
-          ) {
-            if (qaData[key].followUp) {
-              const randomFollowUp = getRandomFollowUp(qaData[key].followUp);
-              const followUpKey = randomFollowUp.toLowerCase();
-              if (qaData[followUpKey]) {
-                return {
-                  answer: qaData[followUpKey].answer,
-                  followUp: qaData[followUpKey].followUp,
-                };
+      // Context-aware responses based on conversation history
+      const lastQuestion = conversationHistory[conversationHistory.length - 2];
+      if (lastQuestion) {
+        if (
+          normalizedQuestion.includes("more") ||
+          normalizedQuestion.includes("else")
+        ) {
+          // Find a related topic
+          for (const key in qaData) {
+            if (
+              lastQuestion.includes(key) ||
+              qaData[key].keywords.some((k) => lastQuestion.includes(k))
+            ) {
+              if (qaData[key].followUp) {
+                const randomFollowUp = getRandomFollowUp(qaData[key].followUp);
+                const followUpKey = randomFollowUp.toLowerCase();
+                if (qaData[followUpKey]) {
+                  return {
+                    answer: qaData[followUpKey].answer,
+                    followUp: qaData[followUpKey].followUp,
+                  };
+                }
               }
             }
           }
         }
       }
-    }
 
-    // Return best match or fallback
-    if (bestMatch.similarity > 0.3 && qaData[bestMatch.key]) {
-      return {
-        answer: qaData[bestMatch.key].answer,
-        followUp: qaData[bestMatch.key].followUp,
-      };
-    }
+      // Return best match or fallback
+      if (bestMatch.similarity > 0.3 && qaData[bestMatch.key]) {
+        return {
+          answer: qaData[bestMatch.key].answer,
+          followUp: qaData[bestMatch.key].followUp,
+        };
+      }
 
-    // Intelligent fallback based on question type
-    if (
-      normalizedQuestion.includes("?") ||
-      normalizedQuestion.includes("what") ||
-      normalizedQuestion.includes("how")
-    ) {
+      // Intelligent fallback based on question type
+      if (
+        normalizedQuestion.includes("?") ||
+        normalizedQuestion.includes("what") ||
+        normalizedQuestion.includes("how")
+      ) {
+        return {
+          answer:
+            "I can help you with information about Bishnu's skills, experience, services, and contact details. Try asking more specific questions like 'What are your skills?' or 'How can I contact you?'",
+          followUp: [
+            "What are your skills?",
+            "How can I contact you?",
+            "What services do you offer?",
+          ],
+        };
+      }
+
+      // Default fallback with suggestions
       return {
         answer:
-          "I can help you with information about Bishnu's skills, experience, services, and contact details. Try asking more specific questions like 'What are your skills?' or 'How can I contact you?'",
+          "I'm here to help you learn about Bishnu BK! You can ask me about his skills, experience, services, or how to contact him.",
         followUp: [
           "What are your skills?",
-          "How can I contact you?",
           "What services do you offer?",
+          "How experienced are you?",
         ],
       };
-    }
+    },
+    [
+      setConversationHistory,
+      conversationHistory,
+      calculateSimilarity,
+      getRandomFollowUp,
+    ]
+  );
 
-    // Default fallback with suggestions
-    return {
-      answer:
-        "I'm here to help you learn about Bishnu BK! You can ask me about his skills, experience, services, or how to contact him.",
-      followUp: [
-        "What are your skills?",
-        "What services do you offer?",
-        "How experienced are you?",
-      ],
-    };
-  };
-
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (inputText.trim() === "") return;
 
     const userMessage: Message = {
@@ -488,7 +508,7 @@ const Chatbot: React.FC = () => {
         }, 500);
       }
     }, getRandomDelay()); // Variable typing speed
-  };
+  }, [inputText, generateId, findBestAnswer, getRandomDelay]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -526,6 +546,10 @@ const Chatbot: React.FC = () => {
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+        // Auto-send message when mic stops (backup to onresult)
+        if (inputText.trim()) {
+          setTimeout(() => handleSendMessage(), 300);
+        }
       };
     }
 
@@ -540,7 +564,8 @@ const Chatbot: React.FC = () => {
             ...msg,
             timestamp: new Date(msg.timestamp),
           }));
-          setMessages(messagesWithDates);
+          // Use setTimeout to avoid synchronous setState in effect
+          setTimeout(() => setMessages(messagesWithDates), 0);
         }
       } catch (e) {
         console.error("Failed to load chat history:", e);
@@ -553,7 +578,7 @@ const Chatbot: React.FC = () => {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [handleSendMessage, inputText]);
 
   // Save messages to localStorage
   useEffect(() => {
