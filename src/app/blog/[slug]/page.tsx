@@ -2,6 +2,7 @@
 
 import { getSupabase } from "@/lib/supabase";
 import { Calendar, User, ArrowLeft } from "lucide-react";
+import BlogAd from "@/components/BlogAd";
 import {
   AnimatedSection,
   StaggeredContainer,
@@ -106,6 +107,13 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
             >
               {blog.title}
             </h1>
+
+            {/* Ad after title */}
+            <BlogAd
+              slot="YOUR_AD_SLOT_AFTER_TITLE"
+              size="banner"
+              className="mb-8"
+            />
           </header>
         </AnimatedSection>
 
@@ -174,10 +182,41 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
               isDarkMode ? "prose-invert" : "prose-gray"
             }`}
           >
-            <div
-              dangerouslySetInnerHTML={{ __html: blog.content }}
-              className="whitespace-pre-wrap"
-            />
+            <div className="whitespace-pre-wrap">
+              {/* First half of content */}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    blog.content.length > 1000
+                      ? blog.content.substring(0, blog.content.length / 2)
+                      : blog.content,
+                }}
+              />
+
+              {/* Middle ad (only if content is long enough) */}
+              {blog.content.length > 1000 && (
+                <>
+                  <BlogAd
+                    slot="YOUR_AD_SLOT_MIDDLE"
+                    size="in_article"
+                    className="my-12"
+                  />
+                  {/* Second half of content */}
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: blog.content.substring(blog.content.length / 2),
+                    }}
+                  />
+                </>
+              )}
+
+              {/* Bottom ad */}
+              <BlogAd
+                slot="YOUR_AD_SLOT_BOTTOM"
+                size="rectangle"
+                className="mt-12"
+              />
+            </div>
           </div>
         </AnimatedSection>
       </article>

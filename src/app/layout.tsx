@@ -18,6 +18,7 @@ import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import Chatbot from "@/components/Chatbot";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import AdSense from "@/components/AdSense";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -366,6 +367,7 @@ export default function RootLayout({
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
         <GoogleAnalytics />
+        <AdSense />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col`}
