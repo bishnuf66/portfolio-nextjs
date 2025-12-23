@@ -32,7 +32,7 @@ interface SpeechRecognition {
   interimResults: boolean;
   lang: string;
   onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: () => void;
+  onerror: (event: any) => void;
   onend: () => void;
   start(): void;
   stop(): void;
@@ -291,6 +291,37 @@ const qaData: QAData = {
       "What services do you offer?",
     ],
   },
+
+  "do you work remotely": {
+    answer:
+      "Yes, I work remotely and can collaborate with clients from anywhere in the world. I use modern communication tools and project management platforms to ensure smooth remote collaboration.",
+    keywords: ["remote", "remotely", "work from home", "location", "distance"],
+    category: "services",
+    followUp: ["What timezone are you in?", "How do you communicate remotely?"],
+  },
+
+  "do you work with international clients": {
+    answer:
+      "Absolutely! I work with international clients and have experience delivering projects for clients from various countries. I handle time zone differences and cultural communication effectively.",
+    keywords: [
+      "international",
+      "clients",
+      "global",
+      "foreign",
+      "overseas",
+      "abroad",
+    ],
+    category: "services",
+    followUp: ["Do you work remotely?", "What services do you offer?"],
+  },
+
+  "what timezone are you in": {
+    answer:
+      "I'm in Nepal Time (NPT), which is UTC+5:45. I'm flexible with meeting times and can accommodate different time zones for client calls and collaboration.",
+    keywords: ["timezone", "time", "schedule", "when", "hours"],
+    category: "personal",
+    followUp: ["Do you work remotely?", "How can I contact you?"],
+  },
 };
 
 const Chatbot: React.FC = () => {
@@ -330,69 +361,191 @@ const Chatbot: React.FC = () => {
   // Enhanced string similarity algorithm
   const calculateSimilarity = useCallback(
     (str1: string, str2: string): number => {
-      const s1 = str1.toLowerCase();
-      const s2 = str2.toLowerCase();
+      const s1 = str1.toLowerCase().trim();
+      const s2 = str2.toLowerCase().trim();
 
       if (s1 === s2) return 1;
       if (s1.includes(s2) || s2.includes(s1)) return 0.9;
 
-      // Simple word matching
-      const words1 = s1.split(" ");
-      const words2 = s2.split(" ");
-      const matches = words1.filter((word) => words2.includes(word)).length;
-      const maxWords = Math.max(words1.length, words2.length);
+      // Split into words
+      const words1 = s1.split(/\s+/);
+      const words2 = s2.split(/\s+/);
 
-      // Add a small value to avoid division by zero
-      return (matches + 0.01) / (maxWords + 0.01);
+      // Count word matches
+      let matches = 0;
+      words1.forEach((word1) => {
+        if (word1.length < 2) return; // Ignore short words
+        words2.forEach((word2) => {
+          if (word2.length < 2) return; // Ignore short words
+
+          // Exact word match
+          if (word1 === word2) {
+            matches += 1;
+          }
+          // Partial word match (one contains the other)
+          else if (word1.includes(word2) || word2.includes(word1)) {
+            matches += 0.8;
+          }
+          // Similar words (edit distance < 2)
+          else if (Math.abs(word1.length - word2.length) <= 2) {
+            // Simple Levenshtein-like check for short words
+            let diff = 0;
+            const minLength = Math.min(word1.length, word2.length);
+            for (let i = 0; i < minLength; i++) {
+              if (word1[i] !== word2[i]) diff++;
+              if (diff > 1) break; // Too many differences
+            }
+            if (diff <= 1) {
+              matches += 0.5;
+            }
+          }
+        });
+      });
+
+      // Calculate similarity score
+      const totalWords = (words1.length + words2.length) / 2;
+      return totalWords > 0 ? Math.min(matches / totalWords, 1) : 0;
     },
     []
   );
+
+  // Helper function to get exact match with variations
+  const getExactMatch = useCallback((question: string): string | null => {
+    const normalized = question.toLowerCase().trim();
+
+    // Remove punctuation and question marks
+    const cleanQuestion = normalized
+      .replace(/[^\w\s]|_/g, "")
+      .replace(/\s+/g, " ");
+
+    // Try to find exact match first
+    for (const key in qaData) {
+      if (cleanQuestion === key.toLowerCase()) {
+        return key;
+      }
+    }
+
+    // Try to match with common variations
+    const variations: { [key: string]: string[] } = {
+      "who are you": [
+        "who r u",
+        "who are u",
+        "tell me about yourself",
+        "introduce yourself",
+      ],
+      "what are your skills": [
+        "what skills do you have",
+        "what can you do",
+        "your skills",
+        "skills",
+      ],
+      "how can i contact you": [
+        "how to contact",
+        "contact info",
+        "get in touch",
+        "contact details",
+      ],
+      "what is your name": ["your name", "name"],
+      "where are you from": ["where you from", "your location", "location"],
+      "what services do you offer": [
+        "services",
+        "what do you offer",
+        "offerings",
+      ],
+    };
+
+    for (const [mainQuestion, variantList] of Object.entries(variations)) {
+      if (
+        variantList.includes(cleanQuestion) ||
+        cleanQuestion.includes(mainQuestion)
+      ) {
+        return mainQuestion;
+      }
+    }
+
+    return null;
+  }, []);
 
   const findBestAnswer = useCallback(
     (question: string): { answer: string; followUp?: string[] } => {
       const normalizedQuestion = question.toLowerCase().trim();
 
-      // Update conversation history
+      // Update conversation history immediately
       setConversationHistory((prev) => [...prev.slice(-5), normalizedQuestion]);
 
-      // Direct match first
-      if (qaData[normalizedQuestion]) {
+      // Try to get exact match first
+      const exactMatchKey = getExactMatch(normalizedQuestion);
+      if (exactMatchKey && qaData[exactMatchKey]) {
         return {
-          answer: qaData[normalizedQuestion].answer,
-          followUp: qaData[normalizedQuestion].followUp,
+          answer: qaData[exactMatchKey].answer,
+          followUp: qaData[exactMatchKey].followUp,
         };
       }
 
-      // Check for keyword matches
+      // Check for keyword matches with priority
       let bestMatch = { key: "", similarity: 0 };
+      let keywordMatch = null;
 
       Object.entries(qaData).forEach(([key, data]) => {
-        // Check direct keyword matches
-        if (
-          data.keywords.some((keyword) => normalizedQuestion.includes(keyword))
-        ) {
-          bestMatch = { key, similarity: 0.8 };
-          return;
-        }
+        // Check direct keyword matches with higher priority
+        let keywordScore = 0;
+        data.keywords.forEach((keyword) => {
+          if (normalizedQuestion.includes(keyword)) {
+            keywordScore += 0.2; // Add score for each keyword match
+          }
+        });
 
-        // Calculate similarity
-        const similarity = calculateSimilarity(normalizedQuestion, key);
-        if (similarity > bestMatch.similarity) {
-          bestMatch = { key, similarity };
+        if (keywordScore > 0) {
+          const totalScore =
+            keywordScore + calculateSimilarity(normalizedQuestion, key);
+          if (totalScore > bestMatch.similarity) {
+            bestMatch = { key, similarity: totalScore };
+          }
+        } else {
+          // Calculate similarity only if no keyword matches
+          const similarity = calculateSimilarity(normalizedQuestion, key);
+          if (similarity > bestMatch.similarity) {
+            bestMatch = { key, similarity };
+          }
         }
       });
 
-      // Check partial matches
-      if (bestMatch.similarity < 0.3) {
+      // Check partial matches for questions with "?" or question words
+      if (
+        bestMatch.similarity < 0.4 &&
+        (normalizedQuestion.includes("?") ||
+          normalizedQuestion.includes("what") ||
+          normalizedQuestion.includes("how") ||
+          normalizedQuestion.includes("who") ||
+          normalizedQuestion.includes("where") ||
+          normalizedQuestion.includes("when") ||
+          normalizedQuestion.includes("why"))
+      ) {
+        // Look for any word match in the knowledge base
+        const questionWords = normalizedQuestion
+          .split(/\s+/)
+          .filter((w) => w.length > 2);
         for (const key in qaData) {
-          const keyWords = key.split(" ");
-          const questionWords = normalizedQuestion.split(" ");
+          const keyWords = key.split(/\s+/);
+          const hasWordMatch = questionWords.some((qWord) =>
+            keyWords.some(
+              (kWord) => kWord.includes(qWord) || qWord.includes(kWord)
+            )
+          );
 
-          if (keyWords.some((word) => questionWords.includes(word))) {
-            bestMatch = { key, similarity: 0.4 };
+          if (hasWordMatch) {
+            bestMatch = { key, similarity: 0.5 };
             break;
           }
         }
+      }
+
+      // Return best match if similarity is good enough
+      if (bestMatch.similarity > 0.4 && qaData[bestMatch.key]) {
+        return {
+          answer: qaData[bestMatch.key].answer,
+          followUp: qaData[bestMatch.key].followUp,
+        };
       }
 
       // Context-aware responses based on conversation history
@@ -400,15 +553,18 @@ const Chatbot: React.FC = () => {
       if (lastQuestion) {
         if (
           normalizedQuestion.includes("more") ||
-          normalizedQuestion.includes("else")
+          normalizedQuestion.includes("else") ||
+          normalizedQuestion.includes("other") ||
+          normalizedQuestion === "yes" ||
+          normalizedQuestion === "ok"
         ) {
-          // Find a related topic
+          // Find a related topic from the last question
           for (const key in qaData) {
             if (
-              lastQuestion.includes(key) ||
+              lastQuestion.includes(key.toLowerCase()) ||
               qaData[key].keywords.some((k) => lastQuestion.includes(k))
             ) {
-              if (qaData[key].followUp) {
+              if (qaData[key].followUp && qaData[key].followUp.length > 0) {
                 const randomFollowUp = getRandomFollowUp(qaData[key].followUp);
                 const followUpKey = randomFollowUp.toLowerCase();
                 if (qaData[followUpKey]) {
@@ -423,19 +579,13 @@ const Chatbot: React.FC = () => {
         }
       }
 
-      // Return best match or fallback
-      if (bestMatch.similarity > 0.3 && qaData[bestMatch.key]) {
-        return {
-          answer: qaData[bestMatch.key].answer,
-          followUp: qaData[bestMatch.key].followUp,
-        };
-      }
-
       // Intelligent fallback based on question type
       if (
         normalizedQuestion.includes("?") ||
         normalizedQuestion.includes("what") ||
-        normalizedQuestion.includes("how")
+        normalizedQuestion.includes("how") ||
+        normalizedQuestion.includes("who") ||
+        normalizedQuestion.includes("where")
       ) {
         return {
           answer:
@@ -459,12 +609,7 @@ const Chatbot: React.FC = () => {
         ],
       };
     },
-    [
-      setConversationHistory,
-      conversationHistory,
-      calculateSimilarity,
-      getRandomFollowUp,
-    ]
+    [calculateSimilarity, getExactMatch, getRandomFollowUp, conversationHistory]
   );
 
   const handleSendMessage = useCallback(() => {
@@ -528,7 +673,7 @@ const Chatbot: React.FC = () => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = "en-US";
+      recognitionRef.current.lang = navigator.language || "en-US";
 
       recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
@@ -540,13 +685,14 @@ const Chatbot: React.FC = () => {
         }
       };
 
-      recognitionRef.current.onerror = () => {
+      recognitionRef.current.onerror = (event: any) => {
+        console.error("Speech recognition error:", event);
         setIsListening(false);
       };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
-        // Auto-send message when mic stops (backup to onresult)
+        // Only auto-send if we have text
         if (inputText.trim()) {
           setTimeout(() => handleSendMessage(), 300);
         }
@@ -554,22 +700,21 @@ const Chatbot: React.FC = () => {
     }
 
     // Load chat history from localStorage
-    const savedMessages = localStorage.getItem("bishnu_chat_history");
-    if (savedMessages) {
-      try {
+    try {
+      const savedMessages = localStorage.getItem("bishnu_chat_history");
+      if (savedMessages) {
         const parsed = JSON.parse(savedMessages);
-        if (parsed.length > 0) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           // Convert timestamp strings back to Date objects
           const messagesWithDates = parsed.map((msg: Message) => ({
             ...msg,
             timestamp: new Date(msg.timestamp),
           }));
-          // Use setTimeout to avoid synchronous setState in effect
-          setTimeout(() => setMessages(messagesWithDates), 0);
+          setMessages(messagesWithDates);
         }
-      } catch (e) {
-        console.error("Failed to load chat history:", e);
       }
+    } catch (e) {
+      console.error("Failed to load chat history:", e);
     }
 
     return () => {
@@ -578,22 +723,24 @@ const Chatbot: React.FC = () => {
         recognitionRef.current.stop();
       }
     };
-  }, [handleSendMessage, inputText]);
+  }, []); // Remove handleSendMessage dependency to avoid infinite loop
 
   // Save messages to localStorage
   useEffect(() => {
-    if (messages.length > 1) {
+    try {
       localStorage.setItem("bishnu_chat_history", JSON.stringify(messages));
+    } catch (e) {
+      console.error("Failed to save chat history:", e);
     }
   }, [messages]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
@@ -605,6 +752,7 @@ const Chatbot: React.FC = () => {
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      setInputText(""); // Clear input before starting voice
       recognitionRef.current.start();
       setIsListening(true);
     }
@@ -612,7 +760,44 @@ const Chatbot: React.FC = () => {
 
   const handleQuickReply = (reply: string) => {
     setInputText(reply);
-    setTimeout(() => handleSendMessage(), 100);
+    setTimeout(() => {
+      const userMessage: Message = {
+        id: generateId(),
+        text: reply,
+        sender: "user",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+      setIsTyping(true);
+      setShowSuggestions(false);
+
+      // Simulate bot response
+      setTimeout(() => {
+        const response = findBestAnswer(reply);
+        const botMessage: Message = {
+          id: generateId(),
+          text: response.answer,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+
+        if (response.followUp && response.followUp.length > 0) {
+          setTimeout(() => {
+            const followUpMessage: Message = {
+              id: generateId(),
+              text: "Would you like to know more about any of these?",
+              sender: "bot",
+              timestamp: new Date(),
+              followUpOptions: response.followUp,
+            };
+            setMessages((prev) => [...prev, followUpMessage]);
+          }, 500);
+        }
+      }, getRandomDelay());
+    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -644,6 +829,7 @@ const Chatbot: React.FC = () => {
 
     navigator.clipboard.writeText(chatText);
     // You could add a toast notification here
+    alert("Chat copied to clipboard!");
   };
 
   const handleMessageFeedback = (messageId: string, liked: boolean) => {
@@ -738,7 +924,6 @@ const Chatbot: React.FC = () => {
               }
             }}
             style={{
-              touchAction: "none",
               overscrollBehavior: "contain",
             }}
           >
@@ -1087,14 +1272,14 @@ const Chatbot: React.FC = () => {
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Ask me about Bishnu's skills, experience..."
                   className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
                     isDarkMode
                       ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
                       : "bg-white border-slate-300 text-slate-900 placeholder-slate-500"
                   } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  style={{ pointerEvents: "auto", userSelect: "text" }}
+                  disabled={isTyping}
                 />
                 <Button
                   variant="primary"
