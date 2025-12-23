@@ -152,23 +152,23 @@ const ProjectList: React.FC<ProjectListProps> = ({
       <div
         className={`${
           isDarkMode ? "bg-gray-800" : "bg-white"
-        } rounded-lg p-6 shadow-lg mb-6`}
+        } rounded-lg p-4 md:p-6 shadow-lg mb-6`}
       >
         {/* Top Row - Search, View Mode, Refresh */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={20}
+                size={18}
               />
               <input
                 type="text"
-                placeholder="Search projects by name, description, tech stack, or slug..."
+                placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg ${
+                className={`w-full pl-10 pr-10 py-2 md:py-3 border rounded-lg text-sm md:text-base ${
                   isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
@@ -179,66 +179,68 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   onClick={() => setSearchTerm("")}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex border rounded-lg overflow-hidden">
+          {/* View Mode and Refresh */}
+          <div className="flex gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`px-2 md:px-3 py-2 flex items-center gap-1 md:gap-2 transition-colors text-sm md:text-base ${
+                  viewMode === "list"
+                    ? "bg-blue-500 text-white"
+                    : `${
+                        isDarkMode
+                          ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`
+                }`}
+              >
+                <List size={14} className="md:size-16" />
+                <span className="hidden md:inline">List</span>
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`px-2 md:px-3 py-2 flex items-center gap-1 md:gap-2 transition-colors text-sm md:text-base ${
+                  viewMode === "grid"
+                    ? "bg-blue-500 text-white"
+                    : `${
+                        isDarkMode
+                          ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`
+                }`}
+              >
+                <Grid size={14} className="md:size-16" />
+                <span className="hidden md:inline">Grid</span>
+              </button>
+            </div>
+
+            {/* Refresh Button */}
             <button
-              onClick={() => setViewMode("list")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
-                viewMode === "list"
-                  ? "bg-blue-500 text-white"
-                  : `${
-                      isDarkMode
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`
+              onClick={handleRefresh}
+              className={`px-3 md:px-4 py-2 rounded-lg transition-colors text-sm md:text-base ${
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              <List size={16} />
-              List
-            </button>
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`px-3 py-2 flex items-center gap-2 transition-colors ${
-                viewMode === "grid"
-                  ? "bg-blue-500 text-white"
-                  : `${
-                      isDarkMode
-                        ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`
-              }`}
-            >
-              <Grid size={16} />
-              Grid
+              <RefreshCw size={14} className="md:size-16" />
+              <span className="hidden md:inline ml-1 md:ml-2">Refresh</span>
             </button>
           </div>
-
-          {/* Refresh Button */}
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className={`px-4 py-2 flex items-center gap-2 border rounded-lg transition-colors ${
-              isDarkMode
-                ? "border-gray-600 text-gray-300 hover:bg-gray-700"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
         </div>
 
         {/* Second Row - Filters */}
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           {/* Category Filter */}
-          <div className="min-w-[150px]">
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
+          <div className="flex-1 sm:flex-none">
+            <label className="block text-xs md:text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Category
             </label>
             <Select
@@ -260,9 +262,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
           </div>
 
           {/* Featured Filter */}
-          <div className="min-w-[150px]">
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
-              Featured Status
+          <div className="flex-1 sm:flex-none">
+            <label className="block text-xs md:text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
+              Featured
             </label>
             <Select
               value={featuredFilter}
@@ -276,15 +278,15 @@ const ProjectList: React.FC<ProjectListProps> = ({
               }
               options={[
                 { value: "all", label: "All Projects" },
-                { value: "featured", label: "Featured Only" },
+                { value: "featured", label: "Featured" },
                 { value: "not-featured", label: "Not Featured" },
               ]}
             />
           </div>
 
           {/* Items Per Page */}
-          <div className="min-w-[120px]">
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
+          <div className="flex-1 sm:flex-none">
+            <label className="block text-xs md:text-sm font-medium mb-1 text-gray-600 dark:text-gray-400">
               Per Page
             </label>
             <Select
@@ -308,10 +310,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
             <div className="flex items-end">
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-xs md:text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <X size={16} />
-                Clear All
+                <X size={12} className="md:size-16" />
+                <span className="hidden md:inline">Clear Filters</span>
+                <span className="md:hidden">Clear</span>
               </button>
             </div>
           )}
@@ -319,8 +322,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
 
         {/* Sort Controls */}
         <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <span className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-            <Filter size={16} />
+          <span className="text-xs md:text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+            <Filter size={12} className="md:size-16" />
             Sort by:
           </span>
           {[
