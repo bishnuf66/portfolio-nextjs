@@ -791,6 +791,22 @@ const Chatbot: React.FC = () => {
               className={`flex-1 overflow-y-auto p-4 ${
                 isMobile ? "h-[calc(90vh-140px)]" : "h-[350px]"
               }`}
+              onWheel={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => {
+                e.stopPropagation();
+                const container = e.currentTarget;
+                const { scrollHeight, clientHeight } = container;
+
+                // Prevent background scroll when chat can scroll
+                if (scrollHeight > clientHeight) {
+                  e.preventDefault();
+                }
+              }}
+              style={{
+                touchAction: "none",
+                overscrollBehavior: "contain",
+              }}
             >
               <div className="space-y-3">
                 {messages.map((message) => (
