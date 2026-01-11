@@ -15,7 +15,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
-import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+// import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import Chatbot from "@/components/Chatbot";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AdSense from "@/components/AdSense";
@@ -381,50 +381,50 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        <SmoothScrollProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <AnalyticsProvider>
-                  <ServiceWorkerProvider />
-                  <ConfirmDialogProvider>
-                    <ScrollProgressBar />
-                    <Header />
-                    <main id="main-content" role="main">
-                      {children}
-                    </main>
-                    <Footer />
-                    <ConsentManager />
-                    <CustomCursor />
-                    <Chatbot />
-                    <ToastContainer
-                      position="top-right"
-                      autoClose={3000}
-                      hideProgressBar
-                      newestOnTop
-                      closeButton={false}
-                      rtl={false}
-                      pauseOnFocusLoss
-                      draggable
-                      pauseOnHover
-                      toastStyle={{
-                        backgroundColor: "#333",
-                        color: "#fff",
-                        borderRadius: "8px",
-                        fontSize: "16px",
-                        padding: "12px 20px",
-                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                        maxWidth: "400px",
-                      }}
-                    />
-                  </ConfirmDialogProvider>
-                </AnalyticsProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </QueryProvider>
-          <SpeedInsights />
-          <Analytics />
-        </SmoothScrollProvider>
+        {/* <SmoothScrollProvider> */}
+        <QueryProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <AnalyticsProvider>
+                <ServiceWorkerProvider />
+                <ConfirmDialogProvider>
+                  <ScrollProgressBar />
+                  <Header />
+                  <main id="main-content" role="main">
+                    {children}
+                  </main>
+                  <Footer />
+                  <ConsentManager />
+                  <CustomCursor />
+                  <Chatbot />
+                  <ToastContainer
+                    position="top-right"
+                    autoClose={3000}
+                    hideProgressBar
+                    newestOnTop
+                    closeButton={false}
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    toastStyle={{
+                      backgroundColor: "#333",
+                      color: "#fff",
+                      borderRadius: "8px",
+                      fontSize: "16px",
+                      padding: "12px 20px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                      maxWidth: "400px",
+                    }}
+                  />
+                </ConfirmDialogProvider>
+              </AnalyticsProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </QueryProvider>
+        <SpeedInsights />
+        <Analytics />
+        {/* </SmoothScrollProvider> */}
       </body>
     </html>
   );
