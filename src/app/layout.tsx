@@ -15,7 +15,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ServiceWorkerProvider from "@/components/ServiceWorkerProvider";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
-// import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import Chatbot from "@/components/Chatbot";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AdSense from "@/components/AdSense";
@@ -380,8 +379,6 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-
-        {/* <SmoothScrollProvider> */}
         <QueryProvider>
           <AuthProvider>
             <ThemeProvider>
@@ -424,7 +421,6 @@ export default function RootLayout({
         </QueryProvider>
         <SpeedInsights />
         <Analytics />
-        {/* </SmoothScrollProvider> */}
       </body>
     </html>
   );
