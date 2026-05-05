@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, ReactNode } from "react";
+import { useRef, ReactNode } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 
 interface ScrollRevealProps {
@@ -20,13 +20,6 @@ export function ScrollReveal({
 }: ScrollRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [hasRevealed, setHasRevealed] = useState(false);
-
-  useEffect(() => {
-    if (isInView) {
-      setHasRevealed(true);
-    }
-  }, [isInView]);
 
   const directions = {
     up: { y: 100, x: 0 },
@@ -43,7 +36,7 @@ export function ScrollReveal({
         ...directions[direction],
       }}
       animate={
-        hasRevealed
+        isInView
           ? { opacity: 1, y: 0, x: 0 }
           : { opacity: 0, ...directions[direction] }
       }
@@ -125,14 +118,7 @@ export function SplitTextReveal({
 }: SplitTextRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const [hasRevealed, setHasRevealed] = useState(false);
   const words = text.split(" ");
-
-  useEffect(() => {
-    if (isInView) {
-      setHasRevealed(true);
-    }
-  }, [isInView]);
 
   return (
     <div ref={ref} className={className}>
@@ -140,7 +126,7 @@ export function SplitTextReveal({
         <motion.span
           key={i}
           initial={{ opacity: 0, y: 50 }}
-          animate={hasRevealed ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{
             duration: 0.5,
             delay: delay + i * 0.05,

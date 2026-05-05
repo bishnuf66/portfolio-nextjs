@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
@@ -54,26 +54,20 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   duration = 0.6,
   threshold = 0.1,
 }) => {
-  const { elementRef, isIntersecting } = useIntersectionObserver({ threshold });
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    if (isIntersecting) {
-      setHasAnimated(true);
-    }
-  }, [isIntersecting]);
-
+  const { elementRef, isIntersecting } = useIntersectionObserver({
+    threshold,
+    triggerOnce: true,
+  });
   const selectedAnimation = animations[animation];
-  const animationState = hasAnimated
-    ? selectedAnimation.animate
-    : selectedAnimation.initial;
 
   return (
     <motion.div
       ref={elementRef}
       className={className}
       initial={selectedAnimation.initial}
-      animate={animationState}
+      animate={
+        isIntersecting ? selectedAnimation.animate : selectedAnimation.initial
+      }
       transition={{
         duration,
         delay,
@@ -100,21 +94,17 @@ export const StaggeredContainer: React.FC<StaggeredContainerProps> = ({
   staggerDelay = 0.1,
   threshold = 0.1,
 }) => {
-  const { elementRef, isIntersecting } = useIntersectionObserver({ threshold });
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    if (isIntersecting) {
-      setHasAnimated(true);
-    }
-  }, [isIntersecting]);
+  const { elementRef, isIntersecting } = useIntersectionObserver({
+    threshold,
+    triggerOnce: true,
+  });
 
   return (
     <motion.div
       ref={elementRef}
       className={className}
       initial="hidden"
-      animate={hasAnimated ? "visible" : "hidden"}
+      animate={isIntersecting ? "visible" : "hidden"}
       variants={{
         hidden: {},
         visible: {
@@ -125,7 +115,7 @@ export const StaggeredContainer: React.FC<StaggeredContainerProps> = ({
       }}
       style={{ willChange: "transform, opacity" }}
     >
-      {React.Children.map(children, (child, index) => (
+      {React.Children.map(children, (child) => (
         <motion.div
           variants={{
             hidden: { opacity: 0, y: 20 },
