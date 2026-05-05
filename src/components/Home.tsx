@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Typewriter } from "react-simple-typewriter";
 import useStore from "@/store/store";
 import Image from "next/image";
@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/Button";
 
 const Home = () => {
   const { isDarkMode } = useStore();
-  const [scrollY, setScrollY] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const heroRef = useSectionViewTracking("hero-section");
   const parallaxRef = useSectionViewTracking("parallax-mountain-section");
   const ctaRef = useSectionViewTracking("cta-section");
+  const parallaxTransformRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -38,53 +38,31 @@ const Home = () => {
     };
   }, []);
 
+  // Optimized scroll handler: direct DOM manipulation via ref
+  // Avoids React state updates & re-renders on every scroll frame
   useEffect(() => {
     let rafRef: number | null = null;
-    let lastScrollY = 0;
-    let ticking = false;
-    let initialized = false;
 
     const handleScroll = () => {
-      // Prevent multiple simultaneous updates
-      if (ticking) return;
-      ticking = true;
-
-      // Cancel previous animation frame
-      if (rafRef) {
-        cancelAnimationFrame(rafRef);
-      }
-
+      if (rafRef) return; // Throttle: skip if RAF already queued
       rafRef = requestAnimationFrame(() => {
-        const currentScrollY = window.scrollY;
-
-        // Only update if scroll position actually changed significantly
-        if (Math.abs(currentScrollY - lastScrollY) > 1) {
-          lastScrollY = currentScrollY;
-          setScrollY(currentScrollY);
-        }
-
-        // Reset ticking flag
-        ticking = false;
+        rafRef = null;
+        const el = parallaxTransformRef.current;
+        if (!el) return;
+        const sy = window.scrollY;
+        el.style.transform = `perspective(1000px) rotateX(${Math.min(
+          sy * 0.03,
+          30,
+        )}deg) scale(${1 + sy * 0.0005}) translateZ(${-sy * 0.1}px)`;
       });
     };
 
-    // Set initial scroll position only once, using setTimeout to defer state update
-    if (!initialized) {
-      const initialScrollY = window.scrollY;
-      setTimeout(() => {
-        setScrollY(initialScrollY);
-      }, 0);
-      lastScrollY = initialScrollY;
-      initialized = true;
-    }
-
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Set initial transform
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      if (rafRef) {
-        cancelAnimationFrame(rafRef);
-      }
+      if (rafRef) cancelAnimationFrame(rafRef);
     };
   }, []);
 
@@ -166,7 +144,7 @@ const Home = () => {
                             trackSectionInteraction("hero-section", "click", {
                               action: "view-my-work",
                             });
-                          }
+                          },
                         );
                       }}
                     >
@@ -184,7 +162,7 @@ const Home = () => {
                             trackSectionInteraction("hero-section", "click", {
                               action: "hero-contact",
                             });
-                          }
+                          },
                         );
                       }}
                     >
@@ -285,8 +263,8 @@ const Home = () => {
         <div
           className={`absolute top-0 left-0 right-0 h-32 z-20 pointer-events-none ${
             isDarkMode
-              ? "bg-gradient-to-b from-black via-black/80 to-transparent"
-              : "bg-gradient-to-b from-gray-50 via-gray-50/80 to-transparent"
+              ? "bg-linear-to-b from-black via-black/80 to-transparent"
+              : "bg-linear-to-b from-gray-50 via-gray-50/80 to-transparent"
           }`}
         ></div>
 
@@ -294,23 +272,15 @@ const Home = () => {
         <div
           className={`absolute bottom-0 left-0 right-0 h-32 z-20 pointer-events-none ${
             isDarkMode
-              ? "bg-gradient-to-t from-black via-black/80 to-transparent"
-              : "bg-gradient-to-t from-gray-50 via-gray-50/80 to-transparent"
+              ? "bg-linear-to-t from-black via-black/80 to-transparent"
+              : "bg-linear-to-t from-gray-50 via-gray-50/80 to-transparent"
           }`}
         ></div>
 
         <div
-          className="w-full h-full origin-center transition-transform duration-100 ease-out"
-          style={{
-            transform: `perspective(1000px) rotateX(${Math.min(
-              scrollY * 0.03,
-              30
-            )}deg) scale(${1 + scrollY * 0.0005}) translateZ(${
-              -scrollY * 0.1
-            }px)`,
-            transformStyle: "preserve-3d",
-            willChange: "transform",
-          }}
+          ref={parallaxTransformRef}
+          className="w-full h-full origin-center will-change-transform"
+          style={{ transformStyle: "preserve-3d" }}
         >
           <div className="relative w-full h-full">
             <Image
@@ -328,8 +298,8 @@ const Home = () => {
             <div
               className={`absolute inset-0 ${
                 isDarkMode
-                  ? "bg-gradient-to-b from-black/60 via-black/40 to-black/60"
-                  : "bg-gradient-to-b from-white/40 via-white/20 to-white/40"
+                  ? "bg-linear-to-b from-black/60 via-black/40 to-black/60"
+                  : "bg-linear-to-b from-white/40 via-white/20 to-white/40"
               }`}
             ></div>
           </div>
@@ -370,7 +340,7 @@ const Home = () => {
         className={`py-20 ${colorScheme.background.primary}`}
       >
         <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
-          <h2 className="font-display text-5xl font-bold mb-6 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="font-display text-5xl font-bold mb-6 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let&apos;s Build Something Amazing
           </h2>
           <p
@@ -391,7 +361,7 @@ const Home = () => {
                     trackSectionInteraction("cta-section", "click", {
                       action: "cta-get-in-touch",
                     });
-                  }
+                  },
                 );
               }}
             >

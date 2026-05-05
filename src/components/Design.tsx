@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { loadSlim } from "tsparticles-slim";
 import useStore from "@/store/store";
@@ -13,9 +13,19 @@ interface DesignProps {
 
 const Design = ({ id = "tsparticles-default" }: DesignProps) => {
   const { isDarkMode } = useStore();
+  // Compute mobile state once on mount using lazy init
+  const [isMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const isMobileViewport = window.innerWidth < 768;
+    const isCoarsePointer =
+      window.matchMedia?.("(pointer: coarse)").matches ?? false;
+    return isMobileViewport || isCoarsePointer;
+  });
+
   const particleColor = isDarkMode ? "#ffffff" : "#6366f1";
   const linksColor = isDarkMode ? "#ffffff" : "#8b5cf6";
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const particlesInit = useCallback(async (engine: any) => {
     await loadSlim(engine);
   }, []);
@@ -27,7 +37,7 @@ const Design = ({ id = "tsparticles-default" }: DesignProps) => {
   const particlesOptions = useMemo(
     () => ({
       fullScreen: { enable: false },
-      fpsLimit: 60,
+      fpsLimit: 30,
       interactivity: {
         events: {
           onClick: { enable: false },
@@ -36,9 +46,9 @@ const Design = ({ id = "tsparticles-default" }: DesignProps) => {
         },
         modes: {
           grab: {
-            distance: 140,
+            distance: 100,
             links: {
-              opacity: 0.5,
+              opacity: 0.3,
             },
           },
         },
@@ -47,32 +57,35 @@ const Design = ({ id = "tsparticles-default" }: DesignProps) => {
         color: { value: particleColor },
         links: {
           color: linksColor,
-          distance: 150,
+          distance: 120,
           enable: true,
-          opacity: isDarkMode ? 0.2 : 0.3,
+          opacity: isDarkMode ? 0.15 : 0.25,
           width: 1,
         },
         collisions: { enable: false },
         move: {
           enable: true,
           outModes: { default: "out" as const },
-          speed: 1,
+          speed: 0.8,
           straight: false,
         },
         number: {
-          density: { enable: true, area: 1500 },
-          value: 80,
+          density: { enable: true, area: 2000 },
+          value: 40,
         },
         opacity: {
-          value: isDarkMode ? 0.3 : 0.5,
+          value: isDarkMode ? 0.25 : 0.4,
         },
         shape: { type: "circle" },
         size: { value: { min: 1, max: 2 } },
       },
-      detectRetina: true,
+      detectRetina: false,
     }),
-    [particleColor, linksColor, isDarkMode]
+    [particleColor, linksColor, isDarkMode],
   );
+
+  // Disable particles entirely on mobile for performance
+  if (isMobile) return null;
 
   return (
     <div className="absolute inset-0 pointer-events-none z-0">
