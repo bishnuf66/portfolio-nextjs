@@ -228,7 +228,7 @@ export const trackPageView = async (pagePath: string, pageTitle?: string) => {
         const deviceInfo = getDeviceInfo();
         const locationInfo = await getLocationInfo();
 
-        const analyticsData = {
+        const analyticsData: AnalyticsData = {
             session_id: sessionId,
             visitor_id: visitorId,
             page_path: pagePath,
