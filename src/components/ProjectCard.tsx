@@ -3,6 +3,7 @@
 import React from "react";
 import useStore from "@/store/store";
 import Link from "next/link";
+import { AnimatedCard } from "@/components/ui/AnimatedSection";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3DCard";
 import { BackgroundGradient } from "@/components/ui/BackgroundGradient";
 import { Tag } from "@/components/ui/Tag";
@@ -59,102 +60,104 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   return (
     <CardContainer className="inter-var max-w-120">
-      <CardBody
-        className={`relative group/card w-full max-w-120 mx-auto h-auto rounded-xl p-6 border ${
-          isDarkMode
-            ? "bg-black border-white/20 hover:shadow-2xl hover:shadow-emerald-500/10"
-            : "bg-gray-50 border-black/10 hover:shadow-2xl hover:shadow-blue-500/10"
-        }`}
-      >
-        {/* Project Title */}
-        <CardItem
-          translateZ="50"
-          className="text-xl font-bold text-neutral-600 dark:text-white flex items-center gap-2"
+      <AnimatedCard hoverScale={1.01} hoverRotate={0.5} className="w-full">
+        <CardBody
+          className={`relative group/card w-full max-w-120 mx-auto h-auto rounded-xl p-6 border ${
+            isDarkMode
+              ? "bg-black border-white/20 hover:shadow-2xl hover:shadow-emerald-500/10"
+              : "bg-gray-50 border-black/10 hover:shadow-2xl hover:shadow-blue-500/10"
+          }`}
         >
-          {name}
-          {isFeatured && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-linear-to-r from-yellow-500 to-orange-500 text-white text-xs font-semibold rounded-full">
-              <Star size={12} fill="currentColor" />
-              Featured
-            </span>
-          )}
-        </CardItem>
+          {/* Project Title */}
+          <CardItem
+            translateZ="50"
+            className="text-xl font-bold text-neutral-600 dark:text-white flex items-center gap-2"
+          >
+            {name}
+            {isFeatured && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-linear-to-r from-yellow-500 to-orange-500 text-white text-xs font-semibold rounded-full">
+                <Star size={12} fill="currentColor" />
+                Featured
+              </span>
+            )}
+          </CardItem>
 
-        {/* Description */}
-        <CardItem
-          as="div"
-          translateZ="60"
-          className={`text-sm max-w-sm mt-2 line-clamp-1 ${
-            isDarkMode ? "text-neutral-300" : "text-neutral-500"
-          } prose prose-sm max-w-none`}
-          dangerouslySetInnerHTML={{ __html: description }}
-        />
+          {/* Description */}
+          <CardItem
+            as="div"
+            translateZ="60"
+            className={`text-sm max-w-sm mt-2 line-clamp-1 ${
+              isDarkMode ? "text-neutral-300" : "text-neutral-500"
+            } prose prose-sm max-w-none`}
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
 
-        {/* Project Image with Gradient Border */}
-        <CardItem translateZ="100" className="w-full mt-4">
-          <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
-            <div className="relative w-full h-60 rounded-2xl overflow-hidden">
-              <Image
-                src={safeImageUrl}
-                alt={name}
-                fill
-                unoptimized
-                className="object-cover group-hover/card:scale-110 transition-transform duration-500"
-                onError={handleImageError}
-              />
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                <Code className="w-8 h-8 text-white" />
+          {/* Project Image with Gradient Border */}
+          <CardItem translateZ="100" className="w-full mt-4">
+            <BackgroundGradient className="rounded-[22px] p-1 bg-white dark:bg-zinc-900">
+              <div className="relative w-full h-60 rounded-2xl overflow-hidden">
+                <Image
+                  src={safeImageUrl}
+                  alt={name}
+                  fill
+                  unoptimized
+                  className="object-cover group-hover/card:scale-105 transition-transform duration-300 ease-out will-change-transform"
+                  onError={handleImageError}
+                />
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                  <Code className="w-8 h-8 text-white" />
+                </div>
               </div>
+            </BackgroundGradient>
+          </CardItem>
+
+          {/* Tech Stack */}
+          <CardItem translateZ="50" className="w-full mt-4">
+            <div className="min-h-16 h-16 flex flex-wrap gap-2 overflow-hidden relative">
+              {techStack.split(",").map((tech: string, index: number) => (
+                <Tag key={index} variant="blog" size="sm">
+                  {tech.trim()}
+                </Tag>
+              ))}
+              {/* Fade out effect for overflow */}
+              <div
+                className={`absolute bottom-0 right-0 w-8 h-8 bg-linear-to-l ${
+                  isDarkMode ? "from-gray-800" : "from-gray-50"
+                } to-transparent pointer-events-none`}
+              ></div>
             </div>
-          </BackgroundGradient>
-        </CardItem>
+          </CardItem>
 
-        {/* Tech Stack */}
-        <CardItem translateZ="50" className="w-full mt-4">
-          <div className="min-h-16 h-16 flex flex-wrap gap-2 overflow-hidden relative">
-            {techStack.split(",").map((tech: string, index: number) => (
-              <Tag key={index} variant="blog" size="sm">
-                {tech.trim()}
-              </Tag>
-            ))}
-            {/* Fade out effect for overflow */}
-            <div
-              className={`absolute bottom-0 right-0 w-8 h-8 bg-linear-to-l ${
-                isDarkMode ? "from-gray-800" : "from-gray-50"
-              } to-transparent pointer-events-none`}
-            ></div>
-          </div>
-        </CardItem>
-
-        {/* Action Buttons */}
-        <div className="flex justify-between items-center mt-6">
-          <CardItem translateZ={20}>
-            <a
-              href={link}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleProjectClick}
-            >
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<ExternalLink className="w-4 h-4" />}
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center mt-6">
+            <CardItem translateZ={20}>
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleProjectClick}
               >
-                View Project
-              </Button>
-            </a>
-          </CardItem>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<ExternalLink className="w-4 h-4" />}
+                >
+                  View Project
+                </Button>
+              </a>
+            </CardItem>
 
-          <CardItem translateZ={20}>
-            <Link href={`/projects/${slug}`} onClick={handleDetailsClick}>
-              <Button variant="outline" size="sm">
-                Details →
-              </Button>
-            </Link>
-          </CardItem>
-        </div>
-      </CardBody>
+            <CardItem translateZ={20}>
+              <Link href={`/projects/${slug}`} onClick={handleDetailsClick}>
+                <Button variant="outline" size="sm">
+                  Details →
+                </Button>
+              </Link>
+            </CardItem>
+          </div>
+        </CardBody>
+      </AnimatedCard>
     </CardContainer>
   );
 };

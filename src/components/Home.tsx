@@ -5,6 +5,7 @@ import { Typewriter } from "react-simple-typewriter";
 import useStore from "@/store/store";
 import Image from "next/image";
 import Link from "next/link";
+import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { SplineScene } from "@/components/ui/splite";
 import { Spotlight } from "@/components/ui/Spotlight";
 import { colorScheme } from "@/utils/colorUtils";
@@ -87,7 +88,11 @@ const Home = () => {
           <div className="container mx-auto px-4 md:px-8">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               {/* Left: Text Content */}
-              <div className="space-y-6 pt-20 lg:pt-0">
+              <AnimatedSection
+                animation="slideUp"
+                delay={0.1}
+                className="space-y-6 pt-20 lg:pt-0"
+              >
                 <h1 className="font-display text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-400 via-purple-500 to-pink-500">
                   <div className="min-h-[3.6em] md:min-h-[3.3em] flex items-start">
                     <Typewriter
@@ -222,7 +227,7 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </AnimatedSection>
 
               {/* Right: 3D Spline Scene */}
               <div className="relative h-[400px] md:h-[600px] lg:h-[700px]">
@@ -306,7 +311,11 @@ const Home = () => {
         </div>
 
         {/* Overlay Content */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <AnimatedSection
+          animation="slideUp"
+          delay={0.15}
+          className="absolute inset-0 z-10 flex items-center justify-center"
+        >
           <div className="text-center px-4 max-w-4xl">
             <h2
               className={`font-display text-4xl md:text-6xl font-bold mb-6 ${
@@ -331,7 +340,7 @@ const Home = () => {
               Every project is a journey. Every challenge is an opportunity.
             </p>
           </div>
-        </div>
+        </AnimatedSection>
       </div>
 
       {/* CTA Section */}
@@ -339,7 +348,11 @@ const Home = () => {
         ref={ctaRef as React.RefObject<HTMLDivElement>}
         className={`py-20 ${colorScheme.background.primary}`}
       >
-        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+        <AnimatedSection
+          animation="slideUp"
+          delay={0.1}
+          className="max-w-4xl mx-auto px-4 md:px-8 text-center"
+        >
           <h2 className="font-display text-5xl font-bold mb-6 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Let&apos;s Build Something Amazing
           </h2>
@@ -368,7 +381,7 @@ const Home = () => {
               Get In Touch
             </Button>
           </Link>
-        </div>
+        </AnimatedSection>
       </div>
     </>
   );
