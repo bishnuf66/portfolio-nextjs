@@ -141,8 +141,8 @@ export const metadata: Metadata = {
     title: "Bishnu BK - Top Fullstack Developer Nepal | React & Next.js Expert",
     description:
       "Top Fullstack Developer in Nepal specializing in React, Next.js, Node.js. Best Frontend & Backend Developer Nepal. Professional web development services.",
-    creator: "@bishnubk",
-    site: "@bishnubk",
+    creator: process.env.NEXT_PUBLIC_MY_TWITTER_HANDLE,
+    site: process.env.NEXT_PUBLIC_MY_TWITTER_HANDLE,
     images: [
       {
         url: "/og-image.jpg",
@@ -219,9 +219,9 @@ export default function RootLayout({
       "Database Design",
     ],
     sameAs: [
-      "https://github.com/bishnuf66",
-      "https://linkedin.com/in/bishnubk",
-      "https://twitter.com/bishnubk",
+      process.env.NEXT_PUBLIC_MY_GITHUB_URL,
+      process.env.NEXT_PUBLIC_MY_LINKEDIN_URL,
+      process.env.NEXT_PUBLIC_MY_TWITTER_URL,
     ],
     address: {
       "@type": "PostalAddress",

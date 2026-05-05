@@ -236,10 +236,7 @@ const Footer = () => {
               {/* Social Links */}
               <div className="flex gap-4">
                 <a
-                  href={
-                    process.env.NEXT_PUBLIC_GITHUB_URL ||
-                    "https://github.com/bishnuf66"
-                  }
+                  href={process.env.NEXT_PUBLIC_MY_GITHUB_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`p-2 rounded-lg transition-all hover:scale-110 ${
@@ -252,10 +249,7 @@ const Footer = () => {
                   <Github className="w-5 h-5" />
                 </a>
                 <a
-                  href={
-                    process.env.NEXT_PUBLIC_LINKEDIN_URL ||
-                    "https://linkedin.com/in/bishnubk"
-                  }
+                  href={process.env.NEXT_PUBLIC_MY_LINKEDIN_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`p-2 rounded-lg transition-all hover:scale-110 ${
@@ -268,10 +262,7 @@ const Footer = () => {
                   <Linkedin className="w-5 h-5" />
                 </a>
                 <a
-                  href={`mailto:${
-                    process.env.NEXT_PUBLIC_MY_EMAIL ||
-                    "contact@bishnubk.com.np"
-                  }`}
+                  href={`mailto:${process.env.NEXT_PUBLIC_MY_EMAIL}`}
                   className={`p-2 rounded-lg transition-all hover:scale-110 ${
                     isDarkMode
                       ? "bg-gray-800 hover:bg-purple-600 text-gray-300 hover:text-white"

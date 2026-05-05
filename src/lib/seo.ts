@@ -8,8 +8,8 @@ export const siteConfig = {
     url: "https://www.bishnubk.com.np",
     ogImage: "https://www.bishnubk.com.np/og-image.jpg",
     links: {
-        github: "https://github.com/bishnuf66",
-        linkedin: "https://linkedin.com/in/bishnubk",
+        github: process.env.NEXT_PUBLIC_MY_GITHUB_URL,
+        linkedin: process.env.NEXT_PUBLIC_MY_LINKEDIN_URL,
     },
     keywords: [
         "Bishnu BK",
@@ -92,7 +92,7 @@ export function generateSEO({
             title: metaTitle,
             description: metaDescription,
             images: [metaImage],
-            creator: "@bishnubk",
+            creator: process.env.NEXT_PUBLIC_MY_TWITTER_HANDLE,
         },
         robots: {
             index: !noIndex,
